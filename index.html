@@ -1025,7 +1025,7 @@ select {
 <!-- LOCK SCREEN -->
 <div id="lock-screen" class="lock-screen" style="display:none">
   <div class="lock-card">
-    <div id="pk-lock-strip"><span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 03:57 AM</span></div>
+    <div id="pk-lock-strip"><span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 04:23 AM</span></div>
     <div class="lock-body">
       <div class="lock-icon">🔒</div>
       <h2 style="font-size:22px;font-weight:900;margin-bottom:8px">Software Activation</h2>
@@ -1103,7 +1103,7 @@ select {
       <div style="flex:1"></div>
       <div id="pk-net-indicator" class="pk-online">
         <div id="pk-net-row"><span id="pk-net-dot"></span><span id="pk-net-text">Online</span></div>
-        <div id="pk-app-version" dir="rtl">جمعرات 24 ستمبر · 03:57 AM</div>
+        <div id="pk-app-version" dir="rtl">جمعرات 24 ستمبر · 04:23 AM</div>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:5px">
@@ -1687,25 +1687,6 @@ select {
           <input type="tel" id="nc-phone" class="nc-input" placeholder="03001234567" dir="ltr" autocomplete="off" onfocus="ncEnsureContacts()" oninput="ncPhoneLookup(this.value)" onblur="setTimeout(function(){var d=document.getElementById('nc-phone-drop');if(d)d.style.display='none'},280)" style="font-family:Arial,sans-serif">
           <div id="nc-phone-drop" style="display:none;position:absolute;top:100%;right:0;left:0;background:#fff;border:2.5px solid #16a34a;border-top:none;border-radius:0 0 12px 12px;z-index:99999;max-height:200px;overflow-y:auto;box-shadow:0 10px 24px rgba(0,0,0,.28)"></div>
         </div>
-      </div>
-
-      <!-- Amount — dark navy 3D box -->
-      <div class="nc-amount-box">
-        <span class="nc-amount-label">Opening Balance — Opening Balance (Rs)</span>
-        <input type="number" id="nc-amount" class="nc-amount-inp" placeholder="0" dir="ltr" style="font-family:Arial,sans-serif">
-      </div>
-
-      <!-- Type buttons -->
-      <span class="nc-type-label">What kind of amount is this?</span>
-      <div class="nc-type-btns">
-        <button id="nc-got-btn" class="nc-type-btn received active" onclick="setNcDir('got')">
-          ✓ Received
-          <span class="nc-btn-urdu"></span>
-        </button>
-        <button id="nc-gave-btn" class="nc-type-btn paid" onclick="setNcDir('gave')">
-          ✓ Paid
-          <span class="nc-btn-urdu"></span>
-        </button>
       </div>
 
       <!-- Action buttons -->
@@ -2825,19 +2806,10 @@ function renderLedger(){
 function showAddCustomer(){
   document.getElementById('nc-name').value='';
   document.getElementById('nc-phone').value='';
-  document.getElementById('nc-amount').value='';
-  setNcDir('got');
   document.getElementById('modal-add-customer').style.display='flex';
-  setTimeout(()=>document.getElementById('nc-name').focus(),100);
-}
-function setNcDir(d){
-  ncDir=d;
-  const gBtn=document.getElementById('nc-got-btn'), vBtn=document.getElementById('nc-gave-btn');
-  if(d==='got'){
-    gBtn.classList.add('active'); vBtn.classList.remove('active');
-  } else {
-    vBtn.classList.add('active'); gBtn.classList.remove('active');
-  }
+  // 📇 Phonebook opens right away — no extra confirm popup, no separate button tap needed.
+  // If the person cancels/dismisses it, the Name/Phone boxes are still plain inputs they can type into manually.
+  setTimeout(()=>{ ncOpenNativePicker(); document.getElementById('nc-name').focus(); },150);
 }
  // Phonebook button — pick a contact — both fields fill
 async function ncOpenNativePicker(){
@@ -2955,28 +2927,11 @@ function ncAppCustomers(){
   return groups.map(function(c){ return {name:c.name, phone:c.phone||'', existing:true}; });
 }
 
-  // load contacts on first focus
-function ncEnsureContacts(){
-  if(window._pbLoaded) return;
-  if(!('contacts' in navigator && 'ContactsManager' in window)) return;
-  window._pbLoaded = true;
-  setTimeout(function(){
-    var ok = confirm('📱 To search from phonebook\nLoad contacts?\n\n(OK → phonebook opens, select all)');
-    if(!ok){ window._pbLoaded=false; return; }
-    navigator.contacts.select(['name','tel'],{multiple:true}).then(function(contacts){
-      window._pbContacts = [];
-      contacts.forEach(function(c){
-        var name = (c.name && c.name[0]) || '';
-        if(!name) return;
-        (c.tel || ['']).forEach(function(t){
-          var ph = t.replace(/[\s\-\(\)]/g,'');
-          if(ph.startsWith('+92')) ph = '0'+ph.slice(3);
-          window._pbContacts.push({ name: name, phone: ph });
-        });
-      });
-    }).catch(function(){ window._pbLoaded = false; });
-  }, 100);
-}
+  // Kept only as a harmless no-op so the old onfocus="ncEnsureContacts()" attributes never error.
+  // The confirm() popup and the separate multi-select "load all contacts" flow have been removed —
+  // ncOpenNativePicker() (called automatically when Add Customer opens) is now the single,
+  // no-popup way both boxes get filled from the phonebook.
+function ncEnsureContacts(){}
 
  // Suggestions while typing number — app customers first, then phonebook
 function ncPhoneLookup(phone){
@@ -3009,17 +2964,13 @@ function addCustomer(){
   const name=document.getElementById('nc-name').value.trim();
   if(!name){ alert('Enter name'); return; }
   const phone=document.getElementById('nc-phone').value.trim();
-  const amount=parseFloat(document.getElementById('nc-amount').value)||0;
-  const note='Account opened'+(amount>0?' — opening balance':'');
-  const rec={id:Date.now(),name,phone,type:amount>0?ncDir:'got',amount:amount||0,note,date:new Date().toLocaleDateString('en-GB')};
-  if(amount>0) records.push(rec);
-  else { // just create a zero entry to register customer
-    records.push({...rec,amount:0,note:'Account opened'});
-  }
+  // 💡 Customer creation is now name+phone only — no opening-balance/received-paid step.
+  // First Received/Paid entry (and the customer's colour on the main list) happens afterwards, as a normal transaction.
+  const rec={id:Date.now(),name,phone,type:'got',amount:0,note:'Account opened',date:new Date().toLocaleDateString('en-GB')};
+  records.push(rec);
   saveData(); renderList();
   closeModal('modal-add-customer');
-  if(amount>0) openPoster(rec.id);
-  else openDetail(name);
+  openDetail(name);
 }
 
 // ============================================================
@@ -5644,7 +5595,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 03:57 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 04:23 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
