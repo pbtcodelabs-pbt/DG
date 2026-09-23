@@ -2,7 +2,7 @@
 // Cache name is tied to the app version (PK_APP_VERSION in index.html).
 // Bump CACHE_NAME every time you bump PK_APP_VERSION so old caches are cleared automatically.
 
-const CACHE_NAME = 'dg-khatabook-cache-20260923-0900';
+const CACHE_NAME = 'dg-khatabook-cache-20260924-0341';
 
 const PRECACHE_URLS = [
   './',
@@ -47,6 +47,9 @@ self.addEventListener('activate', function (event) {
 // build), cache-first for everything else, with offline fallback to cache.
 self.addEventListener('fetch', function (event) {
   var req = event.request;
+
+  // Never intercept Firebase/Firestore or any other cross-origin / non-GET request
+  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) { return; }
 
   if (req.mode === 'navigate' || (req.method === 'GET' && req.headers.get('accept') && req.headers.get('accept').indexOf('text/html') !== -1)) {
     event.respondWith(

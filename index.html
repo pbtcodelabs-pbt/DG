@@ -980,7 +980,7 @@ select {
     <span id="pk-net-dot"></span>
     <span id="pk-net-text">Online</span>
   </div>
-  <div id="pk-app-version">PK248MO0335PM</div>
+  <div id="pk-app-version">جمعرات24ستمبر03:41am</div>
 </div>
 
 <!-- DEVELOPER CHAT BUBBLE (global — visible on login page + main app) -->
@@ -1095,6 +1095,7 @@ select {
         <button onclick="backupData();toggleSettingsMenu()" style="background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;border-radius:10px;padding:13px 10px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit">💾 Backup</button>
         <button onclick="openRestorePicker();toggleSettingsMenu()" style="background:#fff3e0;color:#e65100;border:1px solid #ffe0b2;border-radius:10px;padding:13px 10px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit">📂 Restore</button>
 
+        <button id="dg-cloud-btn" onclick="dgOpenCloud();toggleSettingsMenu()" style="grid-column:1/-1;background:#e3f2fd;color:#1565c0;border:1px solid #bbdefb;border-radius:10px;padding:13px 10px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit">☁️ Google Drive Backup</button>
         <button onclick="openAdminPanel();toggleSettingsMenu()" style="background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border:none;border-radius:10px;padding:13px 10px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 3px 0 #0a0f1a,0 4px 10px rgba(15,23,42,.5)">🔐 Admin</button>
         <button onclick="doLogout()" style="background:#ffebee;color:#c62828;border:1px solid #ffcdd2;border-radius:10px;padding:13px 10px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit">🔒 Log Out</button>
       </div>
@@ -3921,7 +3922,9 @@ function pkApplyRestoreFile(file){
     try{
       const parsed = JSON.parse(ev.target.result);
       if(!Array.isArray(parsed)) throw new Error('Invalid format');
+      try{ var _pv=localStorage.getItem('easyKhataData'); if(_pv && _pv!=='[]') localStorage.setItem('easyKhataData_prev', _pv); }catch(_e){}
       localStorage.setItem('easyKhataData', ev.target.result);
+      if(window.dgCloudSchedule) window.dgCloudSchedule();
       loadData(); renderStats(); renderList();
       showRestoreDoneModal(parsed.length, file.name);
     } catch(err){
@@ -5776,7 +5779,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'بدھ23ستمبر08:30am';
+  var PK_APP_VERSION = 'جمعرات24ستمبر03:41am';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -5803,5 +5806,328 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 </script>
 
 
+
+<!-- ☁️ DG GOOGLE DRIVE BACKUP -->
+<script>
+(function(){
+  var FB_CFG = {
+    apiKey: "AIzaSyD5zai70g-qjSrd07uSwlOSLo0sXBusBQU",
+    authDomain: "dg-khatabook.firebaseapp.com",
+    projectId: "dg-khatabook",
+    storageBucket: "dg-khatabook.firebasestorage.app",
+    messagingSenderId: "356570867443",
+    appId: "1:356570867443:web:a55e86e53ed3fd296e7986"
+  };
+  var SDK='https://www.gstatic.com/firebasejs/10.12.2/';
+  var FOLDER='DG Khatabook Backup', KEEP=10;
+  var token=null, tokenExp=0, sdkP=null, busy=false, lastErr='';
+
+  function ls(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
+  function ss(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
+  function rm(k){ try{localStorage.removeItem(k);}catch(e){} }
+  function on(){ return ls('dgDriveOn')==='1'; }
+  function localJSON(){ return ls('easyKhataData')||'[]'; }
+  function stats(text){
+    try{ var a=JSON.parse(text); if(!Array.isArray(a)) return null;
+      var u={}; a.forEach(function(r){ u[String((r&&r.name)||'').trim()]=1; });
+      return {customers:Object.keys(u).length, records:a.length}; }catch(e){ return null; }
+  }
+  function fmtTime(ms){ var d=new Date(Number(ms)); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()+'  '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+  function today(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+  // BkDGK24SEPTH0312 : Bk + DGK + تاریخ + مہینہ + دن(2 حرف) + وقت (24 گھنٹے، HHMM)
+  function fileStamp(){
+    var d=new Date(), M=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'], D=['SU','MO','TU','WE','TH','FR','SA'];
+    return 'BkDGK'+String(d.getDate()).padStart(2,'0')+M[d.getMonth()]+D[d.getDay()]+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');
+  }
+
+  // ---------- progress bar (top of home page) ----------
+  var pCur=0, pTgt=0, pTimer=null, pHide=null, pFinal='';
+  function pEl(){
+    var e=document.getElementById('dg-prog'); if(e) return e;
+    e=document.createElement('div'); e.id='dg-prog';
+    e.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99995;background:#0f172a;color:#fff;padding:calc(env(safe-area-inset-top,0px) + 6px) 12px 8px;transform:translateY(-110%);transition:transform .35s ease;box-shadow:0 4px 14px rgba(0,0,0,.4);direction:rtl';
+    e.innerHTML='<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:900;margin-bottom:5px"><span id="dg-prog-l"></span><span id="dg-prog-p" style="direction:ltr">0%</span></div><div style="height:6px;background:#334155;border-radius:6px;overflow:hidden"><div id="dg-prog-f" style="height:100%;width:0%;background:linear-gradient(90deg,#38bdf8,#22c55e);transition:width .25s linear"></div></div>';
+    document.body.appendChild(e); return e;
+  }
+  function pPaint(label){
+    var l=document.getElementById('dg-prog-l'), p=document.getElementById('dg-prog-p'), f=document.getElementById('dg-prog-f');
+    if(l&&label) l.textContent=label; if(p) p.textContent=Math.round(pCur)+'%'; if(f) f.style.width=pCur+'%';
+  }
+  function progStart(label){
+    clearTimeout(pHide); clearInterval(pTimer); pCur=0; pTgt=5; pFinal='';
+    var e=pEl(); pPaint(label); e.style.background='#0f172a';
+    requestAnimationFrame(function(){ e.style.transform='translateY(0)'; });
+    pTimer=setInterval(function(){
+      if(pCur<pTgt){ pCur=Math.min(pTgt, pCur+1.5); pPaint(); }
+      else if(pCur<90 && pTgt<100){ pCur+=0.15; pPaint(); } // آہستہ آہستہ چلتا رہے
+      if(pCur>=100){ clearInterval(pTimer); pPaint(pFinal); pHide=setTimeout(progHide,2800); }
+    },40);
+  }
+  function progSet(pct,label){ if(pct>pTgt) pTgt=pct; if(label) pPaint(label); }
+  function progDone(text){ pFinal=text; pTgt=100; var e=document.getElementById('dg-prog'); if(e) e.style.background='#166534'; }
+  function progFail(text){
+    clearInterval(pTimer); var e=pEl(); e.style.background='#991b1b'; pPaint(text); e.style.transform='translateY(0)';
+    clearTimeout(pHide); pHide=setTimeout(progHide,4500);
+  }
+  function progHide(){ var e=document.getElementById('dg-prog'); if(e) e.style.transform='translateY(-110%)'; }
+
+  // ---------- Firebase Auth (Google sign-in) ----------
+  function loadScript(src){ return new Promise(function(res,rej){ var s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=function(){rej(new Error('انٹرنیٹ چیک کریں (گوگل لوڈ نہیں ہوا)'));}; document.head.appendChild(s); }); }
+  function initSDK(){
+    if(sdkP) return sdkP;
+    sdkP=(async function(){
+      if(!window.firebase){ await loadScript(SDK+'firebase-app-compat.js'); await loadScript(SDK+'firebase-auth-compat.js'); }
+      if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
+      return true;
+    })();
+    sdkP.catch(function(){ sdkP=null; });
+    return sdkP;
+  }
+  async function getToken(interactive){
+    if(token && Date.now()<tokenExp) return token;
+    if(!interactive) throw new Error('NEEDS_LOGIN');
+    await initSDK();
+    var p=new firebase.auth.GoogleAuthProvider();
+    p.addScope('https://www.googleapis.com/auth/drive.file');
+    var hint=ls('dgDriveEmail'); p.setCustomParameters(hint?{login_hint:hint}:{prompt:'select_account'});
+    var r=await firebase.auth().signInWithPopup(p);
+    var em=((r.user&&r.user.email)||'').toLowerCase(), saved=(hint||'').toLowerCase();
+    if(saved && em!==saved){   // اکاؤنٹ مقفل: صرف پہلے چُنے گئے جی میل سے ہی چلے گا
+      try{ await firebase.auth().signOut(); }catch(e){}
+      throw new Error('غلط اکاؤنٹ ('+em+') — صرف '+saved+' سے چلے گا');
+    }
+    token=r.credential.accessToken; tokenExp=Date.now()+50*60000;
+    if(em) ss('dgDriveEmail', em);
+    hideBanner();
+    return token;
+  }
+
+  // ---------- Drive REST ----------
+  async function api(path, tok, opts){
+    opts=opts||{}; var h={Authorization:'Bearer '+tok}; if(opts.headers) for(var k in opts.headers) h[k]=opts.headers[k];
+    var r=await fetch('https://www.googleapis.com'+path, {method:opts.method||'GET', headers:h, body:opts.body});
+    if(r.status===401){ token=null; throw new Error('NEEDS_LOGIN'); }
+    if(r.status===404 && opts.soft404) return null;
+    if(!r.ok){
+      var t=''; try{t=await r.text();}catch(e){}
+      if(/accessNotConfigured|has not been used|SERVICE_DISABLED/i.test(t)) throw new Error('Google Drive API آن نہیں ہے (Cloud Console میں Enable کریں)');
+      throw new Error('Drive ایرر '+r.status);
+    }
+    if(opts.text) return r.text();
+    if(r.status===204) return {};
+    return r.json();
+  }
+  function q(s){ return encodeURIComponent(s); }
+  async function getFolder(tok){
+    var id=ls('dgDriveFolder');
+    if(id){ var f=await api('/drive/v3/files/'+id+'?fields=id,trashed', tok, {soft404:true}); if(f && !f.trashed) return id; }
+    var l=await api('/drive/v3/files?fields=files(id)&q='+q("name='"+FOLDER+"' and mimeType='application/vnd.google-apps.folder' and trashed=false"), tok);
+    if(l.files && l.files.length){ ss('dgDriveFolder', l.files[0].id); return l.files[0].id; }
+    var c=await api('/drive/v3/files?fields=id', tok, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:FOLDER, mimeType:'application/vnd.google-apps.folder'})});
+    ss('dgDriveFolder', c.id); return c.id;
+  }
+  function multipart(meta, body){
+    var b='dgk'+Date.now();
+    return {ct:'multipart/related; boundary='+b, body:'--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+body+'\r\n--'+b+'--'};
+  }
+  async function download(tok, id){ return api('/drive/v3/files/'+id+'?alt=media', tok, {text:true}); }
+  async function listBackups(tok, fid, size){
+    var l=await api('/drive/v3/files?fields=files(id,name,createdTime,modifiedTime,appProperties)&orderBy=createdTime%20desc&pageSize='+(size||30)+'&q='+q("'"+fid+"' in parents and name contains 'BkDGK' and trashed=false"), tok);
+    return l.files||[];
+  }
+
+  // ---------- status / banner ----------
+  function statusText(){
+    if(!on()) return 'Google Drive بیک اپ بند ہے';
+    if(lastErr) return '❌ '+lastErr;
+    var t=ls('dgDriveLast'); return t?'✅ آخری بیک اپ: '+fmtTime(t):'⏳ ابھی بیک اپ نہیں ہوا';
+  }
+  function paintBtn(){
+    var b=document.getElementById('dg-cloud-btn');
+    if(b) b.textContent=!on()?'☁️ Google Drive Backup':(lastErr?'☁️ Drive ⚠️':'☁️ Drive ✅');
+    var s=document.getElementById('dg-cloud-status'); if(s) s.textContent=statusText();
+  }
+  function showBanner(text){
+    if(!on()) return;
+    var d=document.getElementById('dg-drive-banner');
+    if(!d){
+      d=document.createElement('div'); d.id='dg-drive-banner';
+      d.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:8px;right:8px;z-index:99990;background:#1d4ed8;color:#fff;border-radius:14px;padding:11px 14px;font-size:13px;font-weight:900;direction:rtl;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer';
+      d.onclick=function(){ backup(true,'manual'); };
+      document.body.appendChild(d);
+    }
+    d.textContent=text||'☁️ Google Drive بیک اپ کے لیے یہاں ٹیپ کریں';
+  }
+  function hideBanner(){ var d=document.getElementById('dg-drive-banner'); if(d) d.remove(); }
+
+  // ---------- backup ----------
+  async function backup(interactive, why){
+    if(!on() || busy) return false;
+    if(!navigator.onLine){ if(interactive) alert('انٹرنیٹ نہیں ہے'); return false; }
+    var data=localJSON(), st=stats(data);
+    if(!st || !st.records){ if(interactive) alert('ڈیٹا خالی ہے — پہلے کوئی کسٹمر شامل کریں۔ (خالی ڈیٹا Drive پر کبھی نہیں لکھا جاتا)'); return false; }
+    busy=true; var ok=false, started=false;
+    try{
+      var tok=await getToken(interactive);
+      started=true; progStart('☁️ Google Drive پر بیک اپ ہو رہا ہے…');
+      progSet(15);
+      var fid=await getFolder(tok); progSet(35);
+      var name=fileStamp()+'.json', props={customers:String(st.customers), records:String(st.records), rev:String(Date.now())};
+      var same=(await api('/drive/v3/files?fields=files(id)&q='+q("'"+fid+"' in parents and name='"+name+"' and trashed=false"), tok)).files||[];
+      progSet(50);
+      if(same.length){
+        var m=multipart({appProperties:props}, data);
+        await api('/upload/drive/v3/files/'+same[0].id+'?uploadType=multipart&fields=id', tok, {method:'PATCH', headers:{'Content-Type':m.ct}, body:m.body});
+      } else {
+        var m2=multipart({name:name, parents:[fid], appProperties:props}, data);
+        await api('/upload/drive/v3/files?uploadType=multipart&fields=id', tok, {method:'POST', headers:{'Content-Type':m2.ct}, body:m2.body});
+      }
+      progSet(80);
+      var all=await listBackups(tok, fid, 60);
+      for(var i=KEEP;i<all.length;i++){ try{ await api('/drive/v3/files/'+all[i].id, tok, {method:'DELETE'}); }catch(e){} }
+      ss('dgDriveLast', String(Date.now())); lastErr=''; ok=true;
+      progDone('✅ آپ کا بیک اپ ہو گیا ہے — 100% مکمل ('+st.customers+' کسٹمرز، '+st.records+' ریکارڈز)');
+    }catch(e){
+      var m3=(e&&e.message)||'ناکام';
+      if(m3==='NEEDS_LOGIN'){
+        showBanner(why==='auto'?'☁️ خودکار بیک اپ کا وقت ہے — یہاں ٹیپ کریں':null);
+        if(why==='auto' && !window.__dgArm){   // اسکرین پر پہلی ٹچ خود بیک اپ چلا دے (ایک الگ ٹیپ کی ضرورت نہیں)
+          window.__dgArm=true;
+          var fire=function(ev){
+            document.removeEventListener('pointerup',fire,true); window.__dgArm=false;
+            if(ev.target && ev.target.closest && ev.target.closest('#dg-cloud-modal,#dg-drive-banner')) return;
+            backup(true,'manual');
+          };
+          document.addEventListener('pointerup',fire,true);
+        }
+      }
+      else{
+        lastErr=(e&&e.code==='auth/popup-closed-by-user')?'لاگ ان مکمل نہیں ہوا':((e&&e.code==='auth/unauthorized-domain')?'یہ ویب سائٹ Firebase Authorized domains میں شامل نہیں':m3);
+        if(started) progFail('❌ بیک اپ ناکام: '+lastErr);
+        if(interactive) alert('Drive بیک اپ ناکام: '+lastErr);
+      }
+    }finally{ busy=false; paintBtn(); }
+    return ok;
+  }
+  window.dgCloudSchedule=function(){}; // پرانا ہُک — اب ہر سیو پر نہیں، اوپننگ اور شام 7 بجے کے بعد خودکار بیک اپ ہوتا ہے
+
+  // ---------- auto backup: opening + after 7 PM ----------
+  function appVisible(){
+    var a=document.getElementById('app'), l=document.getElementById('lock-screen');
+    return a && a.style.display!=='none' && (!l || l.style.display==='none') && document.visibilityState==='visible';
+  }
+  async function autoCheck(){
+    if(!on() || busy || !appVisible()) return;
+    var slot=(new Date().getHours()>=19)?'eve':'day', key=today()+'|'+slot;
+    if(ls('dgDriveAuto')===key) return;
+    if(!stats(localJSON()) || !stats(localJSON()).records) return;
+    if(!navigator.onLine) return;
+    var ok=await backup(false,'auto');
+    if(ok) ss('dgDriveAuto', key);
+  }
+
+  // ---------- restore ----------
+  function applyRestore(text){
+    var arr; try{ arr=JSON.parse(text); }catch(e){ arr=null; }
+    if(!Array.isArray(arr)) return null;
+    var prev=localJSON(); if(prev && prev!=='[]') ss('easyKhataData_prev', prev);
+    ss('easyKhataData', text);
+    try{ loadData(); renderStats(); renderList(); }catch(e){}
+    return stats(text);
+  }
+  async function restoreFile(x){
+    var st=x.appProperties||{};
+    if(!confirm('یہ فائل ریسٹور کریں؟\n\n📄 '+x.name+'\n🕒 '+fmtTime(Date.parse(x.createdTime))+'\n👥 '+(st.customers||'?')+' کسٹمرز\n🧾 '+(st.records||'?')+' ریکارڈز\n\nاس فون کا موجودہ ڈیٹا بدل جائے گا (حفاظتی کاپی رکھ لی جائے گی)')) return;
+    closeModal();
+    try{
+      var tok=await getToken(true);
+      progStart('⬇️ Google Drive سے ریسٹور ہو رہا ہے…'); progSet(20);
+      var txt=await download(tok, x.id); progSet(60);
+      var r=applyRestore(txt); progSet(85);
+      if(!r){ progFail('❌ یہ فائل درست نہیں ہے'); return; }
+      progDone('✅ ریسٹور 100% مکمل ہو گیا ('+r.customers+' کسٹمرز، '+r.records+' ریکارڈز)');
+    }catch(e){ progFail('❌ ریسٹور ناکام: '+(((e&&e.message)==='NEEDS_LOGIN')?'دوبارہ لاگ ان کریں':((e&&e.message)||e))); }
+  }
+  async function showList(){
+    var box=document.getElementById('dgd-list'); if(!box) return;
+    box.innerHTML='<div style="text-align:center;padding:10px;font-weight:800">⏳ ...</div>';
+    try{
+      var tok=await getToken(true), fid=await getFolder(tok), f=await listBackups(tok, fid, 20);
+      if(!f.length){ box.innerHTML='<div style="text-align:center;padding:10px;color:#991b1b;font-weight:800;direction:rtl">Drive میں کوئی بیک اپ فائل نہیں ملی</div>'; return; }
+      box.innerHTML='<div style="font-size:12px;font-weight:800;color:#475569;text-align:center;margin-bottom:6px;direction:rtl">جو فائل ریسٹور کرنی ہے اس پر ٹیپ کریں</div>';
+      f.forEach(function(x){
+        var b=document.createElement('button'); var p=x.appProperties||{};
+        b.style.cssText='width:100%;text-align:left;direction:ltr;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:10px;margin-bottom:6px;font-family:inherit;cursor:pointer';
+        b.innerHTML='<div style="font-size:14px;font-weight:900;color:#0f172a"></div><div style="font-size:11px;color:#64748b;margin-top:3px"></div><div style="font-size:12px;font-weight:800;color:#1d4ed8;margin-top:4px"></div>';
+        b.children[0].textContent=x.name; b.children[1].textContent=fmtTime(Date.parse(x.createdTime));
+        b.children[2].textContent='👥 '+(p.customers||'?')+' customers   🧾 '+(p.records||'?')+' records';
+        b.onclick=function(){ restoreFile(x); };
+        box.appendChild(b);
+      });
+    }catch(e){ box.innerHTML=''; alert('فہرست نہیں کھلی: '+(((e&&e.message)==='NEEDS_LOGIN')?'دوبارہ لاگ ان کریں':((e&&e.message)||e))); }
+  }
+
+  // ---------- connect ----------
+  async function connect(){
+    var btn=document.getElementById('dgd-connect'); btn.disabled=true; btn.textContent='⏳ ...';
+    try{
+      var tok=await getToken(true), fid=await getFolder(tok), f=await listBackups(tok, fid, 5);
+      ss('dgDriveOn','1'); lastErr='';
+      var st=stats(localJSON());
+      if(f.length && (!st || !st.records)){ openModal(); showList(); return; }   // نیا فون: پہلے ریسٹور کی فہرست
+      await backup(false,'manual'); openModal();
+    }catch(e){
+      rm('dgDriveOn');
+      var m=(e&&e.code==='auth/popup-closed-by-user')?'لاگ ان مکمل نہیں ہوا':((e&&e.code==='auth/unauthorized-domain')?'یہ ویب سائٹ Firebase کے Authorized domains میں شامل نہیں':((e&&e.message)||e));
+      alert('جوڑا نہیں جا سکا: '+m); paintBtn(); btn.disabled=false; btn.textContent='🔗 Google Drive سے جوڑیں';
+    }
+  }
+
+  // ---------- modal ----------
+  function closeModal(){ var m=document.getElementById('dg-cloud-modal'); if(m) m.remove(); }
+  function btnCss(bg,col,bd){ return 'width:100%;background:'+bg+';color:'+col+';padding:14px;border:'+(bd||'none')+';border-radius:14px;font-weight:900;font-size:15px;cursor:pointer;margin-bottom:8px;font-family:inherit'; }
+  function openModal(){
+    closeModal(); initSDK().catch(function(){});
+    var m=document.createElement('div'); m.id='dg-cloud-modal';
+    m.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.88);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto';
+    var body;
+    if(!on()){
+      body='<div style="font-size:13px;color:#334155;line-height:1.9;margin-bottom:12px;direction:rtl;text-align:right">اپنے گوگل اکاؤنٹ سے جوڑیں۔ آپ کا ڈیٹا آپ کی اپنی Google Drive میں "DG Khatabook Backup" فولڈر میں محفوظ ہوگا، اور وہیں سے واپس آئے گا۔ ایپ صرف اپنی بنائی ہوئی فائلیں دیکھ سکتی ہے۔ خودکار بیک اپ: ایپ کھلنے پر اور شام 7 بجے کے بعد۔</div>'
+        +'<button id="dgd-connect" style="'+btnCss('linear-gradient(135deg,#16a34a,#15803d)','#fff')+'">🔗 Google Drive سے جوڑیں</button>';
+    } else {
+      body='<div id="dg-cloud-status" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:12px;font-size:13px;font-weight:800;color:#1e3a8a;direction:rtl;text-align:center;margin-bottom:8px">'+statusText()+'</div>'
+        +'<div style="font-size:12px;color:#64748b;text-align:center;margin-bottom:12px;direction:ltr;word-break:break-all">'+(ls('dgDriveEmail')||'')+'  🔒</div>'
+        +'<button id="dgd-now" style="'+btnCss('linear-gradient(135deg,#2563eb,#1d4ed8)','#fff')+'">☁️ ابھی بیک اپ کریں</button>'
+        +'<button id="dgd-rest" style="'+btnCss('#fff3e0','#e65100','1.5px solid #ffe0b2')+'">⬇️ Drive سے ڈیٹا واپس لائیں</button>'
+        +'<div id="dgd-list"></div>'
+        +'<button id="dgd-off" style="width:100%;background:#fef2f2;color:#b91c1c;padding:11px;border:1px solid #fecaca;border-radius:14px;font-weight:900;font-size:13px;cursor:pointer;font-family:inherit">بند کریں (Drive کا ڈیٹا محفوظ رہے گا)</button>';
+    }
+    m.innerHTML='<div style="background:#fff;border-radius:24px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.5);margin:auto"><div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:18px;text-align:center;color:#fff;font-size:18px;font-weight:900">☁️ Google Drive Backup</div><div style="padding:18px">'+body+'<button id="dgd-close" style="width:100%;background:#f1f5f9;color:#334155;padding:12px;border:none;border-radius:14px;font-weight:900;font-size:13px;cursor:pointer;margin-top:10px;font-family:inherit">بند کریں ✕</button></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',function(e){ if(e.target===m) closeModal(); });
+    document.getElementById('dgd-close').onclick=closeModal;
+    if(!on()){ document.getElementById('dgd-connect').onclick=connect; }
+    else{
+      document.getElementById('dgd-now').onclick=async function(){ closeModal(); await backup(true,'manual'); };
+      document.getElementById('dgd-rest').onclick=showList;
+      document.getElementById('dgd-off').onclick=function(){
+        if(!confirm('Google Drive بیک اپ بند کر دیں؟')) return;
+        ['dgDriveOn','dgDriveLast','dgDriveEmail','dgDriveFolder','dgDriveAuto'].forEach(rm);
+        token=null; lastErr=''; hideBanner(); paintBtn(); openModal();
+      };
+    }
+  }
+  window.dgOpenCloud=function(){ openModal(); };
+
+  // ---------- start ----------
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') setTimeout(autoCheck,1500); });
+  document.addEventListener('DOMContentLoaded',function(){
+    paintBtn();
+    if(on()) initSDK().catch(function(){});
+    setTimeout(autoCheck,4000);
+    setInterval(autoCheck,60000);
+  });
+})();
+</script>
 
 </body></html>
