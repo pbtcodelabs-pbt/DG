@@ -1025,7 +1025,7 @@ select {
 <!-- LOCK SCREEN -->
 <div id="lock-screen" class="lock-screen" style="display:none">
   <div class="lock-card">
-    <div id="pk-lock-strip"><span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 04:23 AM</span></div>
+    <div id="pk-lock-strip"><span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 04:33 AM</span></div>
     <div class="lock-body">
       <div class="lock-icon">🔒</div>
       <h2 style="font-size:22px;font-weight:900;margin-bottom:8px">Software Activation</h2>
@@ -1037,9 +1037,8 @@ select {
         <div class="lock-id-val" id="user-id-display">-----</div>
         <div style="font-size:11px;color:#94a3b8;font-weight:700;margin-top:6px;line-height:1.6">This is your unique ID — automatically generated the first time you opened the app. Send this ID to us for subscription, and we will generate an activation code for it.</div>
       </div>
-      <input type="number" id="activation-key" class="form-inp" placeholder="Enter Activation Code" dir="ltr" style="text-align:center;letter-spacing:.1em;font-size:18px;margin-bottom:6px">
+      <input type="text" id="activation-key" class="form-inp" placeholder="Enter Activation Code" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-align:center;letter-spacing:.1em;font-size:18px;margin-bottom:6px">
       <div id="key-error" style="color:#dc2626;font-size:13px;font-weight:700;margin-bottom:10px;display:none">Wrong code! Try again</div>
-      <button class="btn-unlock" onclick="tryUnlock()">Unlock →</button>
       <button class="btn-unlock" onclick="tryUnlock()">Unlock →</button>
       
       <!-- DEVELOPER CONTACT BUTTONS - COMPACT SIZE -->
@@ -1101,9 +1100,9 @@ select {
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px;gap:5px">
       
       <div style="flex:1"></div>
-      <div id="pk-net-indicator" class="pk-online">
+      <div id="pk-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-net-row"><span id="pk-net-dot"></span><span id="pk-net-text">Online</span></div>
-        <div id="pk-app-version" dir="rtl">جمعرات 24 ستمبر · 04:23 AM</div>
+        <div id="pk-app-version" dir="rtl">جمعرات 24 ستمبر · 04:33 AM</div>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:5px">
@@ -1698,7 +1697,84 @@ select {
   </div>
 </div>
 
-<!-- ENTRY MODAL -->
+<!-- 🕵️ DEVELOPER PANEL (Firebase subscription control) -->
+<div id="modal-dev-panel" class="modal-bg" style="display:none" onclick="if(event.target===this)closeModal('modal-dev-panel')">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-title">🕵️ Developer Panel</div>
+
+    <!-- Password gate -->
+    <div id="dg-dev-locked">
+      <label class="form-label">Developer Panel Password</label>
+      <input type="password" id="dg-dev-pass-input" class="form-inp" placeholder="Password" dir="ltr" onkeydown="if(event.key==='Enter')dgDevUnlock()">
+      <div id="dg-dev-pass-err" style="color:#dc2626;font-size:13px;font-weight:700;margin:-8px 0 12px;display:none">❌ غلط پاسورڈ</div>
+      <button class="btn-unlock" onclick="dgDevUnlock()">Unlock 🔓</button>
+      <button class="nc-btn-back" style="width:100%" onclick="closeModal('modal-dev-panel')">Cancel</button>
+    </div>
+
+    <!-- Unlocked panel -->
+    <div id="dg-dev-unlocked" style="display:none">
+
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#166534;font-weight:700">
+        📱 اپنے فون کا Device UID دیکھنا ہو تو لاک اسکرین پر "Your Unique User ID" دیکھیں۔
+      </div>
+
+      <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:8px">🎁 نیا کوڈ بنائیں (Generate Code)</div>
+      <label class="form-label">دن (Days)</label>
+      <select id="dg-code-days" class="form-inp" onchange="document.getElementById('dg-code-custom-wrap').style.display=(this.value==='custom'?'block':'none')">
+        <option value="30">30 دن</option>
+        <option value="90">90 دن</option>
+        <option value="180">180 دن</option>
+        <option value="365" selected>365 دن</option>
+        <option value="lifetime">Lifetime</option>
+        <option value="custom">Custom…</option>
+      </select>
+      <div id="dg-code-custom-wrap" style="display:none">
+        <label class="form-label">دنوں کی تعداد لکھیں</label>
+        <input type="number" id="dg-code-custom-days" class="form-inp" placeholder="مثلاً 45" dir="ltr">
+      </div>
+      <label class="form-label">کسٹمر کا نام (اختیاری)</label>
+      <input type="text" id="dg-code-name" class="form-inp" placeholder="مثلاً: صدام برادرز">
+      <label class="form-label">مخصوص Device UID سے باندھیں (اختیاری — خالی چھوڑیں تو کوئی بھی ڈیوائس ایک بار چلا سکے گی)</label>
+      <input type="text" id="dg-code-uid" class="form-inp" placeholder="مثلاً 74065" dir="ltr">
+      <button class="btn-unlock" style="background:#16a34a" onclick="dgDevGenerateCode()">✨ کوڈ بنائیں</button>
+      <div id="dg-code-result" style="display:none;background:#fff7ed;border:2px dashed #fb923c;border-radius:12px;padding:12px;text-align:center;margin-bottom:16px">
+        <div style="font-size:11px;color:#9a3412;font-weight:800;margin-bottom:4px">نیا کوڈ — کسٹمر کو بھیجیں</div>
+        <div id="dg-code-result-text" style="font-size:20px;font-weight:900;letter-spacing:.08em;color:#c2410c;direction:ltr"></div>
+      </div>
+
+      <div style="border-top:2px solid #f1f5f9;margin:16px 0;padding-top:14px">
+        <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:8px">📋 جاری کردہ کوڈز</div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+          <button id="dg-filter-all" class="dg-filter-btn active" onclick="dgSetCodeFilter('all')">سب</button>
+          <button id="dg-filter-active" class="dg-filter-btn" onclick="dgSetCodeFilter('active')">فعال</button>
+          <button id="dg-filter-unused" class="dg-filter-btn" onclick="dgSetCodeFilter('unused')">غیراستعمال شدہ</button>
+          <button id="dg-filter-expired" class="dg-filter-btn" onclick="dgSetCodeFilter('expired')">ختم شدہ</button>
+          <button id="dg-filter-revoked" class="dg-filter-btn" onclick="dgSetCodeFilter('revoked')">منسوخ شدہ</button>
+          <button style="margin-right:auto;background:none;border:none;color:#2563eb;font-weight:800;font-size:12px" onclick="dgDevLoadCodes()">🔄 تازہ کریں</button>
+        </div>
+        <div id="dg-codes-list"><div style="text-align:center;color:#94a3b8;font-size:12.5px;padding:14px">⏳ لوڈ ہو رہا ہے...</div></div>
+      </div>
+
+      <div style="border-top:2px solid #f1f5f9;margin:16px 0;padding-top:14px">
+        <div class="form-label" style="font-size:14px;color:#b91c1c;margin-bottom:8px">🔑 پاسورڈ تبدیل کریں</div>
+        <input type="password" id="dg-dev-new-pass" class="form-inp" placeholder="نیا پاسورڈ لکھیں" dir="ltr">
+        <button class="nc-btn-save" style="width:100%" onclick="dgDevChangePassword()">Save New Password</button>
+      </div>
+
+      <button class="nc-btn-back" style="width:100%;margin-top:10px" onclick="closeModal('modal-dev-panel')">Close</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.dg-filter-btn{background:#f1f5f9;border:none;color:#475569;font-size:11px;font-weight:800;padding:6px 10px;border-radius:20px;cursor:pointer}
+.dg-filter-btn.active{background:#2563eb;color:#fff}
+.dg-code-row{border:1.5px solid #e2e8f0;border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:12.5px}
+.dg-code-row .dgc-code{font-weight:900;color:#0f172a;direction:ltr;letter-spacing:.05em}
+.dg-code-row .dgc-meta{color:#64748b;font-size:11.5px;margin-top:3px;line-height:1.6}
+.dg-code-row .dgc-actions{display:flex;gap:6px;margin-top:8px}
+.dg-code-row .dgc-actions button{flex:1;border:none;border-radius:8px;padding:6px 4px;font-size:11px;font-weight:800;cursor:pointer}
+</style>
 <div id="modal-entry" class="modal-bg" style="display:none" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal-box">
     <div class="modal-title" id="entry-modal-title">Enter Amount</div>
@@ -2092,6 +2168,205 @@ function _makeChecksum(uid, ts){
   return (h>>>0).toString(16);
 }
 
+// ============================================================
+// 🕵️ FIREBASE SUBSCRIPTION SYSTEM (licenses/devices/trials on Firestore)
+// Ported from صدام فروٹ منڈی's system, adapted to DG Khatabook.
+// Uses Firebase Anonymous Auth (separate from the Google-sign-in used by
+// the Drive backup block above) so licenses/devices/trials can be
+// protected by Firestore Rules requiring request.auth != null.
+// ============================================================
+const DG_FIREBASE_PROJECT_ID = 'dg-khatabook';
+const DG_FIREBASE_API_KEY    = 'AIzaSyD5zai70g-qjSrd07uSwlOSLo0sXBusBQU';
+const DG_FIRESTORE_BASE      = `https://firestore.googleapis.com/v1/projects/${DG_FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+const DG_AUTH_SIGNUP_URL     = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${DG_FIREBASE_API_KEY}`;
+const DG_AUTH_REFRESH_URL    = `https://securetoken.googleapis.com/v1/token?key=${DG_FIREBASE_API_KEY}`;
+
+function _dgGetFbAuth(){ try{ return JSON.parse(localStorage.getItem('dgFbAuth')||'null'); }catch(e){ return null; } }
+function _dgSetFbAuth(a){ try{ localStorage.setItem('dgFbAuth', JSON.stringify(a)); }catch(e){} }
+
+// Always tries to return a valid anonymous ID token; null only if offline/failed (rest of app keeps working offline).
+async function dgEnsureFirebaseAuth(){
+  const auth = _dgGetFbAuth();
+  if(auth && auth.idToken && auth.expiresAt && auth.expiresAt > Date.now()+60000) return auth.idToken;
+  try{
+    if(auth && auth.refreshToken){
+      const res = await fetch(DG_AUTH_REFRESH_URL, {
+        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:`grant_type=refresh_token&refresh_token=${encodeURIComponent(auth.refreshToken)}`
+      });
+      if(res.ok){
+        const data = await res.json();
+        const a = { localId:data.user_id, idToken:data.id_token, refreshToken:data.refresh_token, expiresAt: Date.now()+(parseInt(data.expires_in||'3600')*1000) };
+        _dgSetFbAuth(a);
+        return a.idToken;
+      }
+    }
+    const res = await fetch(DG_AUTH_SIGNUP_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({returnSecureToken:true}) });
+    if(!res.ok) return null;
+    const data = await res.json();
+    const a = { localId:data.localId, idToken:data.idToken, refreshToken:data.refreshToken, expiresAt: Date.now()+(parseInt(data.expiresIn||'3600')*1000) };
+    _dgSetFbAuth(a);
+    return a.idToken;
+  }catch(e){ return null; }
+}
+
+async function dgAuthFetch(path, options){
+  const token = await dgEnsureFirebaseAuth();
+  if(!token) throw new Error('offline-or-auth-failed');
+  const headers = Object.assign({}, (options&&options.headers)||{}, {'Authorization':'Bearer '+token});
+  return fetch(`${DG_FIRESTORE_BASE}/${path}`, Object.assign({}, options||{}, {headers}));
+}
+
+function _dgParseFields(fields){
+  const out={};
+  for(const k in fields){
+    const v=fields[k];
+    if(v.stringValue!==undefined) out[k]=v.stringValue;
+    else if(v.integerValue!==undefined) out[k]=parseInt(v.integerValue);
+    else if(v.booleanValue!==undefined) out[k]=v.booleanValue;
+    else out[k]=null;
+  }
+  return out;
+}
+
+// ---------- Local cached subscription (replaces the old fixed-365-day formula with a real,
+// developer-chosen expiry date synced from Firestore's devices/{uid} document) ----------
+function _dgSetLocalSub(fp, expEpoch, code){
+  localStorage.setItem('ek_act','YES');
+  localStorage.setItem('ek_uid', fp);
+  localStorage.setItem('ek_exp', _encodeTime(expEpoch));
+  localStorage.setItem('ek_expcs', _makeChecksum('EXP::'+fp, expEpoch));
+  localStorage.setItem('ek_actOn', new Date().toISOString().slice(0,10));
+  if(code) localStorage.setItem('dgSubLastCode', code);
+}
+function _dgLocalSubExpiry(fp){
+  const encExp = localStorage.getItem('ek_exp');
+  const cs = localStorage.getItem('ek_expcs');
+  if(!encExp || !cs) return null;
+  const exp = _decodeTime(encExp);
+  if(!exp || exp < 1000000000000) return null;
+  if(cs !== _makeChecksum('EXP::'+fp, exp)) return null; // tampering detected
+  return exp;
+}
+function _dgClearLocalSub(){
+  ['ek_act','ek_exp','ek_expcs','ek_actOn','dgSubLastCode','ek_act_ts','ek_act_cs'].forEach(k=>localStorage.removeItem(k));
+}
+
+// ---------- Push this device's current subscription up to devices/{uid} — so a reinstall/crash can auto-restore ----------
+async function dgSyncSubToCloud(fp, expEpoch, code){
+  try{
+    await dgAuthFetch(`devices/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({fields:{
+        subscriptionExpiry:{stringValue:new Date(expEpoch).toISOString().slice(0,10)},
+        subscriptionActivatedOn:{stringValue:new Date().toISOString().slice(0,10)},
+        lastActivationCode:{stringValue:String(code||'')},
+        updatedAt:{integerValue:String(Date.now())}
+      }}
+    });
+  }catch(e){ /* offline — will sync again on next activation/open */ }
+}
+
+// ---------- On every app open: if no valid local subscription, silently check devices/{uid} and restore it ----------
+async function dgRestoreSubFromCloud(fp){
+  if(_dgLocalSubExpiry(fp)) return; // already have a valid one locally
+  try{
+    const res = await dgAuthFetch(`devices/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`);
+    if(res.status!==200) return; // this device never had a paid subscription
+    const doc = await res.json();
+    const data = _dgParseFields(doc.fields||{});
+    if(!data.subscriptionExpiry) return;
+    const expEpoch = new Date(data.subscriptionExpiry+'T23:59:59').getTime();
+    if(!expEpoch || expEpoch < Date.now()) return; // was valid once but has since expired
+    _dgSetLocalSub(fp, expEpoch, data.lastActivationCode);
+  }catch(e){ /* offline — try again next time there's internet */ }
+}
+
+// ---------- Locks the free trial permanently to this device (server-side) so Log Out / data clear can't reset it ----------
+async function dgCheckAndLockTrialOnline(fp){
+  if(localStorage.getItem('ek_act')==='YES') return; // paid — leave trial-lock alone
+  if(!localStorage.getItem('ek_ts')) return; // no local trial running
+  try{
+    const res = await dgAuthFetch(`trials/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`);
+    if(res.status===200){
+      // this device already had a trial before (data was cleared to try to get a free one again) — cut it short
+      _clearTrialData();
+      location.reload();
+      return;
+    }
+    // first-ever trial on this device — record it permanently
+    await dgAuthFetch(`trials/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({fields:{startedAt:{integerValue:String(Date.now())}}})
+    });
+  }catch(e){ /* offline — checked again next time there's internet */ }
+}
+
+// ---------- On every app open (paid users): re-check the code online — instant remote revoke if the developer suspends it ----------
+async function dgResyncLicenseOnline(){
+  const code = localStorage.getItem('dgSubLastCode');
+  if(!code || code==='DEV') return;
+  try{
+    const res = await dgAuthFetch(`licenses/${encodeURIComponent(code)}?key=${DG_FIREBASE_API_KEY}`);
+    if(!res.ok) return;
+    const doc = await res.json();
+    const data = _dgParseFields(doc.fields||{});
+    if(data.active===false){
+      _dgClearLocalSub();
+      document.getElementById('app').style.display='none';
+      alert('⚠️ آپ کی سبسکرپشن ڈویلپر نے منسوخ کر دی ہے۔ براہ کرم رابطہ کریں۔');
+      location.reload();
+    }
+  }catch(e){ /* offline — no problem, last known state keeps working */ }
+}
+
+// ---------- Called right after showApp() — background cloud checks, never blocks the UI ----------
+async function dgOnAppOpenSyncChecks(){
+  try{
+    const fp = await getDeviceFingerprint();
+    if(localStorage.getItem('ek_act')==='YES') dgResyncLicenseOnline();
+    else dgCheckAndLockTrialOnline(fp);
+  }catch(e){}
+}
+
+// ---------- Verify + consume an activation code against Firestore, then activate locally ----------
+async function dgActivateWithCode(code){
+  const fp = await getDeviceFingerprint();
+  const trimmed = (code||'').trim().toUpperCase();
+  if(!trimmed) return {success:false, message:'کوڈ درج کریں۔'};
+  let docRes;
+  try{ docRes = await dgAuthFetch(`licenses/${encodeURIComponent(trimmed)}?key=${DG_FIREBASE_API_KEY}`); }
+  catch(e){ return {success:false, message:'انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔'}; }
+  if(docRes.status===404) return {success:false, message:'غلط کوڈ — ڈویلپر سے دوبارہ چیک کریں۔'};
+  if(!docRes.ok) return {success:false, message:'ابھی تصدیق نہیں ہو سکی، دوبارہ کوشش کریں۔'};
+  const doc = await docRes.json();
+  const data = _dgParseFields(doc.fields||{});
+  if(data.active===false) return {success:false, message:'یہ کوڈ منسوخ ہو چکا ہے، ڈویلپر سے رابطہ کریں۔'};
+  if(data.boundUid && data.boundUid!==fp) return {success:false, message:'یہ کوڈ کسی اور ڈیوائس کے لیے بنایا گیا تھا۔'};
+  if(data.activatedAt) return {success:false, message:'یہ کوڈ پہلے استعمال ہو چکا ہے۔'};
+  const daysNum = data.lifetime ? 36500 : (data.days||0);
+  if(!daysNum) return {success:false, message:'اس کوڈ کی مدت غلط ہے، ڈویلپر سے رابطہ کریں۔'};
+  const hasActive = _dgLocalSubExpiry(fp);
+  const base = hasActive ? hasActive : Date.now(); // already-active users: new days add on top (renewal)
+  const newExpEpoch = base + daysNum*86400000;
+  try{
+    const upd = await dgAuthFetch(
+      `licenses/${encodeURIComponent(trimmed)}?updateMask.fieldPaths=activatedAt&updateMask.fieldPaths=expiresAt&updateMask.fieldPaths=activatedByUid&key=${DG_FIREBASE_API_KEY}`,
+      { method:'PATCH', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({fields:{
+          activatedAt:{integerValue:String(Date.now())},
+          expiresAt:{integerValue:String(newExpEpoch)},
+          activatedByUid:{stringValue:String(fp)}
+        }})
+      }
+    );
+    if(!upd.ok) return {success:false, message:'یہ کوڈ ابھی ابھی استعمال ہو چکا یا غلط ہے۔'};
+  }catch(e){ return {success:false, message:'انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔'}; }
+  _dgSetLocalSub(fp, newExpEpoch, trimmed);
+  dgSyncSubToCloud(fp, newExpEpoch, trimmed);
+  return {success:true};
+}
+
 async function initLock(){
   // Clean up old empty values and set defaults
   var wp = localStorage.getItem('dev_chat_whatsapp') || '';
@@ -2105,65 +2380,28 @@ async function initLock(){
     localStorage.setItem('dev_chat_email', 'pbtcodelabs@gmail.com');
   }
   
-  // Developer bypass — owner UID always unlocks
+  // Developer bypass — owner UID always unlocks, lifetime, no Firestore involved
   const DEV_UIDS = ['74065']; // Your UID is here
   const fp        = await getDeviceFingerprint();
   if(DEV_UIDS.includes(fp)){
-    // save in localStorage too so everything shows correctly
     if(!localStorage.getItem('ek_act')){
-      localStorage.setItem('ek_act','YES');
-      localStorage.setItem('ek_uid', fp);
-      const ts = Date.now();
-      localStorage.setItem('ek_act_ts', _encodeTime(ts));
-      localStorage.setItem('ek_act_cs', _makeChecksum('ACT::'+fp, ts));
+      _dgSetLocalSub(fp, Date.now()+36500*86400000, 'DEV');
     }
     showApp(); return;
   }
-  // Activation check (365-day subscription)
-  const activated = localStorage.getItem('ek_act');
-  const actUid    = localStorage.getItem('ek_uid');
 
-  if(activated === 'YES' && actUid === fp){
-    // activation exists and fingerprint matches
-    const actEncTs = localStorage.getItem('ek_act_ts');
-    const actCs    = localStorage.getItem('ek_act_cs');
-    
-    // if timestamp exists, validate it
-    if(actEncTs && actCs){
-      try {
-        let actTs = _decodeTime(actEncTs);
-        // corrupted/invalid timestamp (e.g. from an older app version) — reset instead of locking the user out
-        if(!actTs || actTs < 1000000000000){
-          actTs = Date.now();
-          localStorage.setItem('ek_act_ts', _encodeTime(actTs));
-          localStorage.setItem('ek_act_cs', _makeChecksum('ACT::'+fp, actTs));
-          showApp(); return;
-        }
-        const expectedActCs = _makeChecksum('ACT::'+fp, actTs);
-        const elapsedDays = (Date.now() - actTs) / 86400000;
-        
-        if(actCs === expectedActCs && elapsedDays < 365){
-          showApp(); return; // ✅ activation valid
-        }
-      } catch(e) {
-        // decoding failed — clear and restart
-        _clearActivationData();
-      }
-    } else {
-      // timestamp missing — set it now for 365 days
-      const ts = Date.now();
-      localStorage.setItem('ek_act_ts', _encodeTime(ts));
-      localStorage.setItem('ek_act_cs', _makeChecksum('ACT::'+fp, ts));
-      showApp(); return; // ✅ going to app
-    }
-  }
-  
-  // if we reach here, activation expired or invalid
-  if(activated === 'YES'){
-    _clearActivationData(); // clear old activation
+  // ☁️ Reinstall/data-clear safety net — if this device has no valid local subscription,
+  // silently check Firestore devices/{uid} and restore it (does nothing if offline or nothing to restore).
+  await dgRestoreSubFromCloud(fp);
+
+  // Activation check — real expiry date synced from Firestore (developer picks the days)
+  if(localStorage.getItem('ek_act') === 'YES'){
+    const exp = _dgLocalSubExpiry(fp);
+    if(exp && exp > Date.now()){ showApp(); return; } // ✅ activation valid
+    _dgClearLocalSub(); // expired, tampered, or corrupted — fall through to trial/lock
   }
 
-  // Trial check (7 days)
+  // Trial check (7 days) — unchanged mechanics, plus server-side lock (see dgCheckAndLockTrialOnline)
   const encTs  = localStorage.getItem('ek_ts');
   const storedCs = localStorage.getItem('ek_cs');
   const storedFp = localStorage.getItem('ek_fp');
@@ -2202,10 +2440,10 @@ async function initLock(){
 }
 
 function _clearTrialData(){
-  ['ek_ts','ek_cs','ek_fp','ek_act','ek_act_ts','ek_act_cs'].forEach(k=>localStorage.removeItem(k));
+  ['ek_ts','ek_cs','ek_fp','ek_act','ek_act_ts','ek_act_cs','ek_exp','ek_expcs','ek_actOn','dgSubLastCode'].forEach(k=>localStorage.removeItem(k));
 }
 function _clearActivationData(){
-  ['ek_act','ek_act_ts','ek_act_cs'].forEach(k=>localStorage.removeItem(k));
+  ['ek_act','ek_act_ts','ek_act_cs','ek_exp','ek_expcs','ek_actOn','dgSubLastCode'].forEach(k=>localStorage.removeItem(k));
 }
 
 function showApp(){
@@ -2220,6 +2458,7 @@ function showApp(){
   // start subscription/trial timer and info bar
   _startTrialTimer();
   _renderSubInfoBar();
+  dgOnAppOpenSyncChecks(); // ☁️ background: lock trial server-side, or re-check code hasn't been revoked
 }
 
 function _fmtDate(d){
@@ -2235,14 +2474,13 @@ function _renderSubInfoBar(){
   const activated = localStorage.getItem('ek_act');
 
   if(activated === 'YES'){
-    const actEncTs = localStorage.getItem('ek_act_ts');
-    if(!actEncTs){ bar.style.display='none'; return; }
-    let startTs = _decodeTime(actEncTs);
-    // if timestamp invalid (1970 or 0), use current date
-    if(!startTs || startTs < 1000000000000) startTs = Date.now();
-    const startDate = new Date(startTs);
-    const endDate = new Date(startTs + 365*86400000);
-    const remainingDays = Math.max(0, Math.ceil((endDate - Date.now())/86400000));
+    const fp = localStorage.getItem('ek_uid') || '';
+    const exp = _dgLocalSubExpiry(fp);
+    if(!exp){ bar.style.display='none'; return; }
+    const endDate = new Date(exp);
+    const actOn = localStorage.getItem('ek_actOn');
+    const startDate = actOn ? new Date(actOn) : new Date();
+    const remainingDays = Math.max(0, Math.ceil((exp - Date.now())/86400000));
     bar.style.display = 'block';
     bar.innerHTML = `✅ Subscribed: ${_fmtDate(startDate)} &nbsp;|&nbsp; Expiry Date: ${_fmtDate(endDate)} &nbsp;|&nbsp; Remaining Days: ${remainingDays}`;
   } else {
@@ -2312,20 +2550,18 @@ async function startTrial(){
 }
 
 async function tryUnlock(){
-  const fp = await getDeviceFingerprint();
-  const uid = parseInt(fp) || parseInt(localStorage.getItem('ek_uid')||'0');
-  const expected = uid * 10 + 1976;
-  const entered = parseInt(document.getElementById('activation-key').value||'0');
-  if(entered === expected){
-    const ts = Date.now();
-    localStorage.setItem('ek_act','YES');
-    localStorage.setItem('ek_uid', fp);
-    localStorage.setItem('ek_act_ts', _encodeTime(ts));
-    localStorage.setItem('ek_act_cs', _makeChecksum('ACT::'+fp, ts));
-    document.getElementById('key-error').style.display='none';
+  const errEl = document.getElementById('key-error');
+  errEl.style.display='none';
+  const codeVal = document.getElementById('activation-key').value;
+  const unlockBtns = document.querySelectorAll('.btn-unlock');
+  unlockBtns.forEach(b=>b.disabled=true);
+  const r = await dgActivateWithCode(codeVal);
+  unlockBtns.forEach(b=>b.disabled=false);
+  if(r.success){
     showApp();
   } else {
-    document.getElementById('key-error').style.display='block';
+    errEl.textContent = r.message || 'Wrong code! Try again';
+    errEl.style.display='block';
   }
 }
 
@@ -2337,8 +2573,197 @@ function doLogout(){
 }
 
 // ============================================================
-// NET CALCULATION
+// 🕵️ DEVELOPER PANEL — day-picker code generator + issued-codes list
+// Default password: 857766 (change it from inside the panel — 🔑 section)
 // ============================================================
+const DG_DEV_DEFAULT_PASS_HASH = '8b5a43764420e5af43f7c4623ad3a6699a628be06269051d38f494f9f4b22a9a';
+
+async function hashPin(pin){
+  const buf = new TextEncoder().encode(String(pin));
+  const h = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+let _dgTapCount = 0, _dgTapTimer = null;
+function dgDevTap(){
+  _dgTapCount++;
+  clearTimeout(_dgTapTimer);
+  _dgTapTimer = setTimeout(()=>{ _dgTapCount=0; }, 2500);
+  if(_dgTapCount >= 7){
+    _dgTapCount = 0;
+    document.getElementById('dg-dev-locked').style.display='block';
+    document.getElementById('dg-dev-unlocked').style.display='none';
+    document.getElementById('dg-dev-pass-input').value='';
+    document.getElementById('dg-dev-pass-err').style.display='none';
+    document.getElementById('modal-dev-panel').style.display='flex';
+  }
+}
+
+async function dgDevUnlock(){
+  const entered = document.getElementById('dg-dev-pass-input').value;
+  const enteredHash = await hashPin(entered);
+  const validHash = localStorage.getItem('dgDevPassHash') || DG_DEV_DEFAULT_PASS_HASH;
+  if(enteredHash !== validHash){
+    document.getElementById('dg-dev-pass-err').style.display='block';
+    return;
+  }
+  document.getElementById('dg-dev-locked').style.display='none';
+  document.getElementById('dg-dev-unlocked').style.display='block';
+  dgDevLoadCodes();
+}
+
+function dgDevGenerateRandomCode(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O, 1/I — avoids read/write mix-ups
+  let code = '';
+  for(let i=0;i<10;i++){
+    if(i===5) code += '-';
+    code += chars[Math.floor(Math.random()*chars.length)];
+  }
+  return code;
+}
+
+async function dgDevGenerateCode(){
+  const daysSel = document.getElementById('dg-code-days').value;
+  const isLifetime = daysSel === 'lifetime';
+  const isCustom = daysSel === 'custom';
+  let daysVal = daysSel;
+  if(isCustom){
+    const c = parseInt(document.getElementById('dg-code-custom-days').value, 10);
+    if(!c || c<1){ alert('⚠️ دنوں کی درست تعداد لکھیں (کم از کم 1)۔'); return; }
+    daysVal = String(c);
+  }
+  const nameVal = document.getElementById('dg-code-name').value.trim();
+  const uidVal  = document.getElementById('dg-code-uid').value.trim();
+  const code = dgDevGenerateRandomCode();
+
+  const fields = { active:{booleanValue:true}, createdAt:{integerValue:String(Date.now())} };
+  if(isLifetime) fields.lifetime = {booleanValue:true};
+  else fields.days = {integerValue:daysVal};
+  if(uidVal) fields.boundUid = {stringValue:uidVal};
+  if(nameVal) fields.customerName = {stringValue:nameVal};
+
+  try{
+    const res = await dgAuthFetch(`licenses/${encodeURIComponent(code)}?key=${DG_FIREBASE_API_KEY}`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({fields})
+    });
+    if(!res.ok) throw new Error('Firestore write failed');
+    document.getElementById('dg-code-result-text').textContent = code;
+    document.getElementById('dg-code-result').style.display='block';
+    document.getElementById('dg-code-name').value='';
+    document.getElementById('dg-code-uid').value='';
+    dgDevLoadCodes();
+  }catch(e){
+    alert('⚠️ کوڈ نہیں بن سکا — انٹرنیٹ چیک کریں۔ ('+e.message+')');
+  }
+}
+
+let _dgCodesCache = [];
+let _dgCodeFilter = 'all';
+function dgSetCodeFilter(f){
+  _dgCodeFilter = f;
+  ['all','active','unused','expired','revoked'].forEach(k=>{
+    document.getElementById('dg-filter-'+k)?.classList.toggle('active', k===f);
+  });
+  dgRenderCodesList();
+}
+
+async function dgDevLoadCodes(){
+  const wrap = document.getElementById('dg-codes-list');
+  wrap.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:12.5px;padding:14px">⏳ لوڈ ہو رہا ہے...</div>';
+  try{
+    const res = await dgAuthFetch(`licenses?key=${DG_FIREBASE_API_KEY}&pageSize=300`);
+    if(!res.ok) throw new Error('فہرست نہیں مل سکی');
+    const data = await res.json();
+    const docs = data.documents || [];
+    _dgCodesCache = docs.map(d=>{
+      const code = d.name.split('/').pop();
+      return { code, ..._dgParseFields(d.fields||{}) };
+    }).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    dgRenderCodesList();
+  }catch(e){
+    wrap.innerHTML = '<div style="text-align:center;color:#dc2626;font-size:12.5px;padding:14px">⚠️ لوڈ نہیں ہو سکا — انٹرنیٹ چیک کریں۔</div>';
+  }
+}
+
+function dgRenderCodesList(){
+  const wrap = document.getElementById('dg-codes-list');
+  const now = Date.now();
+  let list = _dgCodesCache.filter(c=>{
+    const used = !!c.activatedAt;
+    const revoked = c.active === false;
+    const expired = used && c.expiresAt && c.expiresAt < now;
+    if(_dgCodeFilter==='all') return true;
+    if(_dgCodeFilter==='revoked') return revoked;
+    if(_dgCodeFilter==='unused') return !used && !revoked;
+    if(_dgCodeFilter==='expired') return expired && !revoked;
+    if(_dgCodeFilter==='active') return used && !revoked && !expired;
+    return true;
+  });
+  if(!list.length){ wrap.innerHTML='<div style="text-align:center;color:#94a3b8;font-size:12.5px;padding:14px">کوئی کوڈ نہیں ملا</div>'; return; }
+  wrap.innerHTML = list.map(c=>{
+    const used = !!c.activatedAt;
+    const revoked = c.active === false;
+    const expired = used && c.expiresAt && c.expiresAt < now;
+    let statusHtml;
+    if(revoked) statusHtml = '<span style="color:#dc2626;font-weight:900">🚫 منسوخ</span>';
+    else if(!used) statusHtml = '<span style="color:#2563eb;font-weight:900">🆕 غیراستعمال شدہ</span>';
+    else if(expired) statusHtml = '<span style="color:#9a3412;font-weight:900">⌛ ختم شدہ</span>';
+    else {
+      const daysLeft = c.expiresAt ? Math.max(0, Math.ceil((c.expiresAt-now)/86400000)) : '∞';
+      statusHtml = `<span style="color:#16a34a;font-weight:900">✅ فعال — ${daysLeft} دن باقی</span>`;
+    }
+    const meta = [];
+    if(c.customerName) meta.push('👤 '+c.customerName);
+    meta.push(c.lifetime ? '⏳ Lifetime' : ('📅 '+(c.days||'?')+' دن'));
+    meta.push(c.boundUid ? ('🔗 مخصوص UID: '+c.boundUid) : '🔓 کوئی بھی ڈیوائس');
+    if(used) meta.push('📱 چلایا: '+(c.activatedByUid||'—'));
+    if(c.expiresAt && used) meta.push('🗓️ ختم: '+_fmtDate(new Date(c.expiresAt)));
+    let actions = '';
+    if(revoked){
+      actions = `<button style="background:#16a34a;color:#fff" onclick="dgDevReactivateCode('${c.code}')">✅ دوبارہ فعال</button>`;
+    } else {
+      actions = `<button style="background:#dc2626;color:#fff" onclick="dgDevRevokeCode('${c.code}')">🚫 معطل</button>`;
+    }
+    actions += `<button style="background:#f1f5f9;color:#475569" onclick="dgDevDeleteCode('${c.code}')">🗑️ حذف</button>`;
+    actions += `<button style="background:#f1f5f9;color:#475569" onclick="navigator.clipboard&&navigator.clipboard.writeText('${c.code}')">📋 کاپی</button>`;
+    return `<div class="dg-code-row"><div class="dgc-code">${c.code}</div><div class="dgc-meta">${statusHtml}<br>${meta.join(' &nbsp;|&nbsp; ')}</div><div class="dgc-actions">${actions}</div></div>`;
+  }).join('');
+}
+
+async function dgDevRevokeCode(code){
+  if(!confirm('یہ کوڈ معطل کرنا چاہتے ہیں؟')) return;
+  try{
+    await dgAuthFetch(`licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=active&key=${DG_FIREBASE_API_KEY}`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({fields:{active:{booleanValue:false}}})
+    });
+    dgDevLoadCodes();
+  }catch(e){ alert('⚠️ انٹرنیٹ چیک کریں۔'); }
+}
+async function dgDevReactivateCode(code){
+  try{
+    await dgAuthFetch(`licenses/${encodeURIComponent(code)}?updateMask.fieldPaths=active&key=${DG_FIREBASE_API_KEY}`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({fields:{active:{booleanValue:true}}})
+    });
+    dgDevLoadCodes();
+  }catch(e){ alert('⚠️ انٹرنیٹ چیک کریں۔'); }
+}
+async function dgDevDeleteCode(code){
+  if(!confirm('یہ کوڈ مستقل طور پر حذف کرنا چاہتے ہیں؟ یہ واپس نہیں آئے گا۔')) return;
+  try{
+    await dgAuthFetch(`licenses/${encodeURIComponent(code)}?key=${DG_FIREBASE_API_KEY}`, { method:'DELETE' });
+    dgDevLoadCodes();
+  }catch(e){ alert('⚠️ انٹرنیٹ چیک کریں۔'); }
+}
+
+async function dgDevChangePassword(){
+  const newPw = document.getElementById('dg-dev-new-pass').value.trim();
+  if(!newPw){ alert('نیا پاسورڈ لکھیں'); return; }
+  localStorage.setItem('dgDevPassHash', await hashPin(newPw));
+  document.getElementById('dg-dev-new-pass').value='';
+  alert('✅ پاسورڈ محفوظ ہو گیا');
+}
+
+
 function getCustomerNet(name){
   // positive = Received, negative = Paid
   return records.filter(r=>r.name.trim()===name)
@@ -5595,7 +6020,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 04:23 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 04:33 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
