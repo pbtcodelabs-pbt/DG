@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "DG Khatabook",
+  "short_name": "DG Khatabook",
+  "description": "DG Khatabook — Customer Ledger & Transactions App",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0a2e",
+  "theme_color": "#1a0a2e",
+  "lang": "ur",
+  "dir": "rtl",
+  "icons": [
+    { "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
