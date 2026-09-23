@@ -101,11 +101,8 @@
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
   animation:pk-text 4s linear infinite; filter:drop-shadow(0 0 3px rgba(255,255,255,.55));
 }
-#pk-lock-ver{
-  position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:5;
-  padding:5px 14px; border-radius:14px; font-size:12px !important;
-  background-color:#0f172a; border:1px solid rgba(255,255,255,.4);
-}
+#pk-lock-strip{background:linear-gradient(120deg,#0f172a,#1e3a8a,#6d28d9,#0f766e,#0f172a);background-size:300% 300%;animation:pk-bg 7s ease-in-out infinite;text-align:center;padding:7px 10px}
+#pk-lock-ver{display:inline-block;font-size:12px !important}
 @keyframes pk-bg{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes pk-shine{0%{left:-60%}55%,100%{left:130%}}
 @keyframes pk-text{0%{background-position:0% 0}100%{background-position:250% 0}}
@@ -1027,8 +1024,8 @@ select {
 
 <!-- LOCK SCREEN -->
 <div id="lock-screen" class="lock-screen" style="display:none">
-  <div id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 03:54 AM</div>
   <div class="lock-card">
+    <div id="pk-lock-strip"><span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 03:57 AM</span></div>
     <div class="lock-body">
       <div class="lock-icon">🔒</div>
       <h2 style="font-size:22px;font-weight:900;margin-bottom:8px">Software Activation</h2>
@@ -1106,7 +1103,7 @@ select {
       <div style="flex:1"></div>
       <div id="pk-net-indicator" class="pk-online">
         <div id="pk-net-row"><span id="pk-net-dot"></span><span id="pk-net-text">Online</span></div>
-        <div id="pk-app-version" dir="rtl">جمعرات 24 ستمبر · 03:54 AM</div>
+        <div id="pk-app-version" dir="rtl">جمعرات 24 ستمبر · 03:57 AM</div>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:5px">
@@ -5647,7 +5644,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 03:54 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 03:57 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
