@@ -2262,7 +2262,7 @@ async function dgSyncSubToCloud(fp, expEpoch, code){
         subscriptionActivatedOn:{stringValue:new Date().toISOString().slice(0,10)},
         lastActivationCode:{stringValue:String(code||'')},
         updatedAt:{integerValue:String(Date.now())}
-      }}
+      }})
     });
   }catch(e){ /* offline — will sync again on next activation/open */ }
 }
@@ -6020,7 +6020,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 04:33 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 04:42 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
