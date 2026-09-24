@@ -86,8 +86,23 @@
   background:linear-gradient(120deg,#0f172a,#1e3a8a,#6d28d9,#0f766e,#0f172a) !important;
   background-size:300% 300% !important; animation:pk-bg 7s ease-in-out infinite;
   border:1px solid rgba(255,255,255,.45); box-shadow:0 0 12px rgba(125,211,252,.55), inset 0 0 8px rgba(255,255,255,.12);
-  backdrop-filter:none !important; pointer-events:none;
+  backdrop-filter:none !important; pointer-events:auto !important; cursor:pointer;
 }
+#pk-lock-net-indicator{
+  display:inline-flex; flex-direction:column; align-items:center; gap:1px;
+  padding:5px 12px; border-radius:14px; overflow:hidden; position:relative;
+  background:linear-gradient(120deg,#0f172a,#1e3a8a,#6d28d9,#0f766e,#0f172a);
+  background-size:300% 300%; animation:pk-bg 7s ease-in-out infinite;
+  border:1px solid rgba(255,255,255,.45); box-shadow:0 0 12px rgba(125,211,252,.55), inset 0 0 8px rgba(255,255,255,.12);
+  pointer-events:auto; cursor:pointer;
+}
+#pk-lock-net-indicator #pk-lock-net-row{display:flex;align-items:center;gap:6px}
+#pk-lock-net-indicator #pk-lock-net-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+#pk-lock-net-indicator.pk-online #pk-lock-net-dot{background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.7);animation:pk-pulse 1.6s infinite}
+#pk-lock-net-indicator.pk-offline #pk-lock-net-dot{background:#ef4444;animation:none;box-shadow:none}
+#pk-lock-net-indicator.pk-online #pk-lock-net-text{color:#4ade80}
+#pk-lock-net-indicator.pk-offline #pk-lock-net-text{color:#f87171}
+#pk-lock-net-indicator #pk-lock-net-text{font-size:10px;font-weight:900;letter-spacing:.3px}
 #pk-net-indicator::after{
   content:""; position:absolute; top:0; bottom:0; width:40%; left:-60%;
   background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);
@@ -1025,17 +1040,26 @@ select {
 <!-- LOCK SCREEN -->
 <div id="lock-screen" class="lock-screen" style="display:none">
   <div class="lock-card">
-    <div id="pk-lock-strip"><span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 04:33 AM</span></div>
+    <div id="pk-lock-strip" style="display:flex;justify-content:center">
+      <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
+        <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
+        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 05:05 AM</span>
+      </div>
+    </div>
     <div class="lock-body">
       <div class="lock-icon">🔒</div>
       <h2 style="font-size:22px;font-weight:900;margin-bottom:8px">Software Activation</h2>
-      <p style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:20px;line-height:1.6">Enter activation code to use the app, or start with a 7-day free trial.</p>
-      <button class="btn-trial" onclick="startTrial()">Start 7-Day Free Trial</button>
+      <p style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:20px;line-height:1.6">Enter activation code to use the app, or start with a 3-day free trial.</p>
+      <button class="btn-trial" onclick="startTrial()">Start 3-Day Free Trial</button>
       <div class="divider"><div class="divider-line"></div><span class="divider-text">OR</span><div class="divider-line"></div></div>
       <div class="lock-id-box">
         <div class="lock-id-lbl">Your Unique User ID</div>
         <div class="lock-id-val" id="user-id-display">-----</div>
         <div style="font-size:11px;color:#94a3b8;font-weight:700;margin-top:6px;line-height:1.6">This is your unique ID — automatically generated the first time you opened the app. Send this ID to us for subscription, and we will generate an activation code for it.</div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button type="button" onclick="pkCopyUserId()" style="flex:1;background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:10px;padding:11px 8px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit">📋 UID کاپی کریں</button>
+          <button type="button" onclick="sendUidToDeveloper()" style="flex:1.3;background:linear-gradient(135deg,#25D366 0%,#20BA58 100%);color:#fff;border:none;border-radius:10px;padding:11px 8px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(37,211,102,.4)">📲 ڈیویلپر کو بھیجیں</button>
+        </div>
       </div>
       <input type="text" id="activation-key" class="form-inp" placeholder="Enter Activation Code" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-align:center;letter-spacing:.1em;font-size:18px;margin-bottom:6px">
       <div id="key-error" style="color:#dc2626;font-size:13px;font-weight:700;margin-bottom:10px;display:none">Wrong code! Try again</div>
@@ -2039,10 +2063,20 @@ function _isLoginScreen(){
 function _devChatMessage(){
   if(_isLoginScreen()){
     var uid = (document.getElementById('user-id-display')||{}).textContent || '-----';
-    return 'Respected Developer,\nI am interested to subscribe your application. This is my User ID: '+uid+'\nPlease provide me the activation code.';
+    return 'محترم ڈیویلپر السلام علیکم ورحمۃ اللہ وبرکاتہ\n\nمیں آپکی ایپ DG KHATABOOK استعمال کرنا چاہتا ہوں\nیہ میری UID ہے\n'+uid+'\n\nمیرا نام: ..........................';
   }
   return 'Respected Developer,\nI am user of your application DG Khatabook. I am facing this problem / this is my suggestion:\n';
 }
+function pkCopyUserId(){
+  var uid = (document.getElementById('user-id-display')||{}).textContent || '-----';
+  var done = ()=> pkToast('UID کاپی ہو گیا: '+uid);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(uid).then(done).catch(()=>pkCopyFallback(uid, done));
+  } else {
+    pkCopyFallback(uid, done);
+  }
+}
+function sendUidToDeveloper(){ openDevWA(); }
 function openDevWA(){
   var c = _devContact();
   if(!c.wa){ alert('⚠️ Developer WhatsApp number is not set. Set it in Admin Panel > 💬 Developer tab.'); return; }
@@ -2401,7 +2435,7 @@ async function initLock(){
     _dgClearLocalSub(); // expired, tampered, or corrupted — fall through to trial/lock
   }
 
-  // Trial check (7 days) — unchanged mechanics, plus server-side lock (see dgCheckAndLockTrialOnline)
+  // Trial check (3 days) — unchanged mechanics, plus server-side lock (see dgCheckAndLockTrialOnline)
   const encTs  = localStorage.getItem('ek_ts');
   const storedCs = localStorage.getItem('ek_cs');
   const storedFp = localStorage.getItem('ek_fp');
@@ -2418,8 +2452,8 @@ async function initLock(){
     const elapsed = (Date.now() - ts) / 86400000; // days
 
     // no tampering and fingerprint matches
-    if(storedCs === expectedCs && storedFp === fp && elapsed < 7){
-      const remaining = Math.ceil(7 - elapsed);
+    if(storedCs === expectedCs && storedFp === fp && elapsed < 3){
+      const remaining = Math.ceil(3 - elapsed);
       // show remaining days
       const bannerEl = document.querySelector('.lock-banner');
       if(bannerEl) bannerEl.textContent = `⏳ Trial remaining: ${remaining} days — activation required after`;
@@ -2490,7 +2524,7 @@ function _renderSubInfoBar(){
     // if timestamp invalid, use current date
     if(!startTs || startTs < 1000000000000) startTs = Date.now();
     const startDate = new Date(startTs);
-    const endDate = new Date(startTs + 7*86400000);
+    const endDate = new Date(startTs + 3*86400000);
     const remainingDays = Math.max(0, Math.ceil((endDate - Date.now())/86400000));
     bar.style.display = 'block';
     bar.innerHTML = `🔶 Trial Started: ${_fmtDate(startDate)} &nbsp;|&nbsp; Trial Expires: ${_fmtDate(endDate)} &nbsp;|&nbsp; Remaining Days: ${remainingDays}`;
@@ -2507,7 +2541,7 @@ function _startTrialTimer(){
   let startTs = _decodeTime(encTs);
   // if timestamp invalid (corrupted or from an older app version), reset to now instead of falsely expiring
   if(!startTs || startTs < 1000000000000){ startTs = Date.now(); localStorage.setItem('ek_ts', _encodeTime(startTs)); }
-  const TRIAL_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
+  const TRIAL_DURATION = 3 * 24 * 60 * 60 * 1000; // 3 days in ms
 
   // (کاؤنٹ ڈاؤن بار ہٹا دی گئی — صرف اوپر کی سبسکرپشن پٹی دکھتی ہے)
 
@@ -2518,7 +2552,7 @@ function _startTrialTimer(){
       clearInterval(_trialTimerInterval);
       document.getElementById('app').style.display='none';
       _clearTrialData();
-      alert('⛔ Your 7-day free trial has ended!\nEnter activation code or contact 0320 6 793 793.');
+      alert('⛔ Your 3-day free trial has ended!\nEnter activation code or contact 0320 6 793 793.');
       location.reload();
       return;
     }
@@ -2540,7 +2574,7 @@ async function startTrial(){
   if(existing){
     const oldTs = _decodeTime(existing);
     const elapsed = (Date.now()-oldTs)/86400000;
-    if(elapsed >= 7){ alert('⛔ Your 7-day trial has ended. Enter activation code.'); return; }
+    if(elapsed >= 3){ alert('⛔ Your 3-day trial has ended. Enter activation code.'); return; }
   }
   const ts = Date.now();
   localStorage.setItem('ek_ts', _encodeTime(ts));
@@ -5997,21 +6031,27 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     }
   }catch(e){}
 
-  // 2) Online / Offline indicator
+  // 2) Online / Offline indicator (header + lock screen, both driven together)
   var indicator = document.getElementById('pk-net-indicator');
   var textEl = document.getElementById('pk-net-text');
+  var lockIndicator = document.getElementById('pk-lock-net-indicator');
+  var lockTextEl = document.getElementById('pk-lock-net-text');
 
   function updateNetStatus() {
-    if (!indicator) return;
-    if (navigator.onLine) {
-      indicator.classList.remove('pk-offline');
-      indicator.classList.add('pk-online');
-      textEl.textContent = 'Online';
-    } else {
-      indicator.classList.remove('pk-online');
-      indicator.classList.add('pk-offline');
-      textEl.textContent = 'Offline';
-    }
+    var online = navigator.onLine;
+    [[indicator,textEl],[lockIndicator,lockTextEl]].forEach(function(pair){
+      var ind = pair[0], txt = pair[1];
+      if (!ind) return;
+      if (online) {
+        ind.classList.remove('pk-offline');
+        ind.classList.add('pk-online');
+        if (txt) txt.textContent = 'Online';
+      } else {
+        ind.classList.remove('pk-online');
+        ind.classList.add('pk-offline');
+        if (txt) txt.textContent = 'Offline';
+      }
+    });
   }
 
   window.addEventListener('online', updateNetStatus);
@@ -6020,7 +6060,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 04:42 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 05:05 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
