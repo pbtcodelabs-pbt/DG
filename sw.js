@@ -2,7 +2,7 @@
 // Cache name is tied to the app version (PK_APP_VERSION in index.html).
 // Bump CACHE_NAME every time you bump PK_APP_VERSION so old caches are cleared automatically.
 
-const CACHE_NAME = 'dg-khatabook-cache-20260924-0640';
+const CACHE_NAME = 'dg-khatabook-cache-20260924-0746';
 
 const PRECACHE_URLS = [
   './',
@@ -10,7 +10,9 @@ const PRECACHE_URLS = [
   './manifest.json',
   './icon-192x192.png',
   './icon-512x512.png',
-  './icon-512x512-maskable.png'
+  './icon-512x512-maskable.png',
+  './fonts/JameelNooriNastaleeqKasheeda.ttf',
+  './fonts/JameelNooriNastaleeqRegular.ttf'
 ];
 
 // Install: pre-cache the app shell, activate immediately

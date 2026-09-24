@@ -1,4 +1,4 @@
-<html lang="en" dir="ltr" style="--appfont: 'Arial Narrow',Arial,sans-serif;"><head>
+<html lang="en" dir="ltr" style="--appfont: 'Jameel Noori Nastaleeq Kasheeda','Arial Black',Arial,sans-serif;"><head>
 <meta charset="UTF-8">
 <script>
 // ============================================================
@@ -183,8 +183,19 @@
 .btn-download { background: linear-gradient(135deg,#2563eb,#1d4ed8) !important; color: #fff !important; border: none !important; box-shadow: 0 3px 0 #1e3a8a !important; }
 </style>
 <style>
+/* اردو نستعلیق فونٹس — الگ فائلوں کی صورت میں (index.html کے سائز پر بوجھ نہیں ڈالتے) */
+@font-face{
+  font-family:'Jameel Noori Nastaleeq Kasheeda';
+  src:url('fonts/JameelNooriNastaleeqKasheeda.ttf') format('truetype');
+  font-weight:normal; font-style:normal; font-display:swap;
+}
+@font-face{
+  font-family:'Jameel Noori Nastaleeq';
+  src:url('fonts/JameelNooriNastaleeqRegular.ttf') format('truetype');
+  font-weight:normal; font-style:normal; font-display:swap;
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--appfont:'Arial Black',Arial,sans-serif;}
+:root{--appfont:'Jameel Noori Nastaleeq Kasheeda','Arial Black',Arial,sans-serif;}
 body{font-family:var(--appfont);background:#eef2f7;direction:ltr;min-height:100vh;font-weight:700}
 button{cursor:pointer;font-family:inherit;transition:all .15s;border:none}
 button:active{transform:scale(.96)}
@@ -1214,10 +1225,12 @@ select {
       </div>
       <div style="margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9">
         <div style="font-size:10px;font-weight:900;color:#94a3b8;margin-bottom:6px;text-align:center;letter-spacing:.4px">🔤 APP FONT STYLE</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button id="font-opt-kasheeda" onclick="setAppFont('kasheeda');toggleSettingsMenu()" style="background:#f1f5f9;color:#0f172a;border:2.5px solid #2563eb;border-radius:8px;padding:8px 4px;font-size:13px;font-weight:900;cursor:pointer;font-family:'Jameel Noori Nastaleeq Kasheeda',Arial,sans-serif">نستعلیق کشیدہ</button>
+          <button id="font-opt-nastaleeq" onclick="setAppFont('nastaleeq');toggleSettingsMenu()" style="background:#f1f5f9;color:#0f172a;border:1.5px solid #cbd5e1;border-radius:8px;padding:8px 4px;font-size:13px;font-weight:900;cursor:pointer;font-family:'Jameel Noori Nastaleeq',Arial,sans-serif">نستعلیق</button>
           <button id="font-opt-arialblack" onclick="setAppFont('arialblack');toggleSettingsMenu()" style="background:#f1f5f9;color:#0f172a;border:1.5px solid #cbd5e1;border-radius:8px;padding:8px 4px;font-size:11px;font-weight:900;cursor:pointer;font-family:'Arial Black',Arial,sans-serif">Arial Black</button>
-          <button id="font-opt-arialnarrow" onclick="setAppFont('arialnarrow');toggleSettingsMenu()" style="background: rgb(241, 245, 249); color: rgb(15, 23, 42); border: 2.5px solid rgb(37, 99, 235); border-radius: 8px; padding: 8px 4px; font-size: 11px; font-weight: 900; cursor: pointer; font-family: &quot;Arial Narrow&quot;, Arial, sans-serif;">Arial Narrow</button>
-          <button id="font-opt-calibri" onclick="setAppFont('calibri');toggleSettingsMenu()" style="background:#f1f5f9;color:#0f172a;border:1.5px solid #cbd5e1;border-radius:8px;padding:8px 4px;font-size:11px;font-weight:900;cursor:pointer;font-family:Calibri,Arial,sans-serif">Calibri</button>
+          <button id="font-opt-arialnarrow" onclick="setAppFont('arialnarrow');toggleSettingsMenu()" style="background:#f1f5f9;color:#0f172a;border:1.5px solid #cbd5e1;border-radius:8px;padding:8px 4px;font-size:11px;font-weight:900;cursor:pointer;font-family:'Arial Narrow',Arial,sans-serif">Arial Narrow</button>
+          <button id="font-opt-calibri" onclick="setAppFont('calibri');toggleSettingsMenu()" style="background:#f1f5f9;color:#0f172a;border:1.5px solid #cbd5e1;border-radius:8px;padding:8px 4px;font-size:11px;font-weight:900;cursor:pointer;font-family:Calibri,Arial,sans-serif;grid-column:1/-1">Calibri</button>
         </div>
       </div>
     </div>
@@ -2024,31 +2037,33 @@ document.addEventListener('visibilitychange', function(){
 window.addEventListener('pageshow', function(e){ if(e.persisted) _pkRefreshFromStorageIfSafe(); });
 window.addEventListener('focus', _pkRefreshFromStorageIfSafe);
 function fmt(n){ return Number(n||0).toLocaleString('en-US'); }
-// ── APP FONT TOGGLE — Arial Black / Arial Narrow / Calibri ──
+// ── APP FONT TOGGLE — Nastaleeq Kasheeda (default) / Nastaleeq / Arial Black / Arial Narrow / Calibri ──
 const APP_FONT_STACKS = {
+  kasheeda: "'Jameel Noori Nastaleeq Kasheeda','Arial Black',Arial,sans-serif",
+  nastaleeq: "'Jameel Noori Nastaleeq','Arial Black',Arial,sans-serif",
   arialblack: "'Arial Black',Arial,sans-serif",
   arialnarrow: "'Arial Narrow',Arial,sans-serif",
   calibri: "Calibri,Arial,sans-serif"
 };
 function getAppFontStack(){
-  const key = localStorage.getItem('app_font') || 'arialblack';
-  return APP_FONT_STACKS[key] || APP_FONT_STACKS.arialblack;
+  const key = localStorage.getItem('app_font') || 'kasheeda';
+  return APP_FONT_STACKS[key] || APP_FONT_STACKS.kasheeda;
 }
 function setAppFont(key){
-  if(!APP_FONT_STACKS[key]) key='arialblack';
+  if(!APP_FONT_STACKS[key]) key='kasheeda';
   localStorage.setItem('app_font', key);
   document.documentElement.style.setProperty('--appfont', APP_FONT_STACKS[key]);
   _markActiveFontOption(key);
 }
 function _markActiveFontOption(key){
-  ['arialblack','arialnarrow','calibri'].forEach(k=>{
+  ['kasheeda','nastaleeq','arialblack','arialnarrow','calibri'].forEach(k=>{
     const btn=document.getElementById('font-opt-'+k);
     if(btn) btn.style.border = (k===key) ? '2.5px solid #2563eb' : '1.5px solid #cbd5e1';
   });
 }
 (function initAppFont(){
-  const key = localStorage.getItem('app_font') || 'arialblack';
-  document.documentElement.style.setProperty('--appfont', APP_FONT_STACKS[key] || APP_FONT_STACKS.arialblack);
+  const key = localStorage.getItem('app_font') || 'kasheeda';
+  document.documentElement.style.setProperty('--appfont', APP_FONT_STACKS[key] || APP_FONT_STACKS.kasheeda);
 })();
 
 function getShop(){ return localStorage.getItem('custom_shop_name')||'Piarey Bhai Traders'; }
@@ -4298,10 +4313,17 @@ function drawPoster(){
     ctx.beginPath(); ctx.roundRect(x+3,y+3,w-6,h-6,r-2); ctx.stroke();
   }
 
-   // Box 1: Previous Balance — RED
+  // helper: same green/red/grey status colors used across the app (customer list, messages)
+  function balanceStatusColors(net){
+    if(net===0) return {c1:'#94a3b8',c2:'#475569',txt:'#e2e8f0'};
+    return net>0 ? {c1:'#22c55e',c2:'#15803d',txt:'#bbf7d0'} : {c1:'#ef4444',c2:'#b91c1c',txt:'#fecaca'};
+  }
+
+   // Box 1: Previous Balance — GREEN if we owe them (net>=0), RED if they owe us (net<0), GREY if settled
   const s1Y=colY;
-  draw3DBox(rcX,s1Y,rcTotalW,secH,'#ef4444','#b91c1c');
-  ctx.fillStyle='#fecaca'; ctx.font=`bold 13px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
+  const prevClr = balanceStatusColors(prevNet);
+  draw3DBox(rcX,s1Y,rcTotalW,secH,prevClr.c1,prevClr.c2);
+  ctx.fillStyle=prevClr.txt; ctx.font=`bold 13px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
   ctx.fillText('Previous Balance',rcx,s1Y+22);
   ctx.fillStyle='#ffffff'; ctx.font=`900 40px ${NF}`; ctx.direction='ltr'; ctx.textAlign='center';
   ctx.fillText('Rs '+fmt(Math.abs(prevNet)),rcx,s1Y+secH/2+16);
@@ -4315,10 +4337,11 @@ function drawPoster(){
   ctx.fillStyle='#ffffff'; ctx.font=`900 40px ${NF}`; ctx.direction='ltr'; ctx.textAlign='center';
   ctx.fillText('Rs '+fmt(txnAmt),rcx,s2Y+secH/2+16);
 
-   // Box 3: New Balance — GREY (slate)
+   // Box 3: New Balance — GREEN if we owe them (net>=0), RED if they owe us (net<0), GREY if settled
   const s3Y=s2Y+secH+secGap;
-  draw3DBox(rcX,s3Y,rcTotalW,secH,'#64748b','#334155');
-  ctx.fillStyle='#e2e8f0'; ctx.font=`bold 13px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
+  const newClr = balanceStatusColors(newNet);
+  draw3DBox(rcX,s3Y,rcTotalW,secH,newClr.c1,newClr.c2);
+  ctx.fillStyle=newClr.txt; ctx.font=`bold 13px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
   ctx.fillText('New Balance',rcx,s3Y+22);
   ctx.fillStyle='#ffffff'; ctx.font=`900 40px ${NF}`; ctx.direction='ltr'; ctx.textAlign='center';
   ctx.fillText('Rs '+fmt(Math.abs(newNet)),rcx,s3Y+secH/2+16);
@@ -6415,7 +6438,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 06:40 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 07:46 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
