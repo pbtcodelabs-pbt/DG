@@ -360,11 +360,11 @@ input,textarea,select{font-family:inherit;outline:none}
 .info-row-val{font-size:16px;font-weight:900;color:#0f172a;font-family:Arial,sans-serif;direction:ltr}
 
 /* ===== LOCK SCREEN ===== */
-.lock-screen{position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
-.lock-card{background:#fff;border-radius:24px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.lock-screen{position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:flex-start;justify-content:center;box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(48px + env(safe-area-inset-top, 0px)) 16px calc(48px + env(safe-area-inset-bottom, 0px))}
+.lock-card{background:#fff;border-radius:24px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);margin:auto}
 .lock-banner{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;padding:14px;text-align:center;font-size:14px;font-weight:900}
-.lock-body{padding:24px;text-align:center}
-.lock-icon{width:60px;height:60px;background:#eff6ff;color:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px}
+.lock-body{padding:18px;text-align:center}
+.lock-icon{width:48px;height:48px;background:#eff6ff;color:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px}
 .btn-trial{width:100%;background:#ff6b00;color:#fff;padding:14px;border-radius:14px;font-weight:900;font-size:16px;margin-bottom:16px}
 .divider{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .divider-line{flex:1;height:1px;background:#e2e8f0}
@@ -1088,7 +1088,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 06:10 AM</span>
+        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 06:25 AM</span>
       </div>
     </div>
     <div class="lock-body">
@@ -2568,7 +2568,7 @@ function _dgPinEl(){
   if(!el){
     el = document.createElement('div');
     el.id = 'dg-pin-screen';
-    el.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:linear-gradient(160deg,#7f1d1d 0%,#dc2626 45%,#ea580c 100%);display:none;align-items:center;justify-content:center;padding:18px;overflow-y:auto;direction:rtl;font-family:inherit';
+    el.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:linear-gradient(160deg,#7f1d1d 0%,#dc2626 45%,#ea580c 100%);display:none;align-items:flex-start;justify-content:center;box-sizing:border-box;padding:calc(48px + env(safe-area-inset-top, 0px)) 18px calc(48px + env(safe-area-inset-bottom, 0px));overflow-y:auto;-webkit-overflow-scrolling:touch;direction:rtl;font-family:inherit';
     document.body.appendChild(el);
   }
   return el;
@@ -2622,7 +2622,7 @@ function dgPinShow(mode, opts){
       '<div id="dg-pin-err" style="display:none;color:#dc2626;font-size:12.5px;font-weight:800;margin-top:8px;text-align:center"></div>'+
       _dgPinBtn('✅ نیا پن محفوظ کریں','dgPinSubmitReset()','linear-gradient(135deg,#16a34a,#15803d)');
   }
-  el.innerHTML = '<div style="background:#fff;border-radius:22px;padding:22px 20px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.35)">'+body+'</div>';
+  el.innerHTML = '<div style="background:#fff;border-radius:22px;padding:22px 20px;width:100%;max-width:380px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)">'+body+'</div>';
   el.style.display = 'flex';
   var f = el.querySelector('input'); if(f) setTimeout(function(){ try{f.focus();}catch(e){} }, 150);
   if(mode==='enter'){
@@ -6376,7 +6376,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 06:10 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 06:25 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
