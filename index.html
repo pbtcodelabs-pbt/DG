@@ -1758,12 +1758,6 @@ select {
         <button class="btn-unlock" style="background:#16a34a" onclick="dgDevSaveContact()">💾 نمبر محفوظ کریں</button>
       </div>
 
-      <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:12px;margin-bottom:16px">
-        <div class="form-label" style="font-size:14px;color:#9a3412;margin-bottom:4px">♻️ ٹرائل ری سیٹ (ٹیسٹ / دوبارہ ٹرائل دینے کے لیے)</div>
-        <input type="text" id="dg-dev-reset-uid" class="form-inp" placeholder="Device UID مثلاً 82001" dir="ltr">
-        <button class="btn-unlock" style="background:#ea580c" onclick="dgDevResetTrial()">♻️ اس UID کا ٹرائل ری سیٹ کریں</button>
-      </div>
-
       <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:12px;margin-bottom:16px">
         <div class="form-label" style="font-size:14px;color:#1e3a8a;margin-bottom:4px">🔁 سبسکرپشن دیکھیں / نئی UID پر منتقل کریں</div>
         <div style="font-size:11px;color:#1e40af;font-weight:700;line-height:1.6;margin-bottom:8px">اگر گاہک ایپ دوبارہ انسٹال کرے اور UID بدل جائے تو نیا کوڈ بنانے کے بجائے یہاں سے باقی دن نئی UID پر منتقل کریں۔</div>
@@ -1797,6 +1791,10 @@ select {
       <div id="dg-code-result" style="display:none;background:#fff7ed;border:2px dashed #fb923c;border-radius:12px;padding:12px;text-align:center;margin-bottom:16px">
         <div style="font-size:11px;color:#9a3412;font-weight:800;margin-bottom:4px">نیا کوڈ — کسٹمر کو بھیجیں</div>
         <div id="dg-code-result-text" style="font-size:20px;font-weight:900;letter-spacing:.08em;color:#c2410c;direction:ltr"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button type="button" style="flex:1;background:#25D366;color:#fff;border:none;border-radius:10px;padding:10px 8px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit" onclick="dgShareCodeWhatsapp()">📲 واٹس ایپ پر سینڈ کریں</button>
+          <button type="button" style="flex:1;background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 8px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit" onclick="dgCopyGeneratedCode()">📋 کاپی کریں</button>
+        </div>
       </div>
 
       <div style="border-top:2px solid #f1f5f9;margin:16px 0;padding-top:14px">
@@ -2951,6 +2949,23 @@ async function dgDevGenerateCode(){
   }
 }
 
+function dgShareCodeWhatsapp(){
+  const code = (document.getElementById('dg-code-result-text').textContent||'').trim();
+  if(!code) return;
+  const text = encodeURIComponent('آپ کا نیا کوڈ: '+code);
+  window.open('https://wa.me/?text='+text, '_blank');
+}
+function dgCopyGeneratedCode(){
+  const code = (document.getElementById('dg-code-result-text').textContent||'').trim();
+  if(!code) return;
+  const done = ()=> pkToast('✅ کوڈ کاپی ہو گیا: '+code);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(done).catch(()=>pkCopyFallback(code, done));
+  } else {
+    pkCopyFallback(code, done);
+  }
+}
+
 let _dgCodesCache = [];
 let _dgCodeFilter = 'all';
 function dgSetCodeFilter(f){
@@ -3126,18 +3141,6 @@ async function dgDevTransferSub(){
     alert('✅ منتقل ہو گئی۔\nاب گاہک ایپ کھولے یا لاک سکرین پر "🔄 میری سبسکرپشن چیک کریں" دبائے — وہ خودبخود اندر چلا جائے گا۔');
   }catch(e){ alert('⚠️ منتقل نہیں ہو سکی — انٹرنیٹ دیکھیں۔ ('+e.message+')'); }
 }
-async function dgDevResetTrial(){
-  const uid = (document.getElementById('dg-dev-reset-uid').value||'').trim();
-  if(!uid){ alert('⚠️ پہلے UID لکھیں'); return; }
-  try{
-    const res = await dgAuthFetch(`trials/${encodeURIComponent(uid)}?key=${DG_FIREBASE_API_KEY}`, {method:'DELETE'});
-    if(!res.ok && res.status!==404) throw new Error('HTTP '+res.status);
-    pkToast('✅ UID '+uid+' کا ٹرائل ری سیٹ ہو گیا — اب دوبارہ Free Trial شروع ہو سکتا ہے');
-  }catch(e){
-    alert('⚠️ ری سیٹ نہیں ہو سکا — انٹرنیٹ چیک کریں۔ ('+e.message+')');
-  }
-}
-
 async function dgDevChangePassword(){
   const newPw = document.getElementById('dg-dev-new-pass').value.trim();
   if(!newPw){ alert('نیا پاسورڈ لکھیں'); return; }
@@ -6412,7 +6415,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 06:33 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 06:40 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
