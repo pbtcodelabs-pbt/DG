@@ -2005,8 +2005,26 @@ let entryType = 'got';
 let ncDir = 'got'; // for new customer initial balance direction
 
 function loadData(){
-  try{ records = JSON.parse(localStorage.getItem('easyKhataData')||'[]'); }
-  catch{ records = []; }
+  try{
+    records = JSON.parse(localStorage.getItem('easyKhataData')||'[]');
+  }
+  catch(e){
+    // CRITICAL SAFETY NET: the saved data is corrupt (e.g. app crashed / phone
+    // shut down mid-write). Do NOT silently start from an empty list — if we
+    // did, the very next save would overwrite the corrupt-but-maybe-partially-
+    // recoverable data with '[]' and the customer's real records would be
+    // gone forever. Instead: preserve the corrupt raw string untouched under
+    // its own backup key, warn the person immediately, and only THEN fall
+    // back to an empty in-memory list so the app can still open.
+    try{
+      var _rawCorrupt = localStorage.getItem('easyKhataData');
+      if(_rawCorrupt){
+        localStorage.setItem('easyKhataData_corrupt_'+Date.now(), _rawCorrupt);
+      }
+    } catch(_e){}
+    records = [];
+    alert('⚠️ آپ کا محفوظ شدہ ڈیٹا خراب (corrupt) پایا گیا۔\n\nفکر نہ کریں — پرانا ڈیٹا مٹایا نہیں گیا، حفاظتی طور پر ایک الگ بیک اپ کاپی میں محفوظ کر لیا گیا ہے۔\n\nبراہِ کرم نئی انٹری کرنے سے پہلے Settings → Restore میں جا کر اپنی آخری بیک اپ فائل سے ڈیٹا واپس لوڈ کریں، یا ڈویلپر سے رابطہ کریں۔');
+  }
 }
 function saveData(){
   try{
@@ -6438,7 +6456,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 07:46 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 08:07 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
