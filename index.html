@@ -360,6 +360,26 @@ input,textarea,select{font-family:inherit;outline:none}
 .info-row-val{font-size:16px;font-weight:900;color:#0f172a;font-family:Arial,sans-serif;direction:ltr}
 
 /* ===== LOCK SCREEN ===== */
+/* compact lock screen — everything visible without scrolling */
+#lock-screen .lock-body{padding:10px 14px 12px}
+#lock-screen .lock-icon{width:34px;height:34px;font-size:17px;margin-bottom:6px}
+#lock-screen .lock-banner{padding:8px 10px !important;font-size:11.5px !important;line-height:1.55 !important;margin-bottom:8px !important}
+#lock-screen h2{font-size:17px !important;margin-bottom:2px !important}
+#lock-screen .lock-body>p{font-size:11.5px !important;margin-bottom:8px !important;line-height:1.4 !important}
+#lock-screen .btn-trial{padding:10px;font-size:14px;margin-bottom:8px}
+#lock-screen .divider{margin-bottom:8px}
+#lock-screen .lock-id-box{padding:8px 10px;margin-bottom:8px}
+#lock-screen .lock-id-lbl{margin-bottom:0}
+#lock-screen .lock-id-val{font-size:24px;line-height:1.2}
+#lock-screen .lock-id-box>div[style*="font-size:11px"]{font-size:10px !important;margin-top:2px !important;line-height:1.4 !important}
+#lock-screen .lock-id-box button{padding:8px 6px !important;font-size:11.5px !important;margin-top:0 !important}
+#lock-screen .lock-id-box>div[style*="display:flex"]{margin-top:6px !important}
+#lock-screen .lock-id-box>button{margin-top:6px !important;width:100%}
+#lock-screen .form-inp{padding:9px 12px;font-size:15px;margin-bottom:6px !important}
+#lock-screen .btn-unlock{padding:10px;font-size:14px;margin-bottom:6px}
+#lock-screen #key-error{margin-bottom:6px !important}
+#lock-screen .lock-body>div[style*="margin-top:16px"]{margin-top:4px !important}
+#lock-screen .dev-contact-btn{padding:8px 6px !important}
 .lock-screen{position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:flex-start;justify-content:center;box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(48px + env(safe-area-inset-top, 0px)) 16px calc(48px + env(safe-area-inset-bottom, 0px))}
 .lock-card{background:#fff;border-radius:24px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);margin:auto}
 .lock-banner{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;padding:14px;text-align:center;font-size:14px;font-weight:900}
@@ -1088,11 +1108,11 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 06:25 AM</span>
+        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 06:33 AM</span>
       </div>
     </div>
     <div class="lock-body">
-      <div class="lock-icon">🔒</div>
+      <div class="lock-icon" onclick="dgDevTap()" style="cursor:pointer">🔒</div>
       <div id="lock-expired-msg" class="lock-banner" dir="rtl" style="display:none;border-radius:12px;margin-bottom:16px;line-height:1.7;font-size:13px">⚠️ آپ کی سبسکرپشن ایکسپائر ہو چکی ہے۔ دوبارہ سبسکرائب کرنے کے لیے اپنی UID ڈویلپر کو بھیجیں۔ مطمئن رہیں — آپ کا ڈیٹا بالکل محفوظ ہے، ضائع نہیں ہوا۔ سبسکرپشن ملتے ہی آپ کی ایپ دوبارہ کام شروع کر دے گی اور آپ کا مکمل ڈیٹا محفوظ رہے گا۔</div>
       <h2 style="font-size:22px;font-weight:900;margin-bottom:8px">Software Activation</h2>
       <p style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:20px;line-height:1.6">Enter activation code to use the app, or start with a 3-day free trial.</p>
@@ -1706,7 +1726,7 @@ select {
 </div>
 
 <!-- 🕵️ DEVELOPER PANEL (Firebase subscription control) -->
-<div id="modal-dev-panel" class="modal-bg" style="display:none" onclick="if(event.target===this)closeModal('modal-dev-panel')">
+<div id="modal-dev-panel" class="modal-bg" style="display:none;z-index:2147483200" onclick="if(event.target===this)closeModal('modal-dev-panel')">
   <div class="modal-box" style="max-width:520px">
     <div class="modal-title">🕵️ Developer Panel</div>
 
@@ -2533,6 +2553,7 @@ async function initLock(){
   const expiredMsgEl = document.getElementById('lock-expired-msg');
   if(expiredMsgEl) expiredMsgEl.style.display = (localStorage.getItem('ek_ever_used') === 'YES') ? 'block' : 'none';
   document.getElementById('lock-screen').style.display = 'flex';
+  dgFitLock(); setTimeout(dgFitLock, 250); setTimeout(dgFitLock, 1200);
   const dcfWrap = document.querySelector('.dcf-wrap');
   if(dcfWrap) dcfWrap.style.display = 'none'; // hide floating bubble on lock screen — compact WhatsApp/Gmail/SMS buttons already shown below
 }
@@ -2769,6 +2790,20 @@ function _startTrialTimer(){
   _trialTimerInterval = setInterval(updateTimer, 1000);
 }
 
+function dgFitLock(){
+  try{
+    var ls=document.getElementById('lock-screen'); if(!ls || ls.style.display==='none') return;
+    var card=ls.querySelector('.lock-card'); if(!card) return;
+    card.style.zoom = 1;
+    var cs=getComputedStyle(ls);
+    var avail = window.innerHeight - (parseFloat(cs.paddingTop)||0) - (parseFloat(cs.paddingBottom)||0);
+    var need = card.getBoundingClientRect().height;
+    if(need>avail && need>0){ card.style.zoom = Math.max(0.55, avail/need); }
+  }catch(e){}
+}
+window.addEventListener('resize', dgFitLock);
+window.addEventListener('orientationchange', function(){ setTimeout(dgFitLock,200); });
+
 async function dgCheckMySub(){
   try{
     const fp = await getDeviceFingerprint();
@@ -2794,6 +2829,7 @@ async function startTrial(){
     if(chk.status===200){
       localStorage.setItem('ek_ever_used','YES');
       const em = document.getElementById('lock-expired-msg'); if(em) em.style.display='block';
+      dgFitLock();
       alert('⛔ اس ڈیوائس پر مفت ٹرائل پہلے استعمال ہو چکا ہے۔\nسبسکرپشن کے لیے اپنی UID ڈویلپر کو بھیجیں۔');
       return;
     }
@@ -6376,7 +6412,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 06:25 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 06:33 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
