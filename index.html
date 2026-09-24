@@ -1043,11 +1043,12 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 05:05 AM</span>
+        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 05:12 AM</span>
       </div>
     </div>
     <div class="lock-body">
       <div class="lock-icon">🔒</div>
+      <div id="lock-expired-msg" class="lock-banner" dir="rtl" style="display:none;border-radius:12px;margin-bottom:16px;line-height:1.7;font-size:13px">⚠️ آپ کی سبسکرپشن ایکسپائر ہو چکی ہے۔ دوبارہ سبسکرائب کرنے کے لیے اپنی UID ڈویلپر کو بھیجیں۔ مطمئن رہیں — آپ کا ڈیٹا بالکل محفوظ ہے، ضائع نہیں ہوا۔ سبسکرپشن ملتے ہی آپ کی ایپ دوبارہ کام شروع کر دے گی اور آپ کا مکمل ڈیٹا محفوظ رہے گا۔</div>
       <h2 style="font-size:22px;font-weight:900;margin-bottom:8px">Software Activation</h2>
       <p style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:20px;line-height:1.6">Enter activation code to use the app, or start with a 3-day free trial.</p>
       <button class="btn-trial" onclick="startTrial()">Start 3-Day Free Trial</button>
@@ -1060,6 +1061,7 @@ select {
           <button type="button" onclick="pkCopyUserId()" style="flex:1;background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:10px;padding:11px 8px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit">📋 UID کاپی کریں</button>
           <button type="button" onclick="sendUidToDeveloper()" style="flex:1.3;background:linear-gradient(135deg,#25D366 0%,#20BA58 100%);color:#fff;border:none;border-radius:10px;padding:11px 8px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(37,211,102,.4)">📲 ڈیویلپر کو بھیجیں</button>
         </div>
+        <div dir="rtl" style="font-size:11px;color:#c2410c;font-weight:800;margin-top:8px;line-height:1.6">⚠️ میسج سینڈ کرنے سے پہلے اپنا نام ضرور لکھیں — بغیر نام کے کوڈ کی شناخت مشکل ہو جاتی ہے۔</div>
       </div>
       <input type="text" id="activation-key" class="form-inp" placeholder="Enter Activation Code" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-align:center;letter-spacing:.1em;font-size:18px;margin-bottom:6px">
       <div id="key-error" style="color:#dc2626;font-size:13px;font-weight:700;margin-bottom:10px;display:none">Wrong code! Try again</div>
@@ -2063,7 +2065,7 @@ function _isLoginScreen(){
 function _devChatMessage(){
   if(_isLoginScreen()){
     var uid = (document.getElementById('user-id-display')||{}).textContent || '-----';
-    return 'محترم ڈیویلپر السلام علیکم ورحمۃ اللہ وبرکاتہ\n\nمیں آپکی ایپ DG KHATABOOK استعمال کرنا چاہتا ہوں\nیہ میری UID ہے\n'+uid+'\n\nمیرا نام: ..........................';
+    return 'محترم ڈیویلپر السلام علیکم ورحمۃ اللہ وبرکاتہ\n\nمیں آپکی ایپ DG KHATABOOK استعمال کرنا چاہتا ہوں\nیہ میری UID ہے\n'+uid+'\n\nمیرا نام: [یہاں اپنا نام لکھیں]';
   }
   return 'Respected Developer,\nI am user of your application DG Khatabook. I am facing this problem / this is my suggestion:\n';
 }
@@ -2397,6 +2399,7 @@ async function dgActivateWithCode(code){
     if(!upd.ok) return {success:false, message:'یہ کوڈ ابھی ابھی استعمال ہو چکا یا غلط ہے۔'};
   }catch(e){ return {success:false, message:'انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔'}; }
   _dgSetLocalSub(fp, newExpEpoch, trimmed);
+  localStorage.setItem('ek_ever_used', 'YES');
   dgSyncSubToCloud(fp, newExpEpoch, trimmed);
   return {success:true};
 }
@@ -2468,6 +2471,8 @@ async function initLock(){
   // show lock screen
   document.getElementById('user-id-display').textContent = fp;
   localStorage.setItem('ek_uid', fp);
+  const expiredMsgEl = document.getElementById('lock-expired-msg');
+  if(expiredMsgEl) expiredMsgEl.style.display = (localStorage.getItem('ek_ever_used') === 'YES') ? 'block' : 'none';
   document.getElementById('lock-screen').style.display = 'flex';
   const dcfWrap = document.querySelector('.dcf-wrap');
   if(dcfWrap) dcfWrap.style.display = 'none'; // hide floating bubble on lock screen — compact WhatsApp/Gmail/SMS buttons already shown below
@@ -2580,6 +2585,7 @@ async function startTrial(){
   localStorage.setItem('ek_ts', _encodeTime(ts));
   localStorage.setItem('ek_cs', _makeChecksum(fp, ts));
   localStorage.setItem('ek_fp', fp);
+  localStorage.setItem('ek_ever_used', 'YES');
   showApp();
 }
 
@@ -6060,7 +6066,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 05:05 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 05:12 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
