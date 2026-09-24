@@ -1,5 +1,50 @@
 <html lang="en" dir="ltr" style="--appfont: 'Arial Narrow',Arial,sans-serif;"><head>
 <meta charset="UTF-8">
+<script>
+// ============================================================
+// 🔒 DG Khatabook — private storage namespace
+// GitHub Pages / Vercel پر ایک ہی ڈومین کی سب ایپس ایک ہی localStorage شیئر کرتی ہیں۔
+// اسی لیے پرانی/دوسری کاپی کا ڈیٹا اور ٹرائل اس ایپ میں گھس آتا تھا۔
+// اب اس ایپ کی ہر key کے آگے "DGKB::" لگتا ہے، لہٰذا کوئی دوسری ایپ اسے چھو نہیں سکتی۔
+// ============================================================
+(function(){
+  try{
+    var P = 'DGKB::';
+    var proto = Storage.prototype;
+    var LS = window.localStorage;
+    var g = proto.getItem, s = proto.setItem, r = proto.removeItem;
+    proto.getItem    = function(k){ return this === LS ? g.call(this, P + k) : g.call(this, k); };
+    proto.setItem    = function(k, v){ return this === LS ? s.call(this, P + k, v) : s.call(this, k, v); };
+    proto.removeItem = function(k){ return this === LS ? r.call(this, P + k) : r.call(this, k); };
+
+    // ایک بار: پرانی (بغیر prefix) keys میں سے صرف اس ایپ کی keys کاپی کرو
+    if(g.call(LS, P + '__migrated_v1') === null){
+      var KEYS = ['_device_fp','app_font','custom_owner_name','custom_phone','custom_shop_name',
+        'dgDevPassHash','dgFbAuth','dgSubLastCode','easyKhataData','easyKhataData_prev',
+        'ek_act','ek_actOn','ek_cs','ek_ever_used','ek_exp','ek_expcs','ek_fp','ek_ts','ek_uid',
+        'pkLastBackupInfo','pkLastReminderDate','pkLastReminderDay','pk_admin_pin','pk_share_link',
+        'pk_theme_color','pk_wa_header','dgDriveAuto','dgDriveEmail','dgDriveFolder','dgDriveLast','dgDriveOn'];
+      // پرانے ڈیفالٹ/نمونہ کسٹمرز — انہیں کبھی منتقل نہیں کرنا
+      var DEMO = {'Jg EHSAN JHANGVI':1,'Jk zohaib Garments':1,'Htl Shfaat':1,'Fp Waqas Kryana':1};
+      function clean(raw){
+        try{
+          var a = JSON.parse(raw);
+          if(!Array.isArray(a)) return raw;
+          a = a.filter(function(x){ return !(x && DEMO[x.name]); });
+          return a.length ? JSON.stringify(a) : null;
+        }catch(e){ return raw; }
+      }
+      for(var i=0;i<KEYS.length;i++){
+        var k = KEYS[i], v = g.call(LS, k);
+        if(v === null) continue;
+        if(k === 'easyKhataData' || k === 'easyKhataData_prev') v = clean(v);
+        if(v !== null && g.call(LS, P + k) === null) s.call(LS, P + k, v);
+      }
+      s.call(LS, P + '__migrated_v1', '1');
+    }
+  }catch(e){}
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1043,7 +1088,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 05:42 AM</span>
+        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 06:10 AM</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1061,6 +1106,7 @@ select {
           <button type="button" onclick="pkCopyUserId()" style="flex:1;background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:10px;padding:11px 8px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit">📋 UID کاپی کریں</button>
           <button type="button" onclick="sendUidToDeveloper()" style="flex:1.3;background:linear-gradient(135deg,#25D366 0%,#20BA58 100%);color:#fff;border:none;border-radius:10px;padding:11px 8px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(37,211,102,.4)">📲 ڈیویلپر کو بھیجیں</button>
         </div>
+        <button type="button" onclick="dgCheckMySub()" style="width:100%;margin-top:8px;background:#fff7ed;color:#9a3412;border:1.5px solid #fed7aa;border-radius:10px;padding:10px 8px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit">🔄 میری سبسکرپشن چیک کریں (دوبارہ انسٹال کے بعد)</button>
         <div dir="rtl" style="font-size:11px;color:#c2410c;font-weight:800;margin-top:8px;line-height:1.6">⚠️ میسج سینڈ کرنے سے پہلے اپنا نام ضرور لکھیں — بغیر نام کے کوڈ کی شناخت مشکل ہو جاتی ہے۔</div>
       </div>
       <input type="text" id="activation-key" class="form-inp" placeholder="Enter Activation Code" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-align:center;letter-spacing:.1em;font-size:18px;margin-bottom:6px">
@@ -1242,71 +1288,7 @@ select {
   </div>
 
   <!-- LIST -->
-  <main class="list-section no-print" id="main-list"><div class="cust-card-credit">
-      <div class="cust-stripe"></div>
-      <div class="cust-card-body">
-        <div class="cust-info" onclick="openDetail('Jg EHSAN JHANGVI')">
-          <div class="cust-name">Jg EHSAN JHANGVI</div>
-          <div class="cust-phone-row">
-              <a href="tel:03037475475" onclick="event.stopPropagation()" class="cust-call-icon" title="Call"><svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path></svg></a>
-              <a href="https://wa.me/03037475475?text=As-salamu%20alaykum%20Jg%20EHSAN%20JHANGVI%2C%0A%0AYour%20current%20balance%3A%20Rs%20780%0A%0APlease%20contact%20me%20if%20you%20have%20any%20questions." onclick="event.stopPropagation()" class="cust-whatsapp-icon" title="Send WhatsApp" target="_blank"><svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004c-1.325 0-2.612.321-3.757.942l-.27.159-2.796-.735.749 2.741-.175.277c-.675 1.144-1.035 2.469-1.035 3.822 0 3.64 2.961 6.602 6.601 6.602 1.757 0 3.408-.681 4.643-1.916 1.234-1.235 1.915-2.882 1.915-4.644 0-3.641-2.961-6.602-6.601-6.602m5.221-1.834c-1.719-1.67-4.018-2.588-6.464-2.588-5.036 0-9.13 4.094-9.13 9.129 0 1.605.421 3.17 1.221 4.553L2.25 22.369l4.996-1.311c1.338.712 2.839 1.090 4.397 1.090 5.034 0 9.13-4.095 9.13-9.129 0-2.426-.944-4.71-2.66-6.426"></path></svg></a>
-              <a href="javascript:void(0)" onclick="event.stopPropagation(); openReminderModal('Jg EHSAN JHANGVI')" class="cust-reminder-icon" title="Payment Reminder"><svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg></a>
-            </div>
-        </div>
-        <div class="cust-bal-box" onclick="openDetail('Jg EHSAN JHANGVI')">
-          <div class="cust-bal-num">Rs 780</div>
-          <div class="cust-bal-lbl">Received</div>
-        </div>
-      </div>
-    </div><div class="cust-card-credit">
-      <div class="cust-stripe"></div>
-      <div class="cust-card-body">
-        <div class="cust-info" onclick="openDetail('Jk zohaib Garments')">
-          <div class="cust-name">Jk zohaib Garments</div>
-          <div class="cust-phone-row">
-              <a href="tel:03138048351" onclick="event.stopPropagation()" class="cust-call-icon" title="Call"><svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path></svg></a>
-              <a href="https://wa.me/03138048351?text=As-salamu%20alaykum%20Jk%20zohaib%20Garments%2C%0A%0AYour%20current%20balance%3A%20Rs%202%2C250%0A%0APlease%20contact%20me%20if%20you%20have%20any%20questions." onclick="event.stopPropagation()" class="cust-whatsapp-icon" title="Send WhatsApp" target="_blank"><svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004c-1.325 0-2.612.321-3.757.942l-.27.159-2.796-.735.749 2.741-.175.277c-.675 1.144-1.035 2.469-1.035 3.822 0 3.64 2.961 6.602 6.601 6.602 1.757 0 3.408-.681 4.643-1.916 1.234-1.235 1.915-2.882 1.915-4.644 0-3.641-2.961-6.602-6.601-6.602m5.221-1.834c-1.719-1.67-4.018-2.588-6.464-2.588-5.036 0-9.13 4.094-9.13 9.129 0 1.605.421 3.17 1.221 4.553L2.25 22.369l4.996-1.311c1.338.712 2.839 1.090 4.397 1.090 5.034 0 9.13-4.095 9.13-9.129 0-2.426-.944-4.71-2.66-6.426"></path></svg></a>
-              <a href="javascript:void(0)" onclick="event.stopPropagation(); openReminderModal('Jk zohaib Garments')" class="cust-reminder-icon" title="Payment Reminder"><svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg></a>
-            </div>
-        </div>
-        <div class="cust-bal-box" onclick="openDetail('Jk zohaib Garments')">
-          <div class="cust-bal-num">Rs 2,250</div>
-          <div class="cust-bal-lbl">Received</div>
-        </div>
-      </div>
-    </div><div class="cust-card-credit">
-      <div class="cust-stripe"></div>
-      <div class="cust-card-body">
-        <div class="cust-info" onclick="openDetail('Htl Shfaat')">
-          <div class="cust-name">Htl Shfaat</div>
-          <div class="cust-phone-row">
-              <a href="tel:03468763245" onclick="event.stopPropagation()" class="cust-call-icon" title="Call"><svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path></svg></a>
-              <a href="https://wa.me/03468763245?text=As-salamu%20alaykum%20Htl%20Shfaat%2C%0A%0AYour%20current%20balance%3A%20Rs%2010%0A%0APlease%20contact%20me%20if%20you%20have%20any%20questions." onclick="event.stopPropagation()" class="cust-whatsapp-icon" title="Send WhatsApp" target="_blank"><svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004c-1.325 0-2.612.321-3.757.942l-.27.159-2.796-.735.749 2.741-.175.277c-.675 1.144-1.035 2.469-1.035 3.822 0 3.64 2.961 6.602 6.601 6.602 1.757 0 3.408-.681 4.643-1.916 1.234-1.235 1.915-2.882 1.915-4.644 0-3.641-2.961-6.602-6.601-6.602m5.221-1.834c-1.719-1.67-4.018-2.588-6.464-2.588-5.036 0-9.13 4.094-9.13 9.129 0 1.605.421 3.17 1.221 4.553L2.25 22.369l4.996-1.311c1.338.712 2.839 1.090 4.397 1.090 5.034 0 9.13-4.095 9.13-9.129 0-2.426-.944-4.71-2.66-6.426"></path></svg></a>
-              <a href="javascript:void(0)" onclick="event.stopPropagation(); openReminderModal('Htl Shfaat')" class="cust-reminder-icon" title="Payment Reminder"><svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg></a>
-            </div>
-        </div>
-        <div class="cust-bal-box" onclick="openDetail('Htl Shfaat')">
-          <div class="cust-bal-num">Rs 10</div>
-          <div class="cust-bal-lbl">Received</div>
-        </div>
-      </div>
-    </div><div class="cust-card-credit">
-      <div class="cust-stripe"></div>
-      <div class="cust-card-body">
-        <div class="cust-info" onclick="openDetail('Fp Waqas Kryana')">
-          <div class="cust-name">Fp Waqas Kryana</div>
-          <div class="cust-phone-row">
-              <a href="tel:03036543749" onclick="event.stopPropagation()" class="cust-call-icon" title="Call"><svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path></svg></a>
-              <a href="https://wa.me/03036543749?text=As-salamu%20alaykum%20Fp%20Waqas%20Kryana%2C%0A%0AYour%20current%20balance%3A%20Rs%205%2C310%0A%0APlease%20contact%20me%20if%20you%20have%20any%20questions." onclick="event.stopPropagation()" class="cust-whatsapp-icon" title="Send WhatsApp" target="_blank"><svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004c-1.325 0-2.612.321-3.757.942l-.27.159-2.796-.735.749 2.741-.175.277c-.675 1.144-1.035 2.469-1.035 3.822 0 3.64 2.961 6.602 6.601 6.602 1.757 0 3.408-.681 4.643-1.916 1.234-1.235 1.915-2.882 1.915-4.644 0-3.641-2.961-6.602-6.601-6.602m5.221-1.834c-1.719-1.67-4.018-2.588-6.464-2.588-5.036 0-9.13 4.094-9.13 9.129 0 1.605.421 3.17 1.221 4.553L2.25 22.369l4.996-1.311c1.338.712 2.839 1.090 4.397 1.090 5.034 0 9.13-4.095 9.13-9.129 0-2.426-.944-4.71-2.66-6.426"></path></svg></a>
-              <a href="javascript:void(0)" onclick="event.stopPropagation(); openReminderModal('Fp Waqas Kryana')" class="cust-reminder-icon" title="Payment Reminder"><svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg></a>
-            </div>
-        </div>
-        <div class="cust-bal-box" onclick="openDetail('Fp Waqas Kryana')">
-          <div class="cust-bal-num">Rs 5,310</div>
-          <div class="cust-bal-lbl">Received</div>
-        </div>
-      </div>
-    </div></main>
+  <main class="list-section no-print" id="main-list"></main>
 </div>
 
 
@@ -1754,6 +1736,23 @@ select {
         <label class="form-label">Email</label>
         <input type="email" id="dg-dev-c-email" class="form-inp" placeholder="pbtcodelabs@gmail.com" dir="ltr">
         <button class="btn-unlock" style="background:#16a34a" onclick="dgDevSaveContact()">💾 نمبر محفوظ کریں</button>
+      </div>
+
+      <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:12px;margin-bottom:16px">
+        <div class="form-label" style="font-size:14px;color:#9a3412;margin-bottom:4px">♻️ ٹرائل ری سیٹ (ٹیسٹ / دوبارہ ٹرائل دینے کے لیے)</div>
+        <input type="text" id="dg-dev-reset-uid" class="form-inp" placeholder="Device UID مثلاً 82001" dir="ltr">
+        <button class="btn-unlock" style="background:#ea580c" onclick="dgDevResetTrial()">♻️ اس UID کا ٹرائل ری سیٹ کریں</button>
+      </div>
+
+      <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:12px;margin-bottom:16px">
+        <div class="form-label" style="font-size:14px;color:#1e3a8a;margin-bottom:4px">🔁 سبسکرپشن دیکھیں / نئی UID پر منتقل کریں</div>
+        <div style="font-size:11px;color:#1e40af;font-weight:700;line-height:1.6;margin-bottom:8px">اگر گاہک ایپ دوبارہ انسٹال کرے اور UID بدل جائے تو نیا کوڈ بنانے کے بجائے یہاں سے باقی دن نئی UID پر منتقل کریں۔</div>
+        <input type="text" id="dg-dev-tr-old" class="form-inp" placeholder="پرانی UID (جس کی سبسکرپشن تھی)" dir="ltr">
+        <input type="text" id="dg-dev-tr-new" class="form-inp" placeholder="نئی UID (منتقل کرنے کے لیے)" dir="ltr">
+        <div style="display:flex;gap:8px">
+          <button class="btn-unlock" style="background:#0ea5e9;margin:0" onclick="dgDevLookupSub()">🔍 دیکھیں</button>
+          <button class="btn-unlock" style="background:#2563eb;margin:0" onclick="dgDevTransferSub()">🔁 منتقل کریں</button>
+        </div>
       </div>
 
       <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:8px">🎁 نیا کوڈ بنائیں (Generate Code)</div>
@@ -2310,12 +2309,12 @@ function _dgParseFields(fields){
 
 // ---------- Local cached subscription (replaces the old fixed-365-day formula with a real,
 // developer-chosen expiry date synced from Firestore's devices/{uid} document) ----------
-function _dgSetLocalSub(fp, expEpoch, code){
+function _dgSetLocalSub(fp, expEpoch, code, actOnStr){
   localStorage.setItem('ek_act','YES');
   localStorage.setItem('ek_uid', fp);
   localStorage.setItem('ek_exp', _encodeTime(expEpoch));
   localStorage.setItem('ek_expcs', _makeChecksum('EXP::'+fp, expEpoch));
-  localStorage.setItem('ek_actOn', new Date().toISOString().slice(0,10));
+  localStorage.setItem('ek_actOn', (actOnStr && /^\d{4}-\d{2}-\d{2}$/.test(actOnStr)) ? actOnStr : new Date().toISOString().slice(0,10));
   if(code) localStorage.setItem('dgSubLastCode', code);
 }
 function _dgLocalSubExpiry(fp){
@@ -2357,27 +2356,42 @@ async function dgRestoreSubFromCloud(fp){
     if(!data.subscriptionExpiry) return;
     const expEpoch = new Date(data.subscriptionExpiry+'T23:59:59').getTime();
     if(!expEpoch || expEpoch < Date.now()) return; // was valid once but has since expired
-    _dgSetLocalSub(fp, expEpoch, data.lastActivationCode);
+    _dgSetLocalSub(fp, expEpoch, data.lastActivationCode, data.subscriptionActivatedOn);
   }catch(e){ /* offline — try again next time there's internet */ }
 }
 
 // ---------- Locks the free trial permanently to this device (server-side) so Log Out / data clear can't reset it ----------
 async function dgCheckAndLockTrialOnline(fp){
   if(localStorage.getItem('ek_act')==='YES') return; // paid — leave trial-lock alone
-  if(!localStorage.getItem('ek_ts')) return; // no local trial running
+  const encTs = localStorage.getItem('ek_ts');
+  if(!encTs) return; // no local trial running
+  const localTs = _decodeTime(encTs);
+  // یہ ٹرائل پہلے ہی سرور پر درج ہو چکا ہے — دوبارہ چیک کر کے خود کو باہر نہیں نکالنا
+  if(localStorage.getItem('dgTrialRecorded') === String(localTs)) return;
   try{
-    const res = await dgAuthFetch(`trials/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`);
+    const path = `trials/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`;
+    const res = await dgAuthFetch(path);
     if(res.status===200){
-      // this device already had a trial before (data was cleared to try to get a free one again) — cut it short
+      const doc = await res.json();
+      const d = _dgParseFields(doc.fields||{});
+      // اسی ٹرائل کا ریکارڈ ہے (وقت تقریباً برابر) — ٹھیک ہے
+      if(d.startedAt && localTs && Math.abs(d.startedAt - localTs) < 30*60*1000){
+        localStorage.setItem('dgTrialRecorded', String(localTs));
+        return;
+      }
+      // اس ڈیوائس کا ٹرائل پہلے کسی اور وقت شروع ہو چکا تھا (ڈیٹا صاف کر کے دوبارہ مفت ٹرائل کی کوشش) — ختم
       _clearTrialData();
+      localStorage.setItem('ek_ever_used','YES');
       location.reload();
       return;
     }
-    // first-ever trial on this device — record it permanently
-    await dgAuthFetch(`trials/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`, {
+    if(res.status!==404) return; // نیٹ ورک/دوسری خرابی — بعد میں دوبارہ چیک ہوگا
+    // اس ڈیوائس کا پہلا ٹرائل — مستقل درج کریں (ٹرائل کے اپنے شروع ہونے کا وقت)
+    const w = await dgAuthFetch(path, {
       method:'PATCH', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({fields:{startedAt:{integerValue:String(Date.now())}}})
+      body: JSON.stringify({fields:{startedAt:{integerValue:String(localTs||Date.now())}}})
     });
+    if(w.ok) localStorage.setItem('dgTrialRecorded', String(localTs));
   }catch(e){ /* offline — checked again next time there's internet */ }
 }
 
@@ -2474,7 +2488,7 @@ async function initLock(){
 
   // ☁️ Reinstall/data-clear safety net — if this device has no valid local subscription,
   // silently check Firestore devices/{uid} and restore it (does nothing if offline or nothing to restore).
-  await dgRestoreSubFromCloud(fp);
+  await Promise.race([dgRestoreSubFromCloud(fp), new Promise(function(r){ setTimeout(r, 7000); })]);
 
   // Activation check — real expiry date synced from Firestore (developer picks the days)
   if(localStorage.getItem('ek_act') === 'YES'){
@@ -2530,7 +2544,145 @@ function _clearActivationData(){
   ['ek_act','ek_act_ts','ek_act_cs','ek_exp','ek_expcs','ek_actOn','dgSubLastCode'].forEach(k=>localStorage.removeItem(k));
 }
 
+
+// ============================================================
+// 🔐 APP LOCK PIN (4 digits) + recovery by year of birth — all local, nothing sent anywhere
+// ============================================================
+var _dgPinSessionOk = false, _dgPinFails = 0, _dgPinLockUntil = 0;
+var DG_PIN_KEY='dg_app_pin_hash', DG_YOB_KEY='dg_app_yob_hash', DG_PIN_SKIP='dg_app_pin_skipped';
+function _dgPinHash(kind, val){ return hashPin('DGAPP::'+kind+'::'+val); }
+
 function showApp(){
+  if(_dgPinSessionOk){ _showAppCore(); return; }
+  if(localStorage.getItem(DG_PIN_KEY)){ dgPinShow('enter'); return; }
+  if(localStorage.getItem(DG_PIN_SKIP)==='1'){ _dgPinSessionOk = true; _showAppCore(); return; }
+  dgPinShow('setup', {first:true});
+}
+function _dgPinDone(){
+  _dgPinSessionOk = true;
+  var el = document.getElementById('dg-pin-screen'); if(el) el.style.display='none';
+  _showAppCore();
+}
+function _dgPinEl(){
+  var el = document.getElementById('dg-pin-screen');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'dg-pin-screen';
+    el.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:linear-gradient(160deg,#7f1d1d 0%,#dc2626 45%,#ea580c 100%);display:none;align-items:center;justify-content:center;padding:18px;overflow-y:auto;direction:rtl;font-family:inherit';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+function _dgPinField(id, label, maxlen, ph){
+  return '<label style="display:block;font-size:13px;font-weight:800;color:#334155;margin:12px 0 6px;text-align:right">'+label+'</label>'+
+    '<div style="position:relative">'+
+    '<input id="'+id+'" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="'+maxlen+'" placeholder="'+(ph||'••••')+'" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,\'\')" dir="ltr" '+
+    'style="width:100%;box-sizing:border-box;padding:14px 48px 14px 14px;font-size:24px;letter-spacing:10px;text-align:center;border:2px solid #cbd5e1;border-radius:14px;font-weight:900;font-family:inherit;outline:none">'+
+    '<button type="button" onclick="dgPinEye(\''+id+'\')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:22px;cursor:pointer;padding:6px">👁️</button>'+
+    '</div>';
+}
+function dgPinEye(id){ var i=document.getElementById(id); if(i) i.type = (i.type==='password') ? 'text' : 'password'; }
+function _dgPinErr(msg){ var e=document.getElementById('dg-pin-err'); if(e){ e.textContent=msg||''; e.style.display=msg?'block':'none'; } }
+function _dgPinBtn(text, fn, bg){ return '<button type="button" onclick="'+fn+'" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:14px;background:'+(bg||'linear-gradient(135deg,#2563eb,#1d4ed8)')+';color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit">'+text+'</button>'; }
+function _dgPinLink(text, fn){ return '<div style="text-align:center;margin-top:14px"><a href="javascript:void(0)" onclick="'+fn+'" style="color:#2563eb;font-size:13px;font-weight:800;text-decoration:none">'+text+'</a></div>'; }
+
+function dgPinShow(mode, opts){
+  opts = opts || {};
+  var el = _dgPinEl();
+  var head = '<div style="text-align:center;font-size:44px;margin-bottom:4px">🔐</div>';
+  var body = '';
+  if(mode==='enter'){
+    body = head+'<div style="text-align:center;font-size:20px;font-weight:900;color:#0f172a">DG Khatabook</div>'+
+      '<div style="text-align:center;font-size:13px;color:#64748b;font-weight:700;margin-top:4px">اپنا 4 ہندسوں کا پن لکھیں</div>'+
+      _dgPinField('dg-pin-in','پن کوڈ',4)+
+      '<div id="dg-pin-err" style="display:none;color:#dc2626;font-size:12.5px;font-weight:800;margin-top:8px;text-align:center"></div>'+
+      _dgPinBtn('کھولیں 🔓','dgPinSubmitEnter()')+
+      _dgPinLink('پن بھول گئے؟','dgPinShow(\'forgot\')');
+  } else if(mode==='setup'){
+    body = head+'<div style="text-align:center;font-size:19px;font-weight:900;color:#0f172a">'+(opts.first?'پہلی دفعہ اپنا پن کوڈ بنائیں':'ایپ لاک پن بنائیں / بدلیں')+'</div>'+
+      '<div style="text-align:center;font-size:12px;color:#64748b;font-weight:700;margin-top:4px;line-height:1.7">یہ پن صرف آپ کے فون میں محفوظ ہوگا۔ سال پیدائش پن بھولنے پر کام آئے گا۔</div>'+
+      _dgPinField('dg-pin-a','نیا پن (4 ہندسے)',4)+
+      _dgPinField('dg-pin-b','پن دوبارہ لکھیں',4)+
+      _dgPinField('dg-pin-y','آپ کا سال پیدائش (مثلاً 1990)',4,'1990')+
+      '<div id="dg-pin-err" style="display:none;color:#dc2626;font-size:12.5px;font-weight:800;margin-top:8px;text-align:center"></div>'+
+      _dgPinBtn('✅ محفوظ کریں',"dgPinSubmitSetup("+(opts.first?'true':'false')+")",'linear-gradient(135deg,#16a34a,#15803d)')+
+      (opts.first ? _dgPinLink('ابھی چھوڑیں (پن نہیں لگانا)','dgPinSkip()') : _dgPinLink('واپس','dgPinCancel()'));
+  } else if(mode==='forgot'){
+    body = head+'<div style="text-align:center;font-size:19px;font-weight:900;color:#0f172a">پن بھول گئے؟</div>'+
+      '<div style="text-align:center;font-size:12.5px;color:#64748b;font-weight:700;margin-top:4px">آپ کس سال میں پیدا ہوئے تھے؟</div>'+
+      _dgPinField('dg-pin-y','سال پیدائش',4,'1990')+
+      '<div id="dg-pin-err" style="display:none;color:#dc2626;font-size:12.5px;font-weight:800;margin-top:8px;text-align:center"></div>'+
+      _dgPinBtn('تصدیق کریں','dgPinSubmitForgot()')+
+      _dgPinLink('واپس','dgPinShow(\'enter\')');
+  } else if(mode==='reset'){
+    body = head+'<div style="text-align:center;font-size:19px;font-weight:900;color:#0f172a">نیا پن بنائیں</div>'+
+      _dgPinField('dg-pin-a','نیا پن (4 ہندسے)',4)+
+      _dgPinField('dg-pin-b','نیا پن دوبارہ لکھیں',4)+
+      '<div style="font-size:11.5px;color:#64748b;font-weight:700;margin-top:6px;text-align:center">👁️ دبا کر دیکھ لیں کہ دونوں ایک جیسے ہیں</div>'+
+      '<div id="dg-pin-err" style="display:none;color:#dc2626;font-size:12.5px;font-weight:800;margin-top:8px;text-align:center"></div>'+
+      _dgPinBtn('✅ نیا پن محفوظ کریں','dgPinSubmitReset()','linear-gradient(135deg,#16a34a,#15803d)');
+  }
+  el.innerHTML = '<div style="background:#fff;border-radius:22px;padding:22px 20px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.35)">'+body+'</div>';
+  el.style.display = 'flex';
+  var f = el.querySelector('input'); if(f) setTimeout(function(){ try{f.focus();}catch(e){} }, 150);
+  if(mode==='enter'){
+    var inp = document.getElementById('dg-pin-in');
+    if(inp) inp.addEventListener('input', function(){ if(this.value.length===4) dgPinSubmitEnter(); });
+  }
+}
+function dgPinCancel(){ var el=document.getElementById('dg-pin-screen'); if(el) el.style.display='none'; }
+function dgPinSkip(){ localStorage.setItem(DG_PIN_SKIP,'1'); _dgPinDone(); }
+function dgPinOpenSetup(){ dgPinShow('setup', {first:false}); } // Admin panel → change / create PIN later
+
+function _dgPinCooldown(){
+  var left = Math.ceil((_dgPinLockUntil - Date.now())/1000);
+  if(left>0){ _dgPinErr('⏳ بہت زیادہ غلط کوششیں — '+left+' سیکنڈ بعد دوبارہ کوشش کریں'); return true; }
+  return false;
+}
+function _dgPinFail(){
+  _dgPinFails++;
+  if(_dgPinFails>=5){ _dgPinFails=0; _dgPinLockUntil = Date.now()+30000; }
+}
+async function dgPinSubmitEnter(){
+  if(_dgPinCooldown()) return;
+  var v = (document.getElementById('dg-pin-in')||{}).value||'';
+  if(v.length!==4){ _dgPinErr('4 ہندسوں کا پن لکھیں'); return; }
+  var h = await _dgPinHash('pin', v);
+  if(h === localStorage.getItem(DG_PIN_KEY)){ _dgPinFails=0; _dgPinDone(); return; }
+  _dgPinFail();
+  document.getElementById('dg-pin-in').value='';
+  _dgPinErr('❌ غلط پن — دوبارہ کوشش کریں');
+}
+async function dgPinSubmitSetup(first){
+  var a=(document.getElementById('dg-pin-a')||{}).value||'', b=(document.getElementById('dg-pin-b')||{}).value||'', y=(document.getElementById('dg-pin-y')||{}).value||'';
+  var yr=parseInt(y,10), nowY=new Date().getFullYear();
+  if(a.length!==4){ _dgPinErr('پن پورے 4 ہندسوں کا ہونا چاہیے'); return; }
+  if(a!==b){ _dgPinErr('دونوں پن ایک جیسے نہیں ہیں'); return; }
+  if(y.length!==4 || !yr || yr<1900 || yr>nowY){ _dgPinErr('سال پیدائش درست لکھیں (مثلاً 1990)'); return; }
+  localStorage.setItem(DG_PIN_KEY, await _dgPinHash('pin', a));
+  localStorage.setItem(DG_YOB_KEY, await _dgPinHash('yob', y));
+  localStorage.removeItem(DG_PIN_SKIP);
+  if(first){ _dgPinDone(); } else { dgPinCancel(); pkToast('✅ ایپ لاک پن محفوظ ہو گیا'); _dgPinSessionOk = true; }
+}
+async function dgPinSubmitForgot(){
+  if(_dgPinCooldown()) return;
+  var y=(document.getElementById('dg-pin-y')||{}).value||'';
+  if(y.length!==4){ _dgPinErr('سال پیدائش 4 ہندسوں میں لکھیں'); return; }
+  var h = await _dgPinHash('yob', y);
+  if(h === localStorage.getItem(DG_YOB_KEY)){ _dgPinFails=0; dgPinShow('reset'); return; }
+  _dgPinFail();
+  _dgPinErr('❌ سال پیدائش درست نہیں');
+}
+async function dgPinSubmitReset(){
+  var a=(document.getElementById('dg-pin-a')||{}).value||'', b=(document.getElementById('dg-pin-b')||{}).value||'';
+  if(a.length!==4){ _dgPinErr('پن پورے 4 ہندسوں کا ہونا چاہیے'); return; }
+  if(a!==b){ _dgPinErr('دونوں پن ایک جیسے نہیں ہیں'); return; }
+  localStorage.setItem(DG_PIN_KEY, await _dgPinHash('pin', a));
+  _dgPinDone();
+}
+
+
+function _showAppCore(){
   document.getElementById('lock-screen').style.display='none';
   document.getElementById('app').style.display='flex';
   const dcfWrap = document.querySelector('.dcf-wrap');
@@ -2617,6 +2769,16 @@ function _startTrialTimer(){
   _trialTimerInterval = setInterval(updateTimer, 1000);
 }
 
+async function dgCheckMySub(){
+  try{
+    const fp = await getDeviceFingerprint();
+    _dgClearLocalSub();
+    await dgRestoreSubFromCloud(fp);
+    if(_dgLocalSubExpiry(fp) && localStorage.getItem('ek_act')==='YES'){ showApp(); return; }
+    alert('ℹ️ اس UID ('+fp+') پر ابھی کوئی فعال سبسکرپشن نہیں ملی۔\nاپنی UID اور نام ڈویلپر کو بھیجیں۔');
+  }catch(e){ alert('⚠️ انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔'); }
+}
+
 async function startTrial(){
   const fp = await getDeviceFingerprint();
   // already on trial?
@@ -2626,6 +2788,16 @@ async function startTrial(){
     const elapsed = (Date.now()-oldTs)/86400000;
     if(elapsed >= 3){ alert('⛔ Your 3-day trial has ended. Enter activation code.'); return; }
   }
+  // اگر اس ڈیوائس کا ٹرائل پہلے سرور پر درج ہے تو نیا ٹرائل شروع ہی نہ کریں (اندر جا کر باہر نکلنے کا چکر نہ بنے)
+  try{
+    const chk = await dgAuthFetch(`trials/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`);
+    if(chk.status===200){
+      localStorage.setItem('ek_ever_used','YES');
+      const em = document.getElementById('lock-expired-msg'); if(em) em.style.display='block';
+      alert('⛔ اس ڈیوائس پر مفت ٹرائل پہلے استعمال ہو چکا ہے۔\nسبسکرپشن کے لیے اپنی UID ڈویلپر کو بھیجیں۔');
+      return;
+    }
+  }catch(e){ /* offline — اجازت دیں، بعد میں آن لائن چیک ہوگا */ }
   const ts = Date.now();
   localStorage.setItem('ek_ts', _encodeTime(ts));
   localStorage.setItem('ek_cs', _makeChecksum(fp, ts));
@@ -2872,6 +3044,61 @@ async function dgDevSaveContact(){
     pkToast('✅ نیا نمبر محفوظ ہو گیا — سب گاہکوں کے لیے');
   }catch(e){
     alert('⚠️ نمبر محفوظ نہیں ہو سکا — انٹرنیٹ چیک کریں۔ ('+e.message+')');
+  }
+}
+
+async function _dgGetDeviceSub(uid){
+  const res = await dgAuthFetch(`devices/${encodeURIComponent(uid)}?key=${DG_FIREBASE_API_KEY}`);
+  if(res.status===404) return null;
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const d = _dgParseFields((await res.json()).fields||{});
+  if(!d.subscriptionExpiry) return null;
+  const exp = new Date(d.subscriptionExpiry+'T23:59:59').getTime();
+  return { data:d, exp:exp, days: Math.ceil((exp-Date.now())/86400000) };
+}
+async function dgDevLookupSub(){
+  const uid=(document.getElementById('dg-dev-tr-old').value||'').trim();
+  if(!uid){ alert('⚠️ پرانی UID لکھیں'); return; }
+  try{
+    const r = await _dgGetDeviceSub(uid);
+    if(!r){ alert('ℹ️ UID '+uid+' کی کوئی سبسکرپشن نہیں ملی۔'); return; }
+    alert('UID '+uid+'\nشروع: '+(r.data.subscriptionActivatedOn||'-')+'\nختم: '+r.data.subscriptionExpiry+'\n'+(r.days>0 ? ('باقی دن: '+r.days) : 'سبسکرپشن ختم ہو چکی ہے'));
+  }catch(e){ alert('⚠️ چیک نہیں ہو سکا — انٹرنیٹ دیکھیں۔ ('+e.message+')'); }
+}
+async function dgDevTransferSub(){
+  const oldU=(document.getElementById('dg-dev-tr-old').value||'').trim();
+  const newU=(document.getElementById('dg-dev-tr-new').value||'').trim();
+  if(!oldU || !newU){ alert('⚠️ پرانی اور نئی دونوں UID لکھیں'); return; }
+  if(oldU===newU){ alert('⚠️ دونوں UID ایک جیسی ہیں'); return; }
+  try{
+    const r = await _dgGetDeviceSub(oldU);
+    if(!r){ alert('ℹ️ پرانی UID کی سبسکرپشن نہیں ملی۔'); return; }
+    if(r.days<=0){ alert('⛔ پرانی UID کی سبسکرپشن ختم ہو چکی ہے (ختم: '+r.data.subscriptionExpiry+')۔ نیا کوڈ بنائیں۔'); return; }
+    if(!confirm('UID '+oldU+' کے باقی '+r.days+' دن (ختم: '+r.data.subscriptionExpiry+') نئی UID '+newU+' پر منتقل کریں؟')) return;
+    const w = await dgAuthFetch(`devices/${encodeURIComponent(newU)}?key=${DG_FIREBASE_API_KEY}`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({fields:{
+        subscriptionExpiry:{stringValue:r.data.subscriptionExpiry},
+        subscriptionActivatedOn:{stringValue:r.data.subscriptionActivatedOn||new Date().toISOString().slice(0,10)},
+        lastActivationCode:{stringValue:String(r.data.lastActivationCode||'')},
+        transferredFrom:{stringValue:oldU},
+        updatedAt:{integerValue:String(Date.now())}
+      }})
+    });
+    if(!w.ok) throw new Error('HTTP '+w.status);
+    pkToast('✅ '+r.days+' دن نئی UID '+newU+' پر منتقل ہو گئے');
+    alert('✅ منتقل ہو گئی۔\nاب گاہک ایپ کھولے یا لاک سکرین پر "🔄 میری سبسکرپشن چیک کریں" دبائے — وہ خودبخود اندر چلا جائے گا۔');
+  }catch(e){ alert('⚠️ منتقل نہیں ہو سکی — انٹرنیٹ دیکھیں۔ ('+e.message+')'); }
+}
+async function dgDevResetTrial(){
+  const uid = (document.getElementById('dg-dev-reset-uid').value||'').trim();
+  if(!uid){ alert('⚠️ پہلے UID لکھیں'); return; }
+  try{
+    const res = await dgAuthFetch(`trials/${encodeURIComponent(uid)}?key=${DG_FIREBASE_API_KEY}`, {method:'DELETE'});
+    if(!res.ok && res.status!==404) throw new Error('HTTP '+res.status);
+    pkToast('✅ UID '+uid+' کا ٹرائل ری سیٹ ہو گیا — اب دوبارہ Free Trial شروع ہو سکتا ہے');
+  }catch(e){
+    alert('⚠️ ری سیٹ نہیں ہو سکا — انٹرنیٹ چیک کریں۔ ('+e.message+')');
   }
 }
 
@@ -5870,6 +6097,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   <!-- Section 5: PIN Change -->
   <div class="adm-section" id="adm-s5">
     <div class="adm-card">
+      <button class="adm-save-btn" style="margin-bottom:14px" onclick="dgPinOpenSetup()">🔐 ایپ لاک پن (4 ہندسے) بنائیں / بدلیں</button>
       <div style="font-size:15px;font-weight:900;color:#f59e0b;margin-bottom:14px">🔑 Change PIN</div>
       <div class="adm-label">Current PIN</div>
       <input id="adm-old-pin" class="adm-inp" type="password" inputmode="numeric" maxlength="4" placeholder="••••" style="margin-bottom:12px;letter-spacing:6px;text-align:center;font-size:20px">
@@ -6148,7 +6376,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 05:42 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 06:10 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
