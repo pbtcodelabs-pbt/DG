@@ -1043,7 +1043,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 05:12 AM</span>
+        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 05:42 AM</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1744,6 +1744,18 @@ select {
         📱 اپنے فون کا Device UID دیکھنا ہو تو لاک اسکرین پر "Your Unique User ID" دیکھیں۔
       </div>
 
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px;margin-bottom:16px">
+        <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:4px">📞 ڈویلپر کانٹیکٹ نمبر (سب گاہکوں کے لیے)</div>
+        <div style="font-size:11px;color:#166534;font-weight:700;line-height:1.6;margin-bottom:8px">یہاں محفوظ کیا ہوا نمبر تمام گاہکوں کی ایپ میں (انٹرنیٹ آنے پر) خودکار بدل جائے گا۔</div>
+        <label class="form-label">WhatsApp نمبر</label>
+        <input type="tel" id="dg-dev-c-wa" class="form-inp" placeholder="03206793793" dir="ltr">
+        <label class="form-label">SMS نمبر</label>
+        <input type="tel" id="dg-dev-c-sms" class="form-inp" placeholder="03206793793" dir="ltr">
+        <label class="form-label">Email</label>
+        <input type="email" id="dg-dev-c-email" class="form-inp" placeholder="pbtcodelabs@gmail.com" dir="ltr">
+        <button class="btn-unlock" style="background:#16a34a" onclick="dgDevSaveContact()">💾 نمبر محفوظ کریں</button>
+      </div>
+
       <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:8px">🎁 نیا کوڈ بنائیں (Generate Code)</div>
       <label class="form-label">دن (Days)</label>
       <select id="dg-code-days" class="form-inp" onchange="document.getElementById('dg-code-custom-wrap').style.display=(this.value==='custom'?'block':'none')">
@@ -2044,14 +2056,45 @@ function getPhone(){ return localStorage.getItem('custom_phone')||'‎0320 6 793
  // Developer chat bubble (same setting works on both login page and main home page)
 function _devContact(){
   // ডিফল্ট ডেভেলপার কন্টাক্ট (hardcoded)
-  const DEFAULT_DEV_WA = '3206793793';
-  const DEFAULT_DEV_SMS = '3206793793';
+  const DEFAULT_DEV_WA = '923206793793';
+  const DEFAULT_DEV_SMS = '03206793793';
   const DEFAULT_DEV_EMAIL = 'pbtcodelabs@gmail.com';
   
-  var wa = (localStorage.getItem('dev_chat_whatsapp') || DEFAULT_DEV_WA).replace(/[^0-9]/g,'');
-  var sms = (localStorage.getItem('dev_chat_sms') || DEFAULT_DEV_SMS).replace(/[^0-9]/g,'') || wa;
-  var email = localStorage.getItem('dev_chat_email') || DEFAULT_DEV_EMAIL;
+  // ترجیح: کلاؤڈ (Firestore licenses/_developer_contact) میں محفوظ نمبر > کوڈ کا ڈیفالٹ نمبر
+  // (پرانی per-device 'dev_chat_*' سیٹنگ اب استعمال نہیں ہوتی تاکہ سب گاہکوں کے لیے ایک ہی نمبر رہے)
+  var cc = _dgCloudContact();
+  var wa = _dgIntlPhone(cc.whatsapp || DEFAULT_DEV_WA);
+  var sms = String(cc.sms || DEFAULT_DEV_SMS).replace(/[^0-9+]/g,'') || wa;
+  var email = cc.email || DEFAULT_DEV_EMAIL;
   return { wa: wa, sms: sms, email: email };
+}
+var DG_DEV_CONTACT_CACHE = 'dg_dev_contact_cloud';
+function _dgCloudContact(){ try{ return JSON.parse(localStorage.getItem(DG_DEV_CONTACT_CACHE)||'null')||{}; }catch(e){ return {}; } }
+// ڈویلپر کا تازہ نمبر Firestore سے لا کر فون میں محفوظ کرتا ہے (آف لائن ہو تو پرانا/ڈیفالٹ نمبر چلتا رہے گا)
+async function dgFetchDevContact(){
+  try{
+    const res = await dgAuthFetch('licenses/_developer_contact?key='+DG_FIREBASE_API_KEY);
+    if(res.status!==200) return null;
+    const doc = await res.json();
+    const d = _dgParseFields(doc.fields||{});
+    if(d.whatsapp || d.sms || d.email){
+      const c = { whatsapp:d.whatsapp||'', sms:d.sms||'', email:d.email||'' };
+      localStorage.setItem(DG_DEV_CONTACT_CACHE, JSON.stringify(c));
+      return c;
+    }
+  }catch(e){}
+  return null;
+}
+// پاکستانی نمبر کو WhatsApp کے لیے بین الاقوامی فارمیٹ (92...) میں بدلتا ہے
+// 03206793793 / 3206793793 / +92 320 6793793 / 0092... سب درست 923206793793 بن جائیں گے
+function _dgIntlPhone(raw){
+  var d = String(raw||'').replace(/[^0-9]/g,'');
+  if(!d) return '';
+  if(d.indexOf('0092')===0) d = d.slice(2);
+  if(d.indexOf('92')===0 && d.length>=12) return d;
+  if(d.charAt(0)==='0') return '92'+d.slice(1);
+  if(d.length===10 && d.charAt(0)==='3') return '92'+d;
+  return d;
 }
 function toggleDevChat(){
   var m = document.getElementById('dcf-menu');
@@ -2360,6 +2403,7 @@ async function dgResyncLicenseOnline(){
 async function dgOnAppOpenSyncChecks(){
   try{
     const fp = await getDeviceFingerprint();
+    dgFetchDevContact();
     if(localStorage.getItem('ek_act')==='YES') dgResyncLicenseOnline();
     else dgCheckAndLockTrialOnline(fp);
   }catch(e){}
@@ -2405,6 +2449,7 @@ async function dgActivateWithCode(code){
 }
 
 async function initLock(){
+  dgFetchDevContact(); // background — ڈویلپر کا تازہ نمبر کلاؤڈ سے
   // Clean up old empty values and set defaults
   var wp = localStorage.getItem('dev_chat_whatsapp') || '';
   var sm = localStorage.getItem('dev_chat_sms') || '';
@@ -2412,8 +2457,8 @@ async function initLock(){
   
   // If any/all are empty, set defaults
   if(!wp.trim() || !sm.trim() || !em.trim()){
-    localStorage.setItem('dev_chat_whatsapp', '3206793793');
-    localStorage.setItem('dev_chat_sms', '3206793793');
+    localStorage.setItem('dev_chat_whatsapp', '923206793793');
+    localStorage.setItem('dev_chat_sms', '03206793793');
     localStorage.setItem('dev_chat_email', 'pbtcodelabs@gmail.com');
   }
   
@@ -2649,6 +2694,7 @@ async function dgDevUnlock(){
   }
   document.getElementById('dg-dev-locked').style.display='none';
   document.getElementById('dg-dev-unlocked').style.display='block';
+  dgDevLoadContact();
   dgDevLoadCodes();
 }
 
@@ -2718,7 +2764,7 @@ async function dgDevLoadCodes(){
     _dgCodesCache = docs.map(d=>{
       const code = d.name.split('/').pop();
       return { code, ..._dgParseFields(d.fields||{}) };
-    }).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    }).filter(x=>x.code!=='_developer_contact').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
     dgRenderCodesList();
   }catch(e){
     wrap.innerHTML = '<div style="text-align:center;color:#dc2626;font-size:12.5px;padding:14px">⚠️ لوڈ نہیں ہو سکا — انٹرنیٹ چیک کریں۔</div>';
@@ -2793,6 +2839,40 @@ async function dgDevDeleteCode(code){
     await dgAuthFetch(`licenses/${encodeURIComponent(code)}?key=${DG_FIREBASE_API_KEY}`, { method:'DELETE' });
     dgDevLoadCodes();
   }catch(e){ alert('⚠️ انٹرنیٹ چیک کریں۔'); }
+}
+
+async function dgDevLoadContact(){
+  var cc = _dgCloudContact();
+  var c = _devContact();
+  var set=function(id,v){ var el=document.getElementById(id); if(el) el.value=v||''; };
+  set('dg-dev-c-wa', cc.whatsapp || c.wa);
+  set('dg-dev-c-sms', cc.sms || c.sms);
+  set('dg-dev-c-email', cc.email || c.email);
+  var fresh = await dgFetchDevContact();
+  if(fresh){ set('dg-dev-c-wa',fresh.whatsapp); set('dg-dev-c-sms',fresh.sms); set('dg-dev-c-email',fresh.email); }
+}
+async function dgDevSaveContact(){
+  var wa = _dgIntlPhone(document.getElementById('dg-dev-c-wa').value);
+  var sms = document.getElementById('dg-dev-c-sms').value.trim().replace(/[^0-9+]/g,'');
+  var email = document.getElementById('dg-dev-c-email').value.trim();
+  if(wa.length<12){ alert('⚠️ WhatsApp نمبر درست نہیں — مثلاً 03206793793'); return; }
+  if(!sms) sms = '0'+wa.slice(2);
+  document.getElementById('dg-dev-c-wa').value = wa;
+  document.getElementById('dg-dev-c-sms').value = sms;
+  try{
+    var res = await dgAuthFetch('licenses/_developer_contact?key='+DG_FIREBASE_API_KEY, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({fields:{
+        whatsapp:{stringValue:wa}, sms:{stringValue:sms}, email:{stringValue:email},
+        updatedAt:{integerValue:String(Date.now())}
+      }})
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    localStorage.setItem(DG_DEV_CONTACT_CACHE, JSON.stringify({whatsapp:wa,sms:sms,email:email}));
+    pkToast('✅ نیا نمبر محفوظ ہو گیا — سب گاہکوں کے لیے');
+  }catch(e){
+    alert('⚠️ نمبر محفوظ نہیں ہو سکا — انٹرنیٹ چیک کریں۔ ('+e.message+')');
+  }
 }
 
 async function dgDevChangePassword(){
@@ -4796,6 +4876,8 @@ function admSaveDevChat(){
   var w=document.getElementById('adm-dev-wa').value.trim();
   var e=document.getElementById('adm-dev-email').value.trim();
   var s=document.getElementById('adm-dev-sms').value.trim();
+  w=_dgIntlPhone(w);
+  document.getElementById('adm-dev-wa').value=w;
   localStorage.setItem('dev_chat_whatsapp',w);
   localStorage.setItem('dev_chat_email',e);
   localStorage.setItem('dev_chat_sms',s);
@@ -5698,7 +5780,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     <button class="adm-tab" onclick="admTab(2)">📤 Share Link</button>
     <button class="adm-tab" onclick="admTab(3)">💬 WhatsApp</button>
     <button class="adm-tab" onclick="admTab(5)">🔑 PIN</button>
-    <button class="adm-tab" onclick="admTab(6)">💬 Developer</button>
+    <button class="adm-tab" style="display:none" onclick="admTab(6)">💬 Developer</button>
     <button class="adm-tab active" onclick="admTab(7)">💾 Source Code</button>
   </div>
 
@@ -5815,7 +5897,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     <div class="adm-card">
       <div style="font-size:15px;font-weight:900;color:#f59e0b;margin-bottom:6px">💬 Developer Chat Bubble Contact</div>
       <div class="adm-hint" style="margin-bottom:14px;font-size:12px;color:#94a3b8">The info set here is used automatically on the login page and main home page — both places, in the chat bubble 💬. Set this once before building the APK.</div>
-      <div class="adm-label">WhatsApp Number (with country code, e.g. 923001234567)</div>
+      <div class="adm-label">WhatsApp Number (e.g. 03206793793 or 923206793793 — 0 سے شروع ہو تو خودکار 92 لگ جائے گا)</div>
       <input id="adm-dev-wa" class="adm-inp" placeholder="923001234567" style="margin-bottom:12px;direction:ltr">
       <div class="adm-label">Gmail Address</div>
       <input id="adm-dev-email" class="adm-inp" placeholder="you@gmail.com" style="margin-bottom:12px;direction:ltr">
@@ -6066,7 +6148,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 05:12 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 05:42 AM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
