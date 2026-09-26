@@ -1108,7 +1108,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · ہفتہ 26 ستمبر · 05:45 PM</span>
+        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · ہفتہ 26 ستمبر · 06:45 PM</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1137,7 +1137,7 @@ select {
           <div style="font-size:10.5px;color:#94a3b8;font-weight:900;text-transform:uppercase;margin-bottom:4px">Activation Code</div>
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
             <div id="dg-lm-code" dir="ltr" style="flex:1;font-family:monospace;font-size:16px;font-weight:900;color:#0f172a;word-break:break-all">—</div>
-            <button type="button" onclick="dgLockCopy('dg-lm-code')" style="background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:8px;padding:7px 11px;font-size:11.5px;font-weight:900;flex-shrink:0">Copy</button>
+            <button type="button" onclick="dgLockUseCode()" style="background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:8px;padding:7px 11px;font-size:11.5px;font-weight:900;flex-shrink:0">📋 استعمال کریں</button>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;font-weight:800;padding:6px 0;border-top:1px dashed #e2e8f0">
             <span>شروع کی تاریخ</span><span id="dg-lm-start">—</span>
@@ -2827,6 +2827,18 @@ function dgFitLock(){
 window.addEventListener('resize', dgFitLock);
 window.addEventListener('orientationchange', function(){ setTimeout(dgFitLock,200); });
 
+// کوڈ کاپی کرنے کے بجائے سیدھا "Enter Activation Code" خانے میں بھر کر خودکار Unlock کرتا ہے
+// نوٹ: یہ کوڈ کو خانے میں دکھاتا ہے، مگر اصل فیصلہ لائسنس کے "استعمال شدہ" ٹیگ سے نہیں —
+// سرور پر اسی ڈیوائس کی باقی سبسکرپشن (devices/{uid}) سے ہوتا ہے۔ اسی لیے ایک ہی کوڈ
+// بار بار (ری انسٹال کے بعد بھی) اُس وقت تک کام کرتا رہے گا جب تک اُس کے دن باقی ہیں۔
+function dgLockUseCode(){
+  var code = (document.getElementById('dg-lm-code')||{}).textContent||'';
+  if(!code || code==='—'){ pkToast('ℹ️ کوئی کوڈ نہیں ملا'); return; }
+  var inp = document.getElementById('activation-key');
+  if(inp){ inp.value = code; }
+  pkToast('✅ سبسکرپشن چیک ہو رہی ہے...');
+  dgCheckMySub();
+}
 function dgLockCopy(id){
   var t=(document.getElementById(id)||{}).textContent||'';
   if(!t || t==='—'){ return; }
@@ -6556,7 +6568,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · ہفتہ 26 ستمبر · 05:45 PM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · ہفتہ 26 ستمبر · 06:45 PM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
