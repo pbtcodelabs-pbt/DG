@@ -1108,7 +1108,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · ہفتہ 26 ستمبر · 06:45 PM</span>
+        <span id="pk-lock-ver" dir="ltr">DG26SEPSA0648PM</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1217,7 +1217,7 @@ select {
       <div style="flex:1"></div>
       <div id="pk-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-net-row"><span id="pk-net-dot"></span><span id="pk-net-text">Online</span></div>
-        <div id="pk-app-version" dir="rtl">جمعرات 24 ستمبر · 04:33 AM</div>
+        <div id="pk-app-version" dir="ltr">DG26SEPSA0648PM</div>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:5px">
@@ -6568,7 +6568,9 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · ہفتہ 26 ستمبر · 06:45 PM';
+  // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
+  // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
+  var PK_APP_VERSION = 'DG26SEPSA0648PM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
