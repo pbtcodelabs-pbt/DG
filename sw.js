@@ -1,18 +1,14 @@
-// DG Khatabook (پیارا کھاتہ) — Service Worker
+// Piara Khata (پیارا کھاتہ) — Service Worker
 // Cache name is tied to the app version (PK_APP_VERSION in index.html).
 // Bump CACHE_NAME every time you bump PK_APP_VERSION so old caches are cleared automatically.
 
-const CACHE_NAME = 'dg-khatabook-cache-20260924-0807';
+const CACHE_NAME = 'piara-khata-cache-20260919-0847';
 
 const PRECACHE_URLS = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192x192.png',
-  './icon-512x512.png',
-  './icon-512x512-maskable.png',
-  './fonts/JameelNooriNastaleeqKasheeda.ttf',
-  './fonts/JameelNooriNastaleeqRegular.ttf'
+  './icon-512x512.png'
 ];
 
 // Install: pre-cache the app shell, activate immediately
@@ -22,7 +18,7 @@ self.addEventListener('install', function (event) {
     caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll(PRECACHE_URLS).catch(function (err) {
         // Don't fail install if one optional asset (e.g. an icon) is missing
-        console.log('DG Khatabook SW: precache warning', err);
+        console.log('Piara Khata SW: precache warning', err);
       });
     })
   );
@@ -49,9 +45,6 @@ self.addEventListener('activate', function (event) {
 // build), cache-first for everything else, with offline fallback to cache.
 self.addEventListener('fetch', function (event) {
   var req = event.request;
-
-  // Never intercept Firebase/Firestore or any other cross-origin / non-GET request
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) { return; }
 
   if (req.mode === 'navigate' || (req.method === 'GET' && req.headers.get('accept') && req.headers.get('accept').indexOf('text/html') !== -1)) {
     event.respondWith(
