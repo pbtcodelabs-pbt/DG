@@ -2,7 +2,7 @@
 // Cache name is tied to the app version (PK_APP_VERSION in index.html).
 // Bump CACHE_NAME every time you bump PK_APP_VERSION so old caches are cleared automatically.
 
-const CACHE_NAME = 'dg-khatabook-cache-20260924-0633';
+const CACHE_NAME = 'dg-khatabook-cache-20260926-1745';
 
 const PRECACHE_URLS = [
   './',

@@ -1108,7 +1108,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · 06:33 AM</span>
+        <span id="pk-lock-ver" dir="rtl">جمعرات 24 ستمبر · ہفتہ 26 ستمبر · 05:45 PM</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1129,6 +1129,29 @@ select {
         <button type="button" onclick="dgCheckMySub()" style="width:100%;margin-top:8px;background:#fff7ed;color:#9a3412;border:1.5px solid #fed7aa;border-radius:10px;padding:10px 8px;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit">🔄 میری سبسکرپشن چیک کریں (دوبارہ انسٹال کے بعد)</button>
         <div dir="rtl" style="font-size:11px;color:#c2410c;font-weight:800;margin-top:8px;line-height:1.6">⚠️ میسج سینڈ کرنے سے پہلے اپنا نام ضرور لکھیں — بغیر نام کے کوڈ کی شناخت مشکل ہو جاتی ہے۔</div>
       </div>
+
+      <button type="button" id="dg-lock-more-toggle" onclick="dgLockMoreToggle()" style="width:100%;background:#f1f5f9;color:#334155;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 8px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:10px">🔧 مزید آپشنز (میری سبسکرپشن کی تفصیل) ▾</button>
+      <div id="dg-lock-more" dir="rtl" style="display:none;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:12px;text-align:right">
+        <div id="dg-lock-more-loading" style="text-align:center;color:#94a3b8;font-size:12px;font-weight:800;padding:6px">⏳ چیک ہو رہا ہے...</div>
+        <div id="dg-lock-more-body" style="display:none">
+          <div style="font-size:10.5px;color:#94a3b8;font-weight:900;text-transform:uppercase;margin-bottom:4px">Activation Code</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <div id="dg-lm-code" dir="ltr" style="flex:1;font-family:monospace;font-size:16px;font-weight:900;color:#0f172a;word-break:break-all">—</div>
+            <button type="button" onclick="dgLockCopy('dg-lm-code')" style="background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:8px;padding:7px 11px;font-size:11.5px;font-weight:900;flex-shrink:0">Copy</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;font-weight:800;padding:6px 0;border-top:1px dashed #e2e8f0">
+            <span>شروع کی تاریخ</span><span id="dg-lm-start">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;font-weight:800;padding:6px 0;border-top:1px dashed #e2e8f0">
+            <span>ختم ہونے کی تاریخ</span><span id="dg-lm-end">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:900;padding:6px 0;border-top:1px dashed #e2e8f0">
+            <span>حالت</span><span id="dg-lm-days">—</span>
+          </div>
+          <button type="button" onclick="dgCheckMySub()" style="width:100%;margin-top:10px;background:#0ea5e9;color:#fff;border:none;border-radius:10px;padding:10px 8px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit">🔄 دوبارہ چیک کریں اور اندر جائیں</button>
+        </div>
+      </div>
+
       <input type="text" id="activation-key" class="form-inp" placeholder="Enter Activation Code" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-align:center;letter-spacing:.1em;font-size:18px;margin-bottom:6px">
       <div id="key-error" style="color:#dc2626;font-size:13px;font-weight:700;margin-bottom:10px;display:none">Wrong code! Try again</div>
       <button class="btn-unlock" onclick="tryUnlock()">Unlock →</button>
@@ -2804,6 +2827,49 @@ function dgFitLock(){
 window.addEventListener('resize', dgFitLock);
 window.addEventListener('orientationchange', function(){ setTimeout(dgFitLock,200); });
 
+function dgLockCopy(id){
+  var t=(document.getElementById(id)||{}).textContent||'';
+  if(!t || t==='—'){ return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){ pkToast('✅ کاپی ہو گیا'); }); }
+  else { pkCopyFallback(t, function(){ pkToast('✅ کاپی ہو گیا'); }); }
+}
+var _dgLockMoreOpen = false;
+async function dgLockMoreToggle(){
+  var panel = document.getElementById('dg-lock-more');
+  var btn = document.getElementById('dg-lock-more-toggle');
+  _dgLockMoreOpen = !_dgLockMoreOpen;
+  panel.style.display = _dgLockMoreOpen ? 'block' : 'none';
+  btn.textContent = _dgLockMoreOpen ? '🔧 مزید آپشنز چھپائیں ▴' : '🔧 مزید آپشنز (میری سبسکرپشن کی تفصیل) ▾';
+  if(_dgLockMoreOpen) dgLockLoadMore();
+}
+// لاک سکرین پر — بغیر پاسورڈ کے — اسی ڈیوائس کی سبسکرپشن سرور سے صرف دکھانے کے لیے پڑھتا ہے (کچھ بدلتا نہیں)
+async function dgLockLoadMore(){
+  var ld=document.getElementById('dg-lock-more-loading'), body=document.getElementById('dg-lock-more-body');
+  ld.style.display='block'; body.style.display='none'; ld.textContent='⏳ چیک ہو رہا ہے...';
+  try{
+    var fp = await getDeviceFingerprint();
+    var res = await dgAuthFetch(`devices/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`);
+    if(res.status!==200){
+      ld.textContent = 'ℹ️ اس ڈیوائس کی کوئی سبسکرپشن ریکارڈ میں نہیں ملی۔ ٹرائل استعمال ہو رہا ہے یا ابھی سبسکرپشن نہیں لی گئی۔';
+      return;
+    }
+    var data = _dgParseFields((await res.json()).fields||{});
+    document.getElementById('dg-lm-code').textContent = data.lastActivationCode || '—';
+    document.getElementById('dg-lm-start').textContent = data.subscriptionActivatedOn || '—';
+    document.getElementById('dg-lm-end').textContent = data.subscriptionExpiry || '—';
+    var daysEl = document.getElementById('dg-lm-days');
+    if(data.subscriptionExpiry){
+      var exp = new Date(data.subscriptionExpiry+'T23:59:59').getTime();
+      var days = Math.ceil((exp-Date.now())/86400000);
+      if(days>0){ daysEl.textContent = '✅ '+days+' دن باقی'; daysEl.style.color='#16a34a'; }
+      else { daysEl.textContent = '⌛ ختم ہو چکی'; daysEl.style.color='#dc2626'; }
+    } else { daysEl.textContent = '—'; daysEl.style.color='#475569'; }
+    ld.style.display='none'; body.style.display='block';
+  }catch(e){
+    ld.textContent = '⚠️ انٹرنیٹ کنکشن چیک کریں اور دوبارہ کھولیں۔';
+  }
+}
+
 async function dgCheckMySub(){
   try{
     const fp = await getDeviceFingerprint();
@@ -3126,6 +3192,55 @@ async function dgDevTransferSub(){
     alert('✅ منتقل ہو گئی۔\nاب گاہک ایپ کھولے یا لاک سکرین پر "🔄 میری سبسکرپشن چیک کریں" دبائے — وہ خودبخود اندر چلا جائے گا۔');
   }catch(e){ alert('⚠️ منتقل نہیں ہو سکی — انٹرنیٹ دیکھیں۔ ('+e.message+')'); }
 }
+function _dgAdmFillSub(){
+  var fp = localStorage.getItem('ek_uid') || '';
+  var uidEl=document.getElementById('adm-sub-uid'); if(uidEl) uidEl.textContent = fp || '—';
+  var code = localStorage.getItem('dgSubLastCode');
+  var codeEl=document.getElementById('adm-sub-code');
+  if(codeEl) codeEl.textContent = code || (localStorage.getItem('ek_ts') ? 'ٹرائل — کوئی کوڈ نہیں' : '—');
+  var sEl=document.getElementById('adm-sub-start'); if(sEl) sEl.textContent = localStorage.getItem('ek_actOn') || '—';
+  var exp = fp ? _dgLocalSubExpiry(fp) : null;
+  var eEl=document.getElementById('adm-sub-end'), dEl=document.getElementById('adm-sub-days');
+  if(exp){
+    if(eEl) eEl.textContent = _fmtDate(new Date(exp));
+    if(dEl) dEl.textContent = Math.max(0, Math.ceil((exp-Date.now())/86400000)) + ' دن';
+  } else {
+    if(eEl) eEl.textContent = '—';
+    if(dEl) dEl.textContent = '—';
+  }
+}
+function dgAdmCopy(id){
+  var t=(document.getElementById(id)||{}).textContent||'';
+  if(!t || t==='—' || t==='-----'){ return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){ pkToast('✅ کاپی ہو گیا'); }); }
+  else { pkCopyFallback(t, function(){ pkToast('✅ کاپی ہو گیا'); }); }
+}
+// سرور سے دوبارہ چیک — چاہے فون میں پہلے سے کچھ محفوظ ہو یا نہ ہو، سرور کا اصل ریکارڈ لاگو کرتا ہے
+async function dgAdmRefreshSub(){
+  try{
+    var fp = await getDeviceFingerprint();
+    var res = await dgAuthFetch(`devices/${encodeURIComponent(fp)}?key=${DG_FIREBASE_API_KEY}`);
+    if(res.status===200){
+      var doc = await res.json();
+      var data = _dgParseFields(doc.fields||{});
+      if(data.subscriptionExpiry){
+        var expEpoch = new Date(data.subscriptionExpiry+'T23:59:59').getTime();
+        if(expEpoch && expEpoch>Date.now()){
+          _dgSetLocalSub(fp, expEpoch, data.lastActivationCode, data.subscriptionActivatedOn);
+          _dgAdmFillSub();
+          pkToast('✅ سبسکرپشن تازہ ہو گئی');
+          return;
+        }
+        pkToast('⚠️ سرور پر یہ سبسکرپشن ختم ہو چکی ہے');
+        _dgAdmFillSub();
+        return;
+      }
+    }
+    pkToast('ℹ️ سرور پر کوئی سبسکرپشن ریکارڈ نہیں ملا');
+    _dgAdmFillSub();
+  }catch(e){ alert('⚠️ انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔'); }
+}
+
 async function dgDevResetTrial(){
   const uid = (document.getElementById('dg-dev-reset-uid').value||'').trim();
   if(!uid){ alert('⚠️ پہلے UID لکھیں'); return; }
@@ -5110,6 +5225,7 @@ function _admOpenPanel(){
   // PINs clear
   ['adm-old-pin','adm-new-pin','adm-pin-confirm'].forEach(id=>{ document.getElementById(id).value=''; });
   
+  _dgAdmFillSub();
   admTab(0);
   document.getElementById('adm-panel').style.display='block';
   var fnEl = document.getElementById('adm-filename-suggest');
@@ -6042,6 +6158,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     <button class="adm-tab" onclick="admTab(1)">🎨 Theme</button>
     <button class="adm-tab" onclick="admTab(2)">📤 Share Link</button>
     <button class="adm-tab" onclick="admTab(3)">💬 WhatsApp</button>
+    <button class="adm-tab" onclick="admTab(4)">📄 سبسکرپشن</button>
     <button class="adm-tab" onclick="admTab(5)">🔑 PIN</button>
     <button class="adm-tab" style="display:none" onclick="admTab(6)">💬 Developer</button>
     <button class="adm-tab active" onclick="admTab(7)">💾 Source Code</button>
@@ -6131,6 +6248,33 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   
 
   <!-- Section 5: PIN Change -->
+  <div class="adm-section" id="adm-s4">
+    <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:8px">📄 میری سبسکرپشن</div>
+    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="font-size:10.5px;color:#94a3b8;font-weight:900;text-transform:uppercase;margin-bottom:4px">Device UID</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <div id="adm-sub-uid" dir="ltr" style="flex:1;font-family:monospace;font-size:17px;font-weight:900;color:#0f172a;word-break:break-all">-----</div>
+        <button type="button" onclick="dgAdmCopy('adm-sub-uid')" style="background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:900;flex-shrink:0">Copy</button>
+      </div>
+      <div style="font-size:10.5px;color:#94a3b8;font-weight:900;text-transform:uppercase;margin-bottom:4px">Activation Code</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <div id="adm-sub-code" dir="ltr" style="flex:1;font-family:monospace;font-size:17px;font-weight:900;color:#0f172a;word-break:break-all">-----</div>
+        <button type="button" onclick="dgAdmCopy('adm-sub-code')" style="background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:900;flex-shrink:0">Copy</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;color:#475569;font-weight:800;padding:7px 0;border-top:1px dashed #e2e8f0">
+        <span>شروع کی تاریخ</span><span id="adm-sub-start">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;color:#475569;font-weight:800;padding:7px 0;border-top:1px dashed #e2e8f0">
+        <span>ختم ہونے کی تاریخ</span><span id="adm-sub-end">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13.5px;color:#16a34a;font-weight:900;padding:7px 0;border-top:1px dashed #e2e8f0">
+        <span>باقی دن</span><span id="adm-sub-days">—</span>
+      </div>
+    </div>
+    <button class="btn-unlock" style="background:#0ea5e9;margin:0 0 10px" onclick="dgAdmRefreshSub()">🔄 سرور سے تازہ کریں</button>
+    <div style="font-size:11px;color:#64748b;font-weight:700;line-height:1.7">اگر کبھی ایپ لاک ہو جائے یا سبسکرپشن غائب نظر آئے تو پہلے اوپر "🔄 سرور سے تازہ کریں" آزمائیں۔ کام نہ کرے تو یہ Activation Code کاپی کر کے لاک سکرین کے "Enter Activation Code" خانے میں لکھ کر Unlock دبائیں۔</div>
+  </div>
+
   <div class="adm-section" id="adm-s5">
     <div class="adm-card">
       <button class="adm-save-btn" style="margin-bottom:14px" onclick="dgPinOpenSetup()">🔐 ایپ لاک پن (4 ہندسے) بنائیں / بدلیں</button>
@@ -6412,7 +6556,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   updateNetStatus();
 
   // 3) App version tag (shown under the Online/Offline indicator)
-  var PK_APP_VERSION = 'جمعرات 24 ستمبر · 06:33 AM';
+  var PK_APP_VERSION = 'جمعرات 24 ستمبر · ہفتہ 26 ستمبر · 05:45 PM';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
