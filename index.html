@@ -1108,7 +1108,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="ltr">DG210FR004</span>
+        <span id="pk-lock-ver" dir="ltr">DG210FR005</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1217,7 +1217,7 @@ select {
       <div style="flex:1"></div>
       <div id="pk-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-net-row"><span id="pk-net-dot"></span><span id="pk-net-text">Online</span></div>
-        <div id="pk-app-version" dir="ltr">DG210FR004</div>
+        <div id="pk-app-version" dir="ltr">DG210FR005</div>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:5px">
@@ -6672,7 +6672,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG210FR004';
+  var PK_APP_VERSION = 'DG210FR005';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7105,87 +7105,86 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 <!-- 🏠 MY HOME EXPENDITURE — میرا گھر کا خرچ -->
 <style>
 @font-face{font-family:'JNKasheeda';src:url('fonts/JameelNooriNastaleeqKasheeda.ttf') format('truetype');font-display:swap}
-#hx-view{position:fixed;inset:0;z-index:250;background:#eef2f7;overflow-y:auto;display:none;direction:rtl;font-family:'JNKasheeda',var(--appfont);-webkit-overflow-scrolling:touch;line-height:1.9}
-#hx-view .ar,#hx-view .n,#hx-view .hx-stat b,#hx-view .hx-today .big,#hx-view .hx-today .line span:last-child,#hx-view input[type=date],#hx-view input[inputmode=numeric]{font-family:Arial,sans-serif;line-height:1.3}
-#hx-view .hx-lbl{font-size:16px;font-weight:400}
-#hx-view .hx-btn{font-size:21px;font-weight:400;padding:8px 13px}
-#hx-view .hx-stat small{font-size:16px;font-weight:400}
-#hx-view .hx-tbl{font-size:17px}
-#hx-view .hx-tbl th{font-size:16px;font-weight:400}
-#hx-view .hx-tbl td{font-weight:400}
-#hx-view .hx-tbl tr.hx-day td{font-size:16px;font-weight:400}
-#hx-view .hx-today .line{font-size:17px;font-weight:400}
-#hx-view input.hx-in{font-family:'JNKasheeda',Arial,sans-serif}
-#hx-view .hx-title span{font-size:18px;font-weight:400}
-.hx-line{display:flex;gap:6px;align-items:flex-end}
-.hx-line>div{min-width:0}
-.hx-c-date{flex:1.35}.hx-c-amt{flex:1}.hx-c-btn{flex:0 0 auto}
-#hx-view .hx-line .hx-in{padding:10px 6px;font-size:16px;height:48px}
-#hx-view .hx-line .hx-btn{height:48px;padding:0 12px;font-size:19px;white-space:nowrap}
-.hx-sug{position:absolute;top:100%;left:0;right:0;z-index:20;background:#fff;border:2px solid #059669;border-top:none;border-radius:0 0 12px 12px;box-shadow:0 10px 24px rgba(0,0,0,.15);max-height:230px;overflow-y:auto}
-.hx-sug div{padding:6px 12px;font-size:19px;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-.hx-sug div:active,.hx-sug div.on{background:#ecfdf5}
-.hx-sug small{font-family:Arial,sans-serif;font-size:12px;color:#94a3b8}
-#hx-bud-sum{font-size:16px!important;font-weight:400}
-#hx-view .hx-toggle>div:first-child,#hx-form-title,#hx-view .hx-card>div>div[style*="font-size:15px"]{font-size:21px!important;font-weight:400!important}
-#hx-today-box>div:first-child{font-size:19px!important;font-weight:400!important}
-#hx-t-msg{font-size:17px!important;font-weight:400!important}
-#hx-all-btn{font-family:'JNKasheeda',Arial,sans-serif!important;font-size:16px!important;font-weight:400!important}
-#hx-view .hx-today .line{align-items:center}
-#hx-view .hx-card>div[style*="font-size:11px"]{font-size:15px!important}
+#hx-view{position:fixed;inset:0;z-index:250;background:#f1f5f9;overflow-y:auto;display:none;direction:rtl;font-family:'JNKasheeda',var(--appfont);-webkit-overflow-scrolling:touch;line-height:1.75;color:#0f172a}
 #hx-view *{box-sizing:border-box}
-.hx-hdr{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,#065f46,#059669);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 12px rgba(0,0,0,.2)}
-.hx-back{background:rgba(255,255,255,.22);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:24px;font-weight:900;cursor:pointer;flex-shrink:0}
-.hx-title{flex:1;line-height:1.25}
-.hx-title b{display:block;font-size:17px;font-weight:900}
-.hx-title span{font-size:12px;opacity:.92;font-weight:800}
-.hx-wrap{padding:10px 10px calc(40px + env(safe-area-inset-bottom,0px));max-width:640px;margin:0 auto}
-.hx-card{background:#fff;border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:0 2px 10px rgba(15,23,42,.07)}
-.hx-lbl{font-size:12px;font-weight:900;color:#475569;margin:0 2px 4px;display:block}
-.hx-in{width:100%;padding:11px 12px;border:2px solid #e2e8f0;border-radius:12px;font-size:16px;font-weight:900;font-family:inherit;background:#fff;color:#0f172a;outline:none}
-.hx-in:focus{border-color:#059669}
-.hx-row{display:flex;gap:8px;margin-bottom:8px}
-.hx-row>div{flex:1;min-width:0}
-.hx-btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;color:#fff;background:linear-gradient(135deg,#059669,#047857)}
-.hx-btn.gray{background:#f1f5f9;color:#334155}
-.hx-btn.red{background:#fee2e2;color:#b91c1c}
-.hx-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
-.hx-stat{border-radius:14px;padding:10px 4px;text-align:center;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.12)}
-.hx-stat small{display:block;font-size:11.5px;font-weight:900;opacity:.95}
-.hx-stat b{display:block;font-size:16px;font-weight:900;direction:ltr;margin-top:3px}
-.hx-today{border-radius:16px;padding:12px;margin-bottom:10px;color:#fff;background:linear-gradient(135deg,#1e3a8a,#2563eb);box-shadow:0 3px 12px rgba(37,99,235,.3)}
-.hx-today .big{font-size:26px;font-weight:900;direction:ltr;text-align:center;margin:2px 0 6px}
-.hx-today .line{display:flex;justify-content:space-between;font-size:13px;font-weight:800;padding:5px 2px;border-top:1px solid rgba(255,255,255,.2)}
-.hx-today .line span:last-child{direction:ltr}
-.hx-tbl{width:100%;border-collapse:collapse;font-size:13px}
-.hx-tbl th{background:#0f172a;color:#fff;font-weight:900;padding:8px 4px;font-size:12px;position:sticky;top:0}
-.hx-tbl td{padding:8px 4px;border-bottom:1px solid #e2e8f0;font-weight:800;color:#0f172a;vertical-align:top}
-.hx-tbl td.n{direction:ltr;text-align:center;white-space:nowrap}
-.hx-tbl tr.hx-day td{background:#ecfdf5;color:#065f46;font-weight:900;font-size:12.5px}
-.hx-tbl tr.hx-e{cursor:pointer}
-.hx-tbl tr.hx-e:active td{background:#f1f5f9}
+#hx-view .ar,#hx-view .n,#hx-view input[type=date],#hx-view input[inputmode=numeric]{font-family:Arial,sans-serif;line-height:1.3}
+/* ہیڈر */
+.hx-hdr{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#047857,#059669 60%,#10b981);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 10px rgba(4,120,87,.35)}
+.hx-pill{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.45);color:#fff;border-radius:20px;padding:4px 10px;font-family:'JNKasheeda',Arial;font-size:17px;cursor:pointer;white-space:nowrap;line-height:1.6}
+.hx-pill b{font-family:Arial;font-size:18px;font-weight:900;line-height:1}
+.hx-title{flex:1;text-align:center;line-height:1.35}
+.hx-title b{display:block;font-size:21px;font-weight:400}
+.hx-title span{font-family:Arial;font-size:10px;font-weight:700;opacity:.85;letter-spacing:.5px}
+.hx-wrap{padding:8px 8px calc(30px + env(safe-area-inset-bottom,0px));max-width:620px;margin:0 auto}
+.hx-card{background:#fff;border-radius:14px;padding:10px;margin-bottom:8px;box-shadow:0 1px 6px rgba(15,23,42,.06);border:1px solid #e8edf3}
+/* بجٹ کی پتلی پٹی */
+.hx-bud-bar{display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:6px}
+.hx-bud-bar .t{font-size:18px;color:#047857}
+#hx-bud-sum{font-size:15px;color:#475569}
+.hx-edit{font-family:Arial;font-size:12px;font-weight:800;color:#047857;background:#ecfdf5;border-radius:10px;padding:3px 9px;white-space:nowrap}
+/* خلاصہ */
+.hx-sum{display:grid;grid-template-columns:repeat(3,1fr);text-align:center}
+.hx-sum>div{padding:2px 2px}
+.hx-sum>div+div{border-right:1px solid #e2e8f0}
+.hx-sum small{display:block;font-size:15px;color:#64748b}
+.hx-sum b{display:block;font-family:Arial;font-size:17px;font-weight:900;direction:ltr}
+.hx-sub{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}
+.hx-sub>div{background:#f8fafc;border-radius:10px;padding:3px 2px 5px;text-align:center}
+.hx-sub small{display:block;font-size:13.5px;color:#64748b;line-height:1.6}
+.hx-sub b{display:block;font-family:Arial;font-size:14px;font-weight:900;direction:ltr}
+.hx-sub>div.main{background:linear-gradient(135deg,#1d4ed8,#3b82f6)}
+.hx-sub>div.main small,.hx-sub>div.main b{color:#fff}
+#hx-t-msg{margin-top:7px;border-radius:10px;padding:4px 8px;font-size:15px;text-align:center;line-height:1.7}
+/* فارم */
+.hx-lbl{font-size:14px;color:#64748b;margin:0 2px 2px;display:block;line-height:1.5}
+.hx-in{width:100%;padding:8px 10px;border:1.5px solid #dbe3ec;border-radius:11px;font-size:16px;font-weight:700;font-family:inherit;background:#fff;color:#0f172a;outline:none}
+.hx-in:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.12)}
+.hx-row{display:flex;gap:6px;margin-bottom:6px}.hx-row>div{flex:1;min-width:0}
+.hx-btn{width:100%;padding:6px 12px;border:none;border-radius:11px;font-size:19px;cursor:pointer;font-family:'JNKasheeda',Arial;color:#fff;background:linear-gradient(135deg,#059669,#047857)}
+.hx-btn.gray{background:#f1f5f9;color:#334155}.hx-btn.red{background:#fee2e2;color:#b91c1c}
+.hx-line{display:flex;gap:6px;align-items:flex-end}.hx-line>div{min-width:0}
+.hx-c-date{flex:1.35}.hx-c-amt{flex:1}.hx-c-btn{flex:0 0 auto}
+#hx-view .hx-line .hx-in{padding:8px 6px;height:44px}
+#hx-view .hx-line .hx-btn{height:44px;padding:0 12px;white-space:nowrap}
+#hx-view input.hx-in[type=text]:not([inputmode]){font-family:'JNKasheeda',Arial,sans-serif;font-weight:400;font-size:18px;padding:4px 10px;height:44px}
+#hx-form-title{font-size:18px;color:#0f172a;margin-bottom:2px}
+.hx-sug{position:absolute;top:100%;left:0;right:0;z-index:20;background:#fff;border:1.5px solid #059669;border-top:none;border-radius:0 0 11px 11px;box-shadow:0 10px 24px rgba(0,0,0,.15);max-height:220px;overflow-y:auto}
+.hx-sug div{padding:4px 12px;font-size:18px;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.hx-sug div:active{background:#ecfdf5}
+.hx-sug small{font-family:Arial;font-size:11px;color:#94a3b8}
+/* ٹیبل */
+.hx-thead{display:flex;justify-content:space-between;align-items:center;padding:6px 10px}
+.hx-thead .t{font-size:18px}
+#hx-all-btn{background:#f1f5f9;border:none;border-radius:10px;padding:2px 10px;font-family:'JNKasheeda',Arial;font-size:14px;color:#334155;cursor:pointer}
+.hx-tbl{width:100%;border-collapse:collapse;font-size:16px}
+.hx-tbl th{background:#0f172a;color:#fff;font-weight:400;padding:4px 4px;font-size:15px}
+.hx-tbl td{padding:5px 4px;border-bottom:1px solid #eef2f6;vertical-align:middle}
+.hx-tbl td.n{direction:ltr;text-align:center;white-space:nowrap;font-size:13.5px;font-weight:700}
+.hx-tbl tr.hx-day td{background:#ecfdf5;color:#065f46;font-size:14.5px;padding:2px 8px}
+.hx-tbl tr.hx-e{cursor:pointer}.hx-tbl tr.hx-e:active td{background:#f1f5f9}
 .hx-neg{color:#dc2626!important}
-.hx-empty{text-align:center;color:#64748b;font-weight:800;padding:18px 8px;font-size:13px}
-.hx-toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.hx-empty{text-align:center;color:#94a3b8;padding:14px 8px;font-size:16px}
+.hx-hint{font-size:13px;color:#94a3b8;text-align:center;padding:4px}
 </style>
 
 <div id="hx-view">
   <div class="hx-hdr">
-    <button class="hx-back" onclick="hxClose()">›</button>
-    <div class="hx-title"><b>🏠 My Home Expenditure</b><span>میرا گھر کا خرچ</span></div>
-    <button class="hx-back" style="font-size:17px" onclick="hxPoster()" title="رپورٹ">📊</button>
+    <button class="hx-pill" onclick="hxClose()" title="مین پیج پر واپس"><b>›</b> DG کھاتہ</button>
+    <div class="hx-title"><b>🏠 میرا گھر کا خرچ</b><span>MY HOME EXPENDITURE</span></div>
+    <button class="hx-pill" onclick="hxPoster()" title="رپورٹ">📊 رپورٹ</button>
   </div>
   <div class="hx-wrap">
 
-    <!-- بجٹ -->
-    <div class="hx-card">
-      <div class="hx-toggle" onclick="hxToggleBudget()">
-        <div style="font-size:15px;font-weight:900;color:#065f46">💰 بجٹ <span id="hx-bud-sum" style="font-size:12px;color:#475569"></span></div>
-        <div id="hx-bud-arrow" style="font-weight:900;color:#475569">▾</div>
+    <!-- بجٹ (ایک پتلی پٹی، ٹیپ کرنے پر کھلتی ہے) -->
+    <div class="hx-card" style="padding:7px 10px">
+      <div class="hx-bud-bar" onclick="hxToggleBudget()">
+        <div style="min-width:0"><span class="t">💰 بجٹ </span><span id="hx-bud-sum"></span></div>
+        <span class="hx-edit"><span id="hx-bud-arrow">▾</span> ✏️</span>
       </div>
-      <div id="hx-bud-form" style="margin-top:10px">
-        <label class="hx-lbl">کل بجٹ (روپے)</label>
-        <input id="hx-bud-amt" class="hx-in" type="text" inputmode="numeric" placeholder="مثلاً 30000" oninput="this.value=this.value.replace(/[^0-9]/g,'')" dir="ltr" style="margin-bottom:8px">
+      <div id="hx-bud-form" style="margin-top:8px">
+        <div class="hx-row">
+          <div style="flex:1.1"><label class="hx-lbl">کل بجٹ (روپے)</label><input id="hx-bud-amt" class="hx-in" type="text" inputmode="numeric" placeholder="30000" oninput="this.value=this.value.replace(/[^0-9]/g,'')" dir="ltr"></div>
+        </div>
         <div class="hx-row">
           <div><label class="hx-lbl">کب سے</label><input id="hx-bud-from" class="hx-in" type="date" dir="ltr"></div>
           <div><label class="hx-lbl">کب تک</label><input id="hx-bud-to" class="hx-in" type="date" dir="ltr"></div>
@@ -7194,40 +7193,38 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       </div>
     </div>
 
-    <!-- رپورٹ -->
-    <div class="hx-stats">
-      <div class="hx-stat" style="background:linear-gradient(135deg,#0f766e,#14b8a6)"><small>کل بجٹ</small><b id="hx-s-total">0</b></div>
-      <div class="hx-stat" style="background:linear-gradient(135deg,#b91c1c,#ef4444)"><small>خرچ ہو چکا</small><b id="hx-s-spent">0</b></div>
-      <div class="hx-stat" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)"><small>باقی جمع پونجی</small><b id="hx-s-left">0</b></div>
-    </div>
-
-    <button class="hx-btn" onclick="hxPoster()" style="margin-bottom:10px;background:linear-gradient(135deg,#7c3aed,#6d28d9)">📊 مکمل رپورٹ — پرنٹ / واٹس ایپ</button>
-    <div class="hx-today" id="hx-today-box">
-      <div style="text-align:center;font-size:13px;font-weight:900;opacity:.95">📅 آج کا بجٹ</div>
-      <div class="big" id="hx-t-budget">0</div>
-      <div class="line"><span>آج کا تازہ خرچ</span><span id="hx-t-spent">0</span></div>
-      <div class="line"><span>آج کا باقی بجٹ</span><span id="hx-t-left">0</span></div>
-      <div class="line"><span>آنے والے دنوں کا روزانہ بجٹ</span><span id="hx-t-next">—</span></div>
-      <div class="line"><span>باقی دن</span><span id="hx-t-days">—</span></div>
-      <div id="hx-t-msg" style="display:none;margin-top:6px;background:rgba(255,255,255,.18);border-radius:10px;padding:8px;font-size:12.5px;font-weight:900;text-align:center;line-height:1.7"></div>
+    <!-- خلاصہ: تین خانے + آج کی پٹی -->
+    <div class="hx-card">
+      <div class="hx-sum">
+        <div><small>کل بجٹ</small><b id="hx-s-total" style="color:#0f766e">0</b></div>
+        <div><small>خرچ ہو چکا</small><b id="hx-s-spent" style="color:#dc2626">0</b></div>
+        <div><small>باقی جمع پونجی</small><b id="hx-s-left" style="color:#1d4ed8">0</b></div>
+      </div>
+      <div id="hx-today-box">
+        <div class="hx-sub">
+          <div class="main"><small>آج کا بجٹ</small><b id="hx-t-budget">0</b></div>
+          <div><small>آج کا خرچ</small><b id="hx-t-spent">0</b></div>
+          <div><small>آج باقی</small><b id="hx-t-left">0</b></div>
+          <div><small>آگے روزانہ</small><b id="hx-t-next">—</b></div>
+        </div>
+        <div style="display:none"><span id="hx-t-days"></span></div>
+        <div id="hx-t-msg" style="display:none"></div>
+      </div>
     </div>
 
     <!-- نیا خرچ -->
     <div class="hx-card" id="hx-form-card">
-      <div id="hx-form-title" style="font-size:15px;font-weight:900;color:#0f172a;margin-bottom:6px">➕ نیا خرچ لکھیں</div>
-      <!-- ایک لائن: دائیں تاریخ — درمیان رقم — آخر میں محفوظ کا بٹن -->
+      <div id="hx-form-title">➕ نیا خرچ لکھیں</div>
       <div class="hx-line">
         <div class="hx-c-date"><label class="hx-lbl">تاریخ</label><input id="hx-e-date" class="hx-in" type="date" dir="ltr"></div>
         <div class="hx-c-amt"><label class="hx-lbl">رقم</label><input id="hx-e-amt" class="hx-in" type="text" inputmode="numeric" placeholder="0" dir="ltr" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="if(event.key==='Enter')hxSaveEntry()"></div>
         <div class="hx-c-btn"><button class="hx-btn" id="hx-save-btn" onclick="hxSaveEntry()">💾 محفوظ</button></div>
       </div>
-      <!-- نیچے: تفصیل، پہلے لکھی ہوئی چیزوں کی تجاویز کے ساتھ -->
-      <label class="hx-lbl" style="margin-top:8px">تفصیل (اگر لکھنی ہو)</label>
-      <div style="position:relative">
-        <input id="hx-e-note" class="hx-in" type="text" autocomplete="off" placeholder="مثلاً دودھ، سبزی، بجلی کا بل" oninput="hxSuggest()" onfocus="hxSuggest()" onblur="setTimeout(hxHideSug,200)" onkeydown="if(event.key==='Enter'){hxHideSug();hxSaveEntry();}">
+      <div style="position:relative;margin-top:6px">
+        <input id="hx-e-note" class="hx-in" type="text" autocomplete="off" placeholder="تفصیل (اگر لکھنی ہو) — مثلاً دودھ، سبزی" oninput="hxSuggest()" onfocus="hxSuggest()" onblur="setTimeout(hxHideSug,200)" onkeydown="if(event.key==='Enter'){hxHideSug();hxSaveEntry();}">
         <div id="hx-sug" class="hx-sug" style="display:none"></div>
       </div>
-      <div id="hx-edit-btns" style="display:none;gap:8px;margin-top:8px">
+      <div id="hx-edit-btns" style="display:none;gap:6px;margin-top:6px">
         <button class="hx-btn red" style="flex:1" onclick="hxDeleteEntry()">🗑️ ڈیلیٹ</button>
         <button class="hx-btn gray" style="flex:1" onclick="hxCancelEdit()">منسوخ</button>
       </div>
@@ -7235,17 +7232,17 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 
     <!-- انٹریاں -->
     <div class="hx-card" style="padding:0;overflow:hidden">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px">
-        <div style="font-size:15px;font-weight:900;color:#0f172a">📋 خرچ کی تفصیل</div>
-        <button id="hx-all-btn" onclick="hxToggleAll()" style="background:#f1f5f9;border:none;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:900;color:#334155;cursor:pointer;font-family:inherit">📜 پرانی انٹریاں بھی</button>
+      <div class="hx-thead">
+        <span class="t">📋 خرچ کی تفصیل</span>
+        <button id="hx-all-btn" onclick="hxToggleAll()">📜 پرانی انٹریاں بھی</button>
       </div>
       <div style="overflow-x:auto">
         <table class="hx-tbl">
-          <thead><tr><th style="text-align:right">تفصیل</th><th>جمع پونجی</th><th>تازہ خرچ</th><th>باقی جمع پونجی</th></tr></thead>
+          <thead><tr><th style="text-align:right;padding-right:8px">تفصیل</th><th>جمع پونجی</th><th>تازہ خرچ</th><th>باقی جمع پونجی</th></tr></thead>
           <tbody id="hx-tbody"></tbody>
         </table>
       </div>
-      <div style="font-size:11px;color:#94a3b8;font-weight:800;text-align:center;padding:8px">کسی انٹری میں تبدیلی یا ڈیلیٹ کے لیے اس پر ٹیپ کریں</div>
+      <div class="hx-hint">تبدیلی یا ڈیلیٹ کے لیے انٹری پر ٹیپ کریں</div>
     </div>
 
   </div>
@@ -7313,7 +7310,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   function isOpen(){ var v=$('hx-view'); return v && v.style.display!=='none'; }
   function render(){
     var c=calc(), b=S.budget;
-    $('hx-bud-sum').innerHTML = b ? '— <span dir="ltr">'+rs(b.amount)+'</span> | <span dir="ltr">'+showDate(b.from).split(' ')[0]+'</span> سے <span dir="ltr">'+showDate(b.to).split(' ')[0]+'</span> تک' : '— ابھی بجٹ نہیں لگایا';
+    $('hx-bud-sum').innerHTML = b ? '<span dir="ltr" style="font-family:Arial;font-weight:800;color:#0f172a">'+rs(b.amount)+'</span> · <span dir="ltr" style="font-family:Arial;font-size:12px">'+showDate(b.from).split(' ')[0].slice(0,5)+' → '+showDate(b.to).split(' ')[0].slice(0,5)+'</span> · '+c.left+' دن باقی' : 'ابھی بجٹ نہیں لگایا — ٹیپ کریں';
     if(c.none){
       $('hx-s-total').textContent='—'; $('hx-s-spent').textContent=rs(S.entries.reduce(function(a,e){return a+e.amount;},0)); $('hx-s-left').textContent='—';
       $('hx-today-box').style.display='none';
@@ -7321,21 +7318,21 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       $('hx-s-total').textContent=rs(b.amount);
       $('hx-s-spent').textContent=rs(c.spent);
       $('hx-s-left').textContent=rs(c.remaining);
-      $('hx-s-left').parentNode.style.background = c.remaining<0 ? 'linear-gradient(135deg,#7f1d1d,#dc2626)' : 'linear-gradient(135deg,#1d4ed8,#3b82f6)';
+      $('hx-s-left').style.color = c.remaining<0 ? '#dc2626' : '#1d4ed8';
       $('hx-today-box').style.display='block';
       $('hx-t-budget').textContent=rs(c.todayBudget);
       $('hx-t-spent').textContent=rs(c.onDay);
       var tl=c.todayBudget-c.onDay;
       $('hx-t-left').textContent=rs(tl);
-      $('hx-t-left').style.color = tl<0 ? '#fecaca' : '#bbf7d0';
+      $('hx-t-left').style.color = tl<0 ? '#dc2626' : '#16a34a';
       $('hx-t-next').textContent = c.next===null ? '—' : rs(c.next);
-      $('hx-t-days').textContent = c.left+' دن (آج سمیت)';
+      $('hx-t-days').textContent = c.left;
       var msg='';
       if(c.notStarted) msg='ℹ️ بجٹ کی مدت ابھی شروع نہیں ہوئی۔';
       else if(c.ended) msg='⌛ بجٹ کی مدت ختم ہو گئی — اوپر نیا بجٹ لگائیں۔';
       else if(c.remaining<0) msg='⛔ آپ بجٹ سے '+rs(-c.remaining).replace('Rs ','')+' روپے زیادہ خرچ کر چکے ہیں۔';
       else if(tl<0 && c.next!==null) msg='⚠️ آج بجٹ سے '+rs(-tl).replace('Rs ','')+' زیادہ خرچ ہوا — اب آپ کا روزانہ بجٹ '+rs(c.next)+' رہ گیا ہے۔';
-      $('hx-t-msg').style.display = msg?'block':'none'; $('hx-t-msg').textContent=msg;
+      $('hx-t-msg').style.display = msg?'block':'none'; $('hx-t-msg').textContent=msg; $('hx-t-msg').style.background = (c.remaining<0||tl<0)?'#fef2f2':'#f0f9ff'; $('hx-t-msg').style.color = (c.remaining<0||tl<0)?'#b91c1c':'#1e40af';
     }
 
     // ٹیبل
