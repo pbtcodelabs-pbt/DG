@@ -1108,7 +1108,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="ltr">DG210FR003</span>
+        <span id="pk-lock-ver" dir="ltr">DG210FR004</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1217,7 +1217,7 @@ select {
       <div style="flex:1"></div>
       <div id="pk-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-net-row"><span id="pk-net-dot"></span><span id="pk-net-text">Online</span></div>
-        <div id="pk-app-version" dir="ltr">DG210FR003</div>
+        <div id="pk-app-version" dir="ltr">DG210FR004</div>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:5px">
@@ -6672,7 +6672,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG210FR003';
+  var PK_APP_VERSION = 'DG210FR004';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7117,6 +7117,15 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 #hx-view .hx-today .line{font-size:17px;font-weight:400}
 #hx-view input.hx-in{font-family:'JNKasheeda',Arial,sans-serif}
 #hx-view .hx-title span{font-size:18px;font-weight:400}
+.hx-line{display:flex;gap:6px;align-items:flex-end}
+.hx-line>div{min-width:0}
+.hx-c-date{flex:1.35}.hx-c-amt{flex:1}.hx-c-btn{flex:0 0 auto}
+#hx-view .hx-line .hx-in{padding:10px 6px;font-size:16px;height:48px}
+#hx-view .hx-line .hx-btn{height:48px;padding:0 12px;font-size:19px;white-space:nowrap}
+.hx-sug{position:absolute;top:100%;left:0;right:0;z-index:20;background:#fff;border:2px solid #059669;border-top:none;border-radius:0 0 12px 12px;box-shadow:0 10px 24px rgba(0,0,0,.15);max-height:230px;overflow-y:auto}
+.hx-sug div{padding:6px 12px;font-size:19px;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.hx-sug div:active,.hx-sug div.on{background:#ecfdf5}
+.hx-sug small{font-family:Arial,sans-serif;font-size:12px;color:#94a3b8}
 #hx-bud-sum{font-size:16px!important;font-weight:400}
 #hx-view .hx-toggle>div:first-child,#hx-form-title,#hx-view .hx-card>div>div[style*="font-size:15px"]{font-size:21px!important;font-weight:400!important}
 #hx-today-box>div:first-child{font-size:19px!important;font-weight:400!important}
@@ -7205,14 +7214,19 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 
     <!-- نیا خرچ -->
     <div class="hx-card" id="hx-form-card">
-      <div id="hx-form-title" style="font-size:15px;font-weight:900;color:#0f172a;margin-bottom:8px">➕ نیا خرچ لکھیں</div>
-      <div class="hx-row">
-        <div><label class="hx-lbl">تاریخ</label><input id="hx-e-date" class="hx-in" type="date" dir="ltr"></div>
-        <div><label class="hx-lbl">رقم (روپے)</label><input id="hx-e-amt" class="hx-in" type="text" inputmode="numeric" placeholder="0" dir="ltr" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="if(event.key==='Enter')hxSaveEntry()"></div>
+      <div id="hx-form-title" style="font-size:15px;font-weight:900;color:#0f172a;margin-bottom:6px">➕ نیا خرچ لکھیں</div>
+      <!-- ایک لائن: دائیں تاریخ — درمیان رقم — آخر میں محفوظ کا بٹن -->
+      <div class="hx-line">
+        <div class="hx-c-date"><label class="hx-lbl">تاریخ</label><input id="hx-e-date" class="hx-in" type="date" dir="ltr"></div>
+        <div class="hx-c-amt"><label class="hx-lbl">رقم</label><input id="hx-e-amt" class="hx-in" type="text" inputmode="numeric" placeholder="0" dir="ltr" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="if(event.key==='Enter')hxSaveEntry()"></div>
+        <div class="hx-c-btn"><button class="hx-btn" id="hx-save-btn" onclick="hxSaveEntry()">💾 محفوظ</button></div>
       </div>
-      <label class="hx-lbl">تفصیل (اگر لکھنی ہو)</label>
-      <input id="hx-e-note" class="hx-in" type="text" placeholder="مثلاً دودھ، سبزی، بجلی کا بل" style="margin-bottom:8px" onkeydown="if(event.key==='Enter')hxSaveEntry()">
-      <button class="hx-btn" id="hx-save-btn" onclick="hxSaveEntry()">💾 خرچ محفوظ کریں</button>
+      <!-- نیچے: تفصیل، پہلے لکھی ہوئی چیزوں کی تجاویز کے ساتھ -->
+      <label class="hx-lbl" style="margin-top:8px">تفصیل (اگر لکھنی ہو)</label>
+      <div style="position:relative">
+        <input id="hx-e-note" class="hx-in" type="text" autocomplete="off" placeholder="مثلاً دودھ، سبزی، بجلی کا بل" oninput="hxSuggest()" onfocus="hxSuggest()" onblur="setTimeout(hxHideSug,200)" onkeydown="if(event.key==='Enter'){hxHideSug();hxSaveEntry();}">
+        <div id="hx-sug" class="hx-sug" style="display:none"></div>
+      </div>
       <div id="hx-edit-btns" style="display:none;gap:8px;margin-top:8px">
         <button class="hx-btn red" style="flex:1" onclick="hxDeleteEntry()">🗑️ ڈیلیٹ</button>
         <button class="hx-btn gray" style="flex:1" onclick="hxCancelEdit()">منسوخ</button>
@@ -7369,7 +7383,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // ---------- خرچ ----------
   function resetForm(){
     editId=null; $('hx-e-date').value=today(); $('hx-e-amt').value=''; $('hx-e-note').value='';
-    $('hx-form-title').textContent='➕ نیا خرچ لکھیں'; $('hx-save-btn').textContent='💾 خرچ محفوظ کریں';
+    $('hx-form-title').textContent='➕ نیا خرچ لکھیں'; $('hx-save-btn').textContent='💾 محفوظ';
     $('hx-edit-btns').style.display='none';
   }
   window.hxSaveEntry=function(){
@@ -7386,10 +7400,32 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   window.hxEdit=function(id){
     var e=S.entries.find(function(x){return x.id===id;}); if(!e) return;
     editId=id; $('hx-e-date').value=e.date; $('hx-e-amt').value=e.amount; $('hx-e-note').value=e.note||'';
-    $('hx-form-title').textContent='✏️ خرچ میں تبدیلی'; $('hx-save-btn').textContent='💾 تبدیلی محفوظ کریں';
+    $('hx-form-title').textContent='✏️ خرچ میں تبدیلی'; $('hx-save-btn').textContent='💾 محفوظ';
     $('hx-edit-btns').style.display='flex';
     $('hx-form-card').scrollIntoView({behavior:'smooth', block:'center'});
   };
+  // ---------- پہلے لکھی ہوئی چیزوں کی تجاویز ----------
+  function noteList(){
+    var m={};
+    S.entries.forEach(function(e){ var n=(e.note||'').trim(); if(!n) return; var k=n.toLowerCase();
+      if(!m[k]) m[k]={t:n,c:0,last:0}; m[k].c++; if(e.ts>m[k].last){ m[k].last=e.ts; m[k].t=n; } });
+    return Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){ return b.c-a.c || b.last-a.last; });
+  }
+  window.hxSuggest=function(){
+    var box=$('hx-sug'), q=$('hx-e-note').value.trim().toLowerCase();
+    var list=noteList().filter(function(x){ var t=x.t.toLowerCase(); return !q || (t.indexOf(q)!==-1 && t!==q); }).slice(0,8);
+    if(!list.length){ box.style.display='none'; return; }
+    box.innerHTML='';
+    list.forEach(function(x){
+      var d=document.createElement('div'); d.innerHTML='<span></span><small>'+x.c+' بار</small>';
+      d.firstChild.textContent=x.t;
+      d.onmousedown=function(ev){ ev.preventDefault(); };
+      d.onclick=function(){ $('hx-e-note').value=x.t; box.style.display='none'; if(!$('hx-e-amt').value) $('hx-e-amt').focus(); };
+      box.appendChild(d);
+    });
+    box.style.display='block';
+  };
+  window.hxHideSug=function(){ var b=$('hx-sug'); if(b) b.style.display='none'; };
   window.hxCancelEdit=resetForm;
   window.hxDeleteEntry=function(){
     if(!editId || !confirm('یہ خرچ ڈیلیٹ کر دیں؟')) return;
