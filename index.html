@@ -1108,7 +1108,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="ltr">DG26SEPSA0648PM</span>
+        <span id="pk-lock-ver" dir="ltr">DG210FR001</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1217,10 +1217,11 @@ select {
       <div style="flex:1"></div>
       <div id="pk-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-net-row"><span id="pk-net-dot"></span><span id="pk-net-text">Online</span></div>
-        <div id="pk-app-version" dir="ltr">DG26SEPSA0648PM</div>
+        <div id="pk-app-version" dir="ltr">DG210FR001</div>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:5px">
+        <button onclick="hxOpen()" style="background:linear-gradient(135deg,#059669,#047857);border:1.5px solid rgba(255,255,255,.6);color:#fff;padding:7px 12px;border-radius:16px;font-size:13px;font-weight:900;cursor:pointer">🏠 My Home</button>
         <button onclick="printAllReport()" style="background:rgba(255,255,255,.25);border:1.5px solid rgba(255,255,255,.5);color:#fff;padding:7px 14px;border-radius:16px;font-size:13px;font-weight:900;cursor:pointer">🖨️ Report</button>
         <button onclick="toggleSettingsMenu()" id="settings-toggle-btn" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;font-weight:900;cursor:pointer">⚙️</button>
       </div>
@@ -2016,13 +2017,89 @@ let posterRecord = null;
 let entryType = 'got';
 let ncDir = 'got'; // for new customer initial balance direction
 
+// ============================================================
+// 🛡️ DATA SAFETY NET — localStorage کے ساتھ IndexedDB میں بھی ہر سیو کی کاپی
+// اگر کوئی اور ایپ (اسی ڈومین پر) localStorage.clear() کر دے، یا براؤزر
+// صرف localStorage صاف کر دے، تو ایپ کھلتے ہی ڈیٹا خود واپس آ جائے گا۔
+// ============================================================
+var DG_SAFE_DB='dgKhataSafe_v1', DG_SAFE_ST='kv';
+function _dgSafeOpen(){
+  return new Promise(function(res,rej){
+    try{
+      var r=indexedDB.open(DG_SAFE_DB,1);
+      r.onupgradeneeded=function(){ r.result.createObjectStore(DG_SAFE_ST); };
+      r.onsuccess=function(){ res(r.result); };
+      r.onerror=function(){ rej(r.error); };
+    }catch(e){ rej(e); }
+  });
+}
+function _dgSafeCount(json){ try{ var a=JSON.parse(json); return Array.isArray(a)?a.length:-1; }catch(e){ return -1; } }
+async function _dgSafePut(json){
+  try{
+    var n=_dgSafeCount(json); if(n<0) return;
+    var db=await _dgSafeOpen(); var tx=db.transaction(DG_SAFE_ST,'readwrite'); var st=tx.objectStore(DG_SAFE_ST);
+    st.put({data:json, ts:Date.now(), count:n}, 'main');
+    // روزانہ کی ایک الگ کاپی (آخری 30 دن) — اگر غلطی سے کچھ ڈیلیٹ ہو جائے تو پرانا دن واپس لایا جا سکے
+    if(n>0){
+      var d=new Date(), k='day:'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      st.put({data:json, ts:Date.now(), count:n}, k);
+      var kr=st.getAllKeys();
+      kr.onsuccess=function(){ var days=(kr.result||[]).filter(function(x){return String(x).indexOf('day:')===0;}).sort(); while(days.length>30){ st.delete(days.shift()); } };
+    }
+  }catch(e){}
+}
+async function _dgSafeGet(key){
+  try{
+    var db=await _dgSafeOpen();
+    return await new Promise(function(res){ var r=db.transaction(DG_SAFE_ST,'readonly').objectStore(DG_SAFE_ST).get(key||'main'); r.onsuccess=function(){res(r.result||null);}; r.onerror=function(){res(null);}; });
+  }catch(e){ return null; }
+}
+// force=false: صرف تب جب localStorage میں key بالکل موجود نہ ہو (یعنی کسی نے صاف کر دی) —
+// جان بوجھ کر سب کسٹمر ڈیلیٹ کرنے پر '[]' ہوتا ہے، وہ واپس نہیں لایا جاتا۔
+var _dgSafeRecovering=false;
+async function _dgSafeRecover(force){
+  if(_dgSafeRecovering) return false; _dgSafeRecovering=true;
+  try{
+    var cur=localStorage.getItem('easyKhataData');
+    if(!force && cur!==null){
+      if(_dgSafeCount(cur)>=0) _dgSafePut(cur); // پہلی بار: موجودہ ڈیٹا کی کاپی بنا دو
+      return false;
+    }
+    var m=await _dgSafeGet('main');
+    if(!m || !m.data || !(m.count>0)) return false;
+    var curN=_dgSafeCount(cur||'[]');
+    if(curN>0 && !force) return false;
+    localStorage.setItem('easyKhataData', m.data);
+    if(typeof loadData==='function'){ records=JSON.parse(m.data); try{ renderStats(); renderList(); }catch(e){} }
+    var when=new Date(m.ts);
+    setTimeout(function(){
+      alert('🛡️ آپ کا ڈیٹا اس فون کی محفوظ کاپی سے خود بخود واپس لایا گیا ہے۔\n\n🧾 '+m.count+' ریکارڈز\n🕒 آخری سیو: '+when.toLocaleString('en-GB')+'\n\nبراہِ کرم ایک دفعہ چیک کر لیں۔');
+    },300);
+    return true;
+  }catch(e){ return false; }
+  finally{ _dgSafeRecovering=false; }
+}
+_dgSafeRecover(false);
+
 function loadData(){
-  try{ records = JSON.parse(localStorage.getItem('easyKhataData')||'[]'); }
-  catch{ records = []; }
+  var raw = localStorage.getItem('easyKhataData');
+  try{
+    var a = JSON.parse(raw||'[]');
+    if(!Array.isArray(a)) throw new Error('not array');
+    records = a;
+  }catch(e){
+    // 🛡️ خراب ڈیٹا کو کبھی خاموشی سے خالی نہ کریں — پہلے اس کی کاپی رکھیں
+    try{ if(raw) localStorage.setItem('easyKhataData_corrupt', raw); }catch(_e){}
+    records = [];
+    _dgSafeRecover(true);
+  }
 }
 function saveData(){
   try{
-    localStorage.setItem('easyKhataData', JSON.stringify(records));
+    var _json = JSON.stringify(records);
+    localStorage.setItem('easyKhataData', _json);
+    _dgSafePut(_json);                                   // 🛡️ IndexedDB میں دوسری کاپی
+    if(window.dgDriveAfterSave) window.dgDriveAfterSave(); // ☁️ Drive پر خودکار بیک اپ
   } catch(e){
     // Never fail silently — if the browser refuses to save (storage full,
     // private mode, etc.) the person MUST know immediately, otherwise the
@@ -4794,6 +4871,7 @@ function pkApplyRestoreFile(file){
       if(!Array.isArray(parsed)) throw new Error('Invalid format');
       try{ var _pv=localStorage.getItem('easyKhataData'); if(_pv && _pv!=='[]') localStorage.setItem('easyKhataData_prev', _pv); }catch(_e){}
       localStorage.setItem('easyKhataData', ev.target.result);
+      try{ _dgSafePut(ev.target.result); }catch(_e){}
       if(window.dgCloudSchedule) window.dgCloudSchedule();
       loadData(); renderStats(); renderList();
       showRestoreDoneModal(parsed.length, file.name);
@@ -6570,7 +6648,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG26SEPSA0648PM';
+  var PK_APP_VERSION = 'DG210FR001';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -6580,15 +6658,18 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 4) Manual refresh button — shows a toast then force-reloads the latest file
   window.pkRefreshApp = function(){
     var msg = document.createElement('div');
-    msg.textContent = 'تازہ ترین ورژن اپلوڈ ہو رہا ہے...';
+    msg.textContent = 'ایپ صاف ہو رہی ہے (ڈیٹا محفوظ ہے)...';
     msg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.88);color:#fff;padding:14px 24px;border-radius:14px;font-size:14px;font-weight:800;z-index:9999999;direction:rtl;box-shadow:0 6px 24px rgba(0,0,0,.4)';
     document.body.appendChild(msg);
     setTimeout(function(){
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(regs){
-          regs.forEach(function(r){ r.update(); });
-          location.reload(true);
-        }).catch(function(){ location.reload(true); });
+        // پھنسی ہوئی فائل کا اصل علاج: صرف ایپ کی پرانی فائلیں (cache) اور service worker ہٹاؤ —
+        // حساب کتاب کا ڈیٹا، پن اور جی میل بالکل نہیں چھیڑے جاتے۔ براؤزر ڈیٹا کلیئر کرنے کی ضرورت ختم۔
+        var clearCaches = (window.caches && caches.keys) ? caches.keys().then(function(ks){ return Promise.all(ks.map(function(k){ return caches.delete(k); })); }) : Promise.resolve();
+        clearCaches.then(function(){ return navigator.serviceWorker.getRegistrations(); })
+          .then(function(regs){ return Promise.all(regs.map(function(r){ return r.unregister(); })); })
+          .then(function(){ location.replace(location.pathname + '?v=' + Date.now()); })
+          .catch(function(){ location.reload(); });
       } else {
         location.reload(true);
       }
@@ -6611,7 +6692,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     appId: "1:356570867443:web:a55e86e53ed3fd296e7986"
   };
   var SDK='https://www.gstatic.com/firebasejs/10.12.2/';
-  var FOLDER='DG Khatabook Backup', KEEP=10;
+  var FOLDER='DG Khatabook Backup', KEEP=40;
   var token=null, tokenExp=0, sdkP=null, busy=false, lastErr='';
 
   function ls(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
@@ -6774,6 +6855,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
         var m2=multipart({name:name, parents:[fid], appProperties:props}, data);
         await api('/upload/drive/v3/files?uploadType=multipart&fields=id', tok, {method:'POST', headers:{'Content-Type':m2.ct}, body:m2.body});
       }
+      try{ await uploadHome(tok, fid); }catch(e){}
       progSet(80);
       var all=await listBackups(tok, fid, 60);
       for(var i=KEEP;i<all.length;i++){ try{ await api('/drive/v3/files/'+all[i].id, tok, {method:'DELETE'}); }catch(e){} }
@@ -6801,7 +6883,17 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     }finally{ busy=false; paintBtn(); }
     return ok;
   }
-  window.dgCloudSchedule=function(){}; // پرانا ہُک — اب ہر سیو پر نہیں، اوپننگ اور شام 7 بجے کے بعد خودکار بیک اپ ہوتا ہے
+  // ☁️ ہر سیو کے 20 سیکنڈ بعد Drive بیک اپ (اگر گوگل لاگ ان اس وقت فعال ہے) — تاکہ آخری بیک اپ ہمیشہ تازہ رہے
+  var _saveT=null;
+  window.dgDriveAfterSave=function(){
+    if(!on()) return;
+    clearTimeout(_saveT);
+    _saveT=setTimeout(function(){
+      if(token && Date.now()<tokenExp) backup(false,'save');
+      else showBanner('☁️ نئی انٹری کا بیک اپ باقی ہے — یہاں ٹیپ کریں');
+    },20000);
+  };
+  window.dgCloudSchedule=function(){ if(window.dgDriveAfterSave) window.dgDriveAfterSave(); }; // پرانا ہُک — اب ہر سیو پر نہیں، اوپننگ اور شام 7 بجے کے بعد خودکار بیک اپ ہوتا ہے
 
   // ---------- auto backup: opening + after 7 PM ----------
   function appVisible(){
@@ -6824,6 +6916,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     if(!Array.isArray(arr)) return null;
     var prev=localJSON(); if(prev && prev!=='[]') ss('easyKhataData_prev', prev);
     ss('easyKhataData', text);
+    try{ _dgSafePut(text); }catch(e){}
     try{ loadData(); renderStats(); renderList(); }catch(e){}
     return stats(text);
   }
@@ -6837,6 +6930,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       var txt=await download(tok, x.id); progSet(60);
       var r=applyRestore(txt); progSet(85);
       if(!r){ progFail('❌ یہ فائل درست نہیں ہے'); return; }
+      try{ await restoreHomeIfEmpty(tok, await getFolder(tok)); }catch(e){}
       progDone('✅ ریسٹور 100% مکمل ہو گیا ('+r.customers+' کسٹمرز، '+r.records+' ریکارڈز)');
     }catch(e){ progFail('❌ ریسٹور ناکام: '+(((e&&e.message)==='NEEDS_LOGIN')?'دوبارہ لاگ ان کریں':((e&&e.message)||e))); }
   }
@@ -6858,6 +6952,66 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       });
     }catch(e){ box.innerHTML=''; alert('فہرست نہیں کھلی: '+(((e&&e.message)==='NEEDS_LOGIN')?'دوبارہ لاگ ان کریں':((e&&e.message)||e))); }
   }
+
+  // ---------- گھر کا خرچ (My Home) — Drive پر الگ فائل ----------
+  var HOME_NAME='DG-Home-Expense.json';
+  async function homeFile(tok, fid){ return ((await api('/drive/v3/files?fields=files(id)&q='+q("'"+fid+"' in parents and name='"+HOME_NAME+"' and trashed=false"), tok)).files||[])[0]||null; }
+  async function uploadHome(tok, fid){
+    var h=ls('dgHomeExp'); if(!h) return;
+    try{ var o=JSON.parse(h); if(!o || (!(o.entries&&o.entries.length) && !o.budget)) return; }catch(e){ return; }
+    var f=await homeFile(tok, fid);
+    if(f){ var m=multipart({}, h); await api('/upload/drive/v3/files/'+f.id+'?uploadType=multipart&fields=id', tok, {method:'PATCH', headers:{'Content-Type':m.ct}, body:m.body}); }
+    else { var m2=multipart({name:HOME_NAME, parents:[fid]}, h); await api('/upload/drive/v3/files?uploadType=multipart&fields=id', tok, {method:'POST', headers:{'Content-Type':m2.ct}, body:m2.body}); }
+  }
+  async function restoreHomeIfEmpty(tok, fid){
+    try{
+      var cur=ls('dgHomeExp'); if(cur){ var o=JSON.parse(cur); if(o && o.entries && o.entries.length) return; }
+      var f=await homeFile(tok, fid); if(!f) return;
+      var txt=await download(tok, f.id), o2=JSON.parse(txt);
+      if(!o2 || !Array.isArray(o2.entries)) return;
+      ss('dgHomeExp', txt); if(window.hxReload) window.hxReload();
+    }catch(e){}
+  }
+
+  // ---------- ایک ٹیپ میں تازہ ترین بیک اپ خود واپس (فہرست میں ڈھونڈنے کی ضرورت نہیں) ----------
+  async function restoreLatest(){
+    var btn=document.getElementById('dgar-go'); if(btn){ btn.disabled=true; btn.textContent='⏳ گوگل سے جوڑ رہا ہے...'; }
+    try{
+      var tok=await getToken(true), fid=await getFolder(tok);
+      ss('dgDriveOn','1'); lastErr='';
+      var f=await listBackups(tok, fid, 5);
+      var m=document.getElementById('dg-autorestore'); if(m) m.remove();
+      if(!f.length){ alert('اس جی میل کی Drive میں کوئی بیک اپ نہیں ملا۔'); paintBtn(); return; }
+      progStart('⬇️ تازہ ترین بیک اپ واپس آ رہا ہے…'); progSet(30);
+      var txt=await download(tok, f[0].id); progSet(70);
+      var r=applyRestore(txt);
+      if(!r){ progFail('❌ بیک اپ فائل درست نہیں'); return; }
+      await restoreHomeIfEmpty(tok, fid);
+      progDone('✅ ڈیٹا واپس آ گیا ('+r.customers+' کسٹمرز، '+r.records+' ریکارڈز) — '+fmtTime(Date.parse(f[0].createdTime)));
+      paintBtn();
+    }catch(e){
+      if(btn){ btn.disabled=false; btn.textContent='☁️ گوگل سے ڈیٹا واپس لائیں'; }
+      alert('ریسٹور نہیں ہوا: '+(((e&&e.code)==='auth/popup-closed-by-user')?'جی میل لاگ ان مکمل نہیں ہوا':((e&&e.message)||e)));
+    }
+  }
+  var _arShown=false;
+  function offerAutoRestore(){
+    if(_arShown || !appVisible()) return;
+    var st=stats(localJSON()); if(st && st.records) return;   // ڈیٹا موجود ہے — کچھ نہ کرو
+    _arShown=true;
+    var m=document.createElement('div'); m.id='dg-autorestore';
+    m.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.9);z-index:99998;display:flex;align-items:center;justify-content:center;padding:18px;direction:rtl';
+    m.innerHTML='<div style="background:#fff;border-radius:22px;max-width:380px;width:100%;padding:22px;text-align:center;font-family:inherit">'
+      +'<div style="font-size:42px">☁️</div>'
+      +'<div style="font-size:18px;font-weight:900;color:#0f172a;margin:6px 0">اس فون میں ابھی کوئی حساب نہیں ہے</div>'
+      +'<div style="font-size:13px;color:#475569;font-weight:700;line-height:1.8;margin-bottom:14px">اگر آپ کا بیک اپ گوگل ڈرائیو پر ہے تو نیچے بٹن دبائیں — جی میل چننے کے بعد تازہ ترین بیک اپ خود واپس آ جائے گا۔</div>'
+      +'<button id="dgar-go" style="width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit">☁️ گوگل سے ڈیٹا واپس لائیں</button>'
+      +'<button id="dgar-no" style="width:100%;margin-top:8px;padding:11px;border:none;border-radius:14px;background:#f1f5f9;color:#334155;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">نیا کھاتہ شروع کریں</button></div>';
+    document.body.appendChild(m);
+    document.getElementById('dgar-go').onclick=restoreLatest;
+    document.getElementById('dgar-no').onclick=function(){ m.remove(); };
+  }
+  setInterval(offerAutoRestore, 2500);
 
   // ---------- connect ----------
   async function connect(){
@@ -6921,6 +7075,304 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     setTimeout(autoCheck,4000);
     setInterval(autoCheck,60000);
   });
+})();
+</script>
+
+<!-- 🏠 MY HOME EXPENDITURE — میرا گھر کا خرچ -->
+<style>
+#hx-view{position:fixed;inset:0;z-index:250;background:#eef2f7;overflow-y:auto;display:none;direction:rtl;font-family:var(--appfont);-webkit-overflow-scrolling:touch}
+#hx-view *{box-sizing:border-box}
+.hx-hdr{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,#065f46,#059669);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 12px rgba(0,0,0,.2)}
+.hx-back{background:rgba(255,255,255,.22);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:24px;font-weight:900;cursor:pointer;flex-shrink:0}
+.hx-title{flex:1;line-height:1.25}
+.hx-title b{display:block;font-size:17px;font-weight:900}
+.hx-title span{font-size:12px;opacity:.92;font-weight:800}
+.hx-wrap{padding:10px 10px calc(40px + env(safe-area-inset-bottom,0px));max-width:640px;margin:0 auto}
+.hx-card{background:#fff;border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:0 2px 10px rgba(15,23,42,.07)}
+.hx-lbl{font-size:12px;font-weight:900;color:#475569;margin:0 2px 4px;display:block}
+.hx-in{width:100%;padding:11px 12px;border:2px solid #e2e8f0;border-radius:12px;font-size:16px;font-weight:900;font-family:inherit;background:#fff;color:#0f172a;outline:none}
+.hx-in:focus{border-color:#059669}
+.hx-row{display:flex;gap:8px;margin-bottom:8px}
+.hx-row>div{flex:1;min-width:0}
+.hx-btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;color:#fff;background:linear-gradient(135deg,#059669,#047857)}
+.hx-btn.gray{background:#f1f5f9;color:#334155}
+.hx-btn.red{background:#fee2e2;color:#b91c1c}
+.hx-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.hx-stat{border-radius:14px;padding:10px 4px;text-align:center;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.hx-stat small{display:block;font-size:11.5px;font-weight:900;opacity:.95}
+.hx-stat b{display:block;font-size:16px;font-weight:900;direction:ltr;margin-top:3px}
+.hx-today{border-radius:16px;padding:12px;margin-bottom:10px;color:#fff;background:linear-gradient(135deg,#1e3a8a,#2563eb);box-shadow:0 3px 12px rgba(37,99,235,.3)}
+.hx-today .big{font-size:26px;font-weight:900;direction:ltr;text-align:center;margin:2px 0 6px}
+.hx-today .line{display:flex;justify-content:space-between;font-size:13px;font-weight:800;padding:5px 2px;border-top:1px solid rgba(255,255,255,.2)}
+.hx-today .line span:last-child{direction:ltr}
+.hx-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.hx-tbl th{background:#0f172a;color:#fff;font-weight:900;padding:8px 4px;font-size:12px;position:sticky;top:0}
+.hx-tbl td{padding:8px 4px;border-bottom:1px solid #e2e8f0;font-weight:800;color:#0f172a;vertical-align:top}
+.hx-tbl td.n{direction:ltr;text-align:center;white-space:nowrap}
+.hx-tbl tr.hx-day td{background:#ecfdf5;color:#065f46;font-weight:900;font-size:12.5px}
+.hx-tbl tr.hx-e{cursor:pointer}
+.hx-tbl tr.hx-e:active td{background:#f1f5f9}
+.hx-neg{color:#dc2626!important}
+.hx-empty{text-align:center;color:#64748b;font-weight:800;padding:18px 8px;font-size:13px}
+.hx-toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+</style>
+
+<div id="hx-view">
+  <div class="hx-hdr">
+    <button class="hx-back" onclick="hxClose()">›</button>
+    <div class="hx-title"><b>🏠 My Home Expenditure</b><span>میرا گھر کا خرچ</span></div>
+    <button class="hx-back" style="font-size:17px" onclick="hxShare()" title="رپورٹ بھیجیں">📤</button>
+  </div>
+  <div class="hx-wrap">
+
+    <!-- بجٹ -->
+    <div class="hx-card">
+      <div class="hx-toggle" onclick="hxToggleBudget()">
+        <div style="font-size:15px;font-weight:900;color:#065f46">💰 بجٹ <span id="hx-bud-sum" style="font-size:12px;color:#475569"></span></div>
+        <div id="hx-bud-arrow" style="font-weight:900;color:#475569">▾</div>
+      </div>
+      <div id="hx-bud-form" style="margin-top:10px">
+        <label class="hx-lbl">کل بجٹ (روپے)</label>
+        <input id="hx-bud-amt" class="hx-in" type="text" inputmode="numeric" placeholder="مثلاً 30000" oninput="this.value=this.value.replace(/[^0-9]/g,'')" dir="ltr" style="margin-bottom:8px">
+        <div class="hx-row">
+          <div><label class="hx-lbl">کب سے</label><input id="hx-bud-from" class="hx-in" type="date" dir="ltr"></div>
+          <div><label class="hx-lbl">کب تک</label><input id="hx-bud-to" class="hx-in" type="date" dir="ltr"></div>
+        </div>
+        <button class="hx-btn" onclick="hxSaveBudget()">✅ بجٹ محفوظ کریں</button>
+      </div>
+    </div>
+
+    <!-- رپورٹ -->
+    <div class="hx-stats">
+      <div class="hx-stat" style="background:linear-gradient(135deg,#0f766e,#14b8a6)"><small>کل بجٹ</small><b id="hx-s-total">0</b></div>
+      <div class="hx-stat" style="background:linear-gradient(135deg,#b91c1c,#ef4444)"><small>خرچ ہو چکا</small><b id="hx-s-spent">0</b></div>
+      <div class="hx-stat" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)"><small>باقی جمع پونجی</small><b id="hx-s-left">0</b></div>
+    </div>
+
+    <div class="hx-today" id="hx-today-box">
+      <div style="text-align:center;font-size:13px;font-weight:900;opacity:.95">📅 آج کا بجٹ</div>
+      <div class="big" id="hx-t-budget">0</div>
+      <div class="line"><span>آج کا تازہ خرچ</span><span id="hx-t-spent">0</span></div>
+      <div class="line"><span>آج کا باقی بجٹ</span><span id="hx-t-left">0</span></div>
+      <div class="line"><span>آنے والے دنوں کا روزانہ بجٹ</span><span id="hx-t-next">—</span></div>
+      <div class="line"><span>باقی دن</span><span id="hx-t-days">—</span></div>
+      <div id="hx-t-msg" style="display:none;margin-top:6px;background:rgba(255,255,255,.18);border-radius:10px;padding:8px;font-size:12.5px;font-weight:900;text-align:center;line-height:1.7"></div>
+    </div>
+
+    <!-- نیا خرچ -->
+    <div class="hx-card" id="hx-form-card">
+      <div id="hx-form-title" style="font-size:15px;font-weight:900;color:#0f172a;margin-bottom:8px">➕ نیا خرچ لکھیں</div>
+      <div class="hx-row">
+        <div><label class="hx-lbl">تاریخ</label><input id="hx-e-date" class="hx-in" type="date" dir="ltr"></div>
+        <div><label class="hx-lbl">رقم (روپے)</label><input id="hx-e-amt" class="hx-in" type="text" inputmode="numeric" placeholder="0" dir="ltr" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="if(event.key==='Enter')hxSaveEntry()"></div>
+      </div>
+      <label class="hx-lbl">تفصیل (اگر لکھنی ہو)</label>
+      <input id="hx-e-note" class="hx-in" type="text" placeholder="مثلاً دودھ، سبزی، بجلی کا بل" style="margin-bottom:8px" onkeydown="if(event.key==='Enter')hxSaveEntry()">
+      <button class="hx-btn" id="hx-save-btn" onclick="hxSaveEntry()">💾 خرچ محفوظ کریں</button>
+      <div id="hx-edit-btns" style="display:none;gap:8px;margin-top:8px">
+        <button class="hx-btn red" style="flex:1" onclick="hxDeleteEntry()">🗑️ ڈیلیٹ</button>
+        <button class="hx-btn gray" style="flex:1" onclick="hxCancelEdit()">منسوخ</button>
+      </div>
+    </div>
+
+    <!-- انٹریاں -->
+    <div class="hx-card" style="padding:0;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px">
+        <div style="font-size:15px;font-weight:900;color:#0f172a">📋 خرچ کی تفصیل</div>
+        <button id="hx-all-btn" onclick="hxToggleAll()" style="background:#f1f5f9;border:none;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:900;color:#334155;cursor:pointer;font-family:inherit">📜 پرانی انٹریاں بھی</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="hx-tbl">
+          <thead><tr><th style="text-align:right">تفصیل</th><th>جمع پونجی</th><th>تازہ خرچ</th><th>باقی جمع پونجی</th></tr></thead>
+          <tbody id="hx-tbody"></tbody>
+        </table>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;font-weight:800;text-align:center;padding:8px">کسی انٹری میں تبدیلی یا ڈیلیٹ کے لیے اس پر ٹیپ کریں</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='dgHomeExp';
+  var S={budget:null, entries:[]};
+  var editId=null, showAll=false;
+
+  // ---------- تاریخ (مقامی وقت کے مطابق، UTC کی غلطی سے بچنے کے لیے) ----------
+  function ds(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function pd(s){ var a=String(s).split('-'); return new Date(+a[0], +a[1]-1, +a[2]); }
+  function dd(a,b){ return Math.round((pd(b)-pd(a))/86400000); }
+  function today(){ return ds(new Date()); }
+  var DAYS=['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
+  function showDate(s){ var d=pd(s); return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear()+' ('+DAYS[d.getDay()]+')'; }
+  function rs(n){ n=Math.round(n||0); return (n<0?'-':'')+'Rs '+Math.abs(n).toLocaleString('en-US'); }
+
+  // ---------- محفوظ کرنا ----------
+  function load(){
+    try{ var o=JSON.parse(localStorage.getItem(KEY)||'null'); if(o && Array.isArray(o.entries)) S=o; }catch(e){}
+  }
+  function idbPut(json){
+    try{ if(typeof _dgSafeOpen!=='function') return;
+      _dgSafeOpen().then(function(db){ db.transaction(DG_SAFE_ST,'readwrite').objectStore(DG_SAFE_ST).put({data:json, ts:Date.now()}, 'home'); }).catch(function(){});
+    }catch(e){}
+  }
+  function save(){
+    var json=JSON.stringify(S);
+    try{ localStorage.setItem(KEY, json); }
+    catch(e){ alert('⚠️ خرچ محفوظ نہیں ہوا! ('+e.message+')'); return; }
+    idbPut(json);
+    if(window.dgDriveAfterSave) window.dgDriveAfterSave();
+  }
+  // اگر فون کی میموری صاف ہو گئی ہو تو IndexedDB والی کاپی سے خود واپس لاؤ
+  (function recover(){
+    if(localStorage.getItem(KEY)!==null || typeof _dgSafeOpen!=='function') return;
+    _dgSafeOpen().then(function(db){
+      var r=db.transaction(DG_SAFE_ST,'readonly').objectStore(DG_SAFE_ST).get('home');
+      r.onsuccess=function(){ var v=r.result; if(v && v.data && localStorage.getItem(KEY)===null){ localStorage.setItem(KEY, v.data); load(); if(isOpen()) render(); } };
+    }).catch(function(){});
+  })();
+  window.hxReload=function(){ load(); if(isOpen()) render(); };
+
+  // ---------- حساب ----------
+  function calc(){
+    var b=S.budget, t=today();
+    var list=S.entries.slice().sort(function(x,y){ return x.date<y.date?-1:x.date>y.date?1:(x.ts-y.ts); });
+    if(!b) return {list:list, none:true};
+    var inP=list.filter(function(e){ return e.date>=b.from && e.date<=b.to; });
+    var spent=0, before=0, onDay=0;
+    inP.forEach(function(e){ spent+=e.amount; if(e.date<t) before+=e.amount; if(e.date===t) onDay+=e.amount; });
+    var total=dd(b.from,b.to)+1;
+    var left=t<b.from ? total : (t>b.to ? 0 : dd(t,b.to)+1);   // آج سمیت باقی دن
+    var todayBudget = t<b.from ? b.amount/total : (left>0 ? (b.amount-before)/left : 0);
+    var after=Math.max(0,left-1);
+    var next = after>0 ? (b.amount-spent)/after : null;
+    return {list:list, inP:inP, b:b, spent:spent, remaining:b.amount-spent, onDay:onDay, todayBudget:todayBudget, left:left, next:next, total:total, notStarted:t<b.from, ended:t>b.to};
+  }
+
+  // ---------- دکھانا ----------
+  function $(id){ return document.getElementById(id); }
+  function isOpen(){ var v=$('hx-view'); return v && v.style.display!=='none'; }
+  function render(){
+    var c=calc(), b=S.budget;
+    $('hx-bud-sum').innerHTML = b ? '— <span dir="ltr">'+rs(b.amount)+'</span> | <span dir="ltr">'+showDate(b.from).split(' ')[0]+'</span> سے <span dir="ltr">'+showDate(b.to).split(' ')[0]+'</span> تک' : '— ابھی بجٹ نہیں لگایا';
+    if(c.none){
+      $('hx-s-total').textContent='—'; $('hx-s-spent').textContent=rs(S.entries.reduce(function(a,e){return a+e.amount;},0)); $('hx-s-left').textContent='—';
+      $('hx-today-box').style.display='none';
+    } else {
+      $('hx-s-total').textContent=rs(b.amount);
+      $('hx-s-spent').textContent=rs(c.spent);
+      $('hx-s-left').textContent=rs(c.remaining);
+      $('hx-s-left').parentNode.style.background = c.remaining<0 ? 'linear-gradient(135deg,#7f1d1d,#dc2626)' : 'linear-gradient(135deg,#1d4ed8,#3b82f6)';
+      $('hx-today-box').style.display='block';
+      $('hx-t-budget').textContent=rs(c.todayBudget);
+      $('hx-t-spent').textContent=rs(c.onDay);
+      var tl=c.todayBudget-c.onDay;
+      $('hx-t-left').textContent=rs(tl);
+      $('hx-t-left').style.color = tl<0 ? '#fecaca' : '#bbf7d0';
+      $('hx-t-next').textContent = c.next===null ? '—' : rs(c.next);
+      $('hx-t-days').textContent = c.left+' دن (آج سمیت)';
+      var msg='';
+      if(c.notStarted) msg='ℹ️ بجٹ کی مدت ابھی شروع نہیں ہوئی۔';
+      else if(c.ended) msg='⌛ بجٹ کی مدت ختم ہو گئی — اوپر نیا بجٹ لگائیں۔';
+      else if(c.remaining<0) msg='⛔ آپ بجٹ سے '+rs(-c.remaining).replace('Rs ','')+' روپے زیادہ خرچ کر چکے ہیں۔';
+      else if(tl<0 && c.next!==null) msg='⚠️ آج بجٹ سے '+rs(-tl).replace('Rs ','')+' زیادہ خرچ ہوا — اب آپ کا روزانہ بجٹ '+rs(c.next)+' رہ گیا ہے۔';
+      $('hx-t-msg').style.display = msg?'block':'none'; $('hx-t-msg').textContent=msg;
+    }
+
+    // ٹیبل
+    var rows=showAll||c.none ? c.list : c.inP, tb=$('hx-tbody'), h='';
+    var bal = (!c.none && !showAll) ? b.amount : null, lastDay=null, dayTot={};
+    rows.forEach(function(e){ dayTot[e.date]=(dayTot[e.date]||0)+e.amount; });
+    rows.forEach(function(e){
+      if(e.date!==lastDay){
+        lastDay=e.date;
+        h+='<tr class="hx-day"><td colspan="4">📅 '+showDate(e.date)+(e.date===today()?' — آج':'')+' &nbsp;|&nbsp; دن کا خرچ: <span dir="ltr">'+rs(dayTot[e.date])+'</span></td></tr>';
+      }
+      var before=bal, after = bal===null ? null : bal-e.amount;
+      if(bal!==null) bal=after;
+      h+='<tr class="hx-e" onclick="hxEdit('+e.id+')">'
+        +'<td>'+(e.note?esc(e.note):'<span style="color:#94a3b8">خرچ</span>')+'</td>'
+        +'<td class="n">'+(before===null?'—':rs(before))+'</td>'
+        +'<td class="n" style="color:#dc2626">'+rs(e.amount)+'</td>'
+        +'<td class="n'+(after!==null&&after<0?' hx-neg':'')+'">'+(after===null?'—':rs(after))+'</td></tr>';
+    });
+    tb.innerHTML = h || '<tr><td colspan="4" class="hx-empty">ابھی کوئی خرچ نہیں لکھا گیا</td></tr>';
+    $('hx-all-btn').textContent = showAll ? '📋 صرف اس بجٹ کی' : '📜 پرانی انٹریاں بھی';
+    $('hx-all-btn').style.display = c.none ? 'none' : 'inline-block';
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  // ---------- بجٹ ----------
+  function fillBudgetForm(){
+    var b=S.budget, n=new Date();
+    $('hx-bud-amt').value = b ? b.amount : '';
+    $('hx-bud-from').value = b ? b.from : ds(new Date(n.getFullYear(), n.getMonth(), 1));
+    $('hx-bud-to').value = b ? b.to : ds(new Date(n.getFullYear(), n.getMonth()+1, 0));
+    var open = !b || today()>b.to;
+    $('hx-bud-form').style.display = open?'block':'none'; $('hx-bud-arrow').textContent = open?'▴':'▾';
+  }
+  window.hxToggleBudget=function(){ var f=$('hx-bud-form'), o=f.style.display==='none'; f.style.display=o?'block':'none'; $('hx-bud-arrow').textContent=o?'▴':'▾'; };
+  window.hxSaveBudget=function(){
+    var a=parseInt($('hx-bud-amt').value,10), f=$('hx-bud-from').value, t=$('hx-bud-to').value;
+    if(!a||a<=0){ alert('بجٹ کی رقم لکھیں'); return; }
+    if(!f||!t){ alert('دونوں تاریخیں منتخب کریں'); return; }
+    if(t<f){ alert('"کب تک" والی تاریخ "کب سے" کے بعد ہونی چاہیے'); return; }
+    S.budget={amount:a, from:f, to:t}; save(); fillBudgetForm(); render();
+    if(typeof pkToast==='function') pkToast('✅ بجٹ محفوظ ہو گیا');
+  };
+
+  // ---------- خرچ ----------
+  function resetForm(){
+    editId=null; $('hx-e-date').value=today(); $('hx-e-amt').value=''; $('hx-e-note').value='';
+    $('hx-form-title').textContent='➕ نیا خرچ لکھیں'; $('hx-save-btn').textContent='💾 خرچ محفوظ کریں';
+    $('hx-edit-btns').style.display='none';
+  }
+  window.hxSaveEntry=function(){
+    var a=parseInt($('hx-e-amt').value,10), d=$('hx-e-date').value||today(), n=$('hx-e-note').value.trim();
+    if(!a||a<=0){ alert('خرچ کی رقم لکھیں'); $('hx-e-amt').focus(); return; }
+    if(editId){
+      var e=S.entries.find(function(x){return x.id===editId;}); if(e){ e.amount=a; e.date=d; e.note=n; }
+    } else {
+      S.entries.push({id:Date.now(), ts:Date.now(), date:d, amount:a, note:n});
+    }
+    save(); resetForm(); render();
+    if(typeof pkToast==='function') pkToast('✅ خرچ محفوظ ہو گیا');
+  };
+  window.hxEdit=function(id){
+    var e=S.entries.find(function(x){return x.id===id;}); if(!e) return;
+    editId=id; $('hx-e-date').value=e.date; $('hx-e-amt').value=e.amount; $('hx-e-note').value=e.note||'';
+    $('hx-form-title').textContent='✏️ خرچ میں تبدیلی'; $('hx-save-btn').textContent='💾 تبدیلی محفوظ کریں';
+    $('hx-edit-btns').style.display='flex';
+    $('hx-form-card').scrollIntoView({behavior:'smooth', block:'center'});
+  };
+  window.hxCancelEdit=resetForm;
+  window.hxDeleteEntry=function(){
+    if(!editId || !confirm('یہ خرچ ڈیلیٹ کر دیں؟')) return;
+    S.entries=S.entries.filter(function(x){return x.id!==editId;}); save(); resetForm(); render();
+  };
+  window.hxToggleAll=function(){ showAll=!showAll; render(); };
+
+  // ---------- رپورٹ واٹس ایپ پر ----------
+  window.hxShare=function(){
+    var c=calc(); if(c.none){ alert('پہلے بجٹ لگائیں'); return; }
+    var t='🏠 *میرا گھر کا خرچ*\n📅 '+showDate(today())+'\n\n💰 کل بجٹ: '+rs(c.b.amount)+'\n🧾 خرچ ہو چکا: '+rs(c.spent)+'\n🏦 باقی جمع پونجی: '+rs(c.remaining)
+      +'\n\n📅 آج کا بجٹ: '+rs(c.todayBudget)+'\n🛒 آج کا تازہ خرچ: '+rs(c.onDay)+(c.next!==null?'\n➡️ آنے والا روزانہ بجٹ: '+rs(c.next):'')+'\n⏳ باقی دن: '+c.left;
+    if(navigator.share){ navigator.share({text:t}).catch(function(){}); }
+    else location.href='https://wa.me/?text='+encodeURIComponent(t);
+  };
+
+  // ---------- کھولنا / بند کرنا ----------
+  window.hxOpen=function(){
+    load(); resetForm(); fillBudgetForm(); showAll=false;
+    $('hx-view').style.display='block'; $('hx-view').scrollTop=0; render();
+    try{ history.pushState({hx:1},''); }catch(e){}
+  };
+  window.hxClose=function(){ if(history.state && history.state.hx){ history.back(); } else { $('hx-view').style.display='none'; } };
+  window.addEventListener('popstate', function(){ var v=$('hx-view'); if(v && v.style.display!=='none') v.style.display='none'; });
+  // آدھی رات کے بعد واپس آئیں تو تاریخ خود نئی ہو جائے
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible' && isOpen()){ load(); if(!editId) $('hx-e-date').value=today(); render(); } });
+  load();
 })();
 </script>
 
