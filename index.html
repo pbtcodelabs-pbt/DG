@@ -1108,7 +1108,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="ltr">DG210FR006</span>
+        <span id="pk-lock-ver" dir="ltr">DG210FR007</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1217,7 +1217,7 @@ select {
       <div style="flex:1"></div>
       <div id="pk-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-net-row"><span id="pk-net-dot"></span><span id="pk-net-text">Online</span></div>
-        <div id="pk-app-version" dir="ltr">DG210FR006</div>
+        <div id="pk-app-version" dir="ltr">DG210FR007</div>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:5px">
@@ -6672,7 +6672,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG210FR006';
+  var PK_APP_VERSION = 'DG210FR007';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7104,7 +7104,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 
 <!-- 🏠 MY HOME EXPENDITURE — میرا گھر کا خرچ -->
 <style>
-@font-face{font-family:'JNKasheeda';src:url('fonts/JameelNooriNastaleeqKasheeda.ttf') format('truetype');font-display:swap}
+@font-face{font-family:'JNKasheeda';src:url('fonts/JNKasheeda.woff') format('woff'),url('fonts/JameelNooriNastaleeqKasheeda.ttf') format('truetype');font-display:swap}
 #hx-view{position:fixed;inset:0;z-index:250;background:#f1f5f9;overflow-y:auto;display:none;direction:rtl;font-family:'JNKasheeda',var(--appfont);-webkit-overflow-scrolling:touch;line-height:1.75;color:#0f172a}
 #hx-view *{box-sizing:border-box}
 #hx-view .ar,#hx-view .n,#hx-view input[type=date],#hx-view input[inputmode=numeric]{font-family:Arial,sans-serif;line-height:1.3}
@@ -7218,6 +7218,11 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 .hx-card3 .n{font-family:Arial,sans-serif;font-size:12.5px;font-weight:800;direction:ltr;color:#334155}
 .hx-card3 .n.red{color:#dc2626}.hx-card3 .n.grn{color:#047857}
 .hx-hint{display:none}
+/* خانوں کے اندر کی لکھائی، ہلکے الفاظ اور بٹن بھی نوری نستعلیق کشیدہ میں */
+#hx-view input::placeholder{font-family:'JNKasheeda',Arial,sans-serif;font-size:18px;font-weight:400;color:#94a3b8;opacity:1}
+#hx-view .hx-btn,#hx-view button.hx-btn{font-family:'JNKasheeda',Arial,sans-serif!important;font-weight:400}
+#hx-view #hx-e-note{font-family:'JNKasheeda',Arial,sans-serif!important;font-size:18px;font-weight:400}
+.hx-rh>span{white-space:nowrap;font-size:13.5px}
 
 </style>
 
@@ -7619,6 +7624,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // آدھی رات کے بعد واپس آئیں تو تاریخ خود نئی ہو جائے
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible' && isOpen()){ load(); if(!editId) $('hx-e-date').value=today(); render(); } });
   load();
+  // نوری نستعلیق کشیدہ ایپ کھلتے ہی پیچھے پیچھے ڈاؤن لوڈ ہو جائے (ایک دفعہ کے بعد فون میں محفوظ رہتا ہے)
+  setTimeout(function(){ try{ if(document.fonts) document.fonts.load("18px 'JNKasheeda'","گھر"); }catch(e){} }, 2500);
 })();
 </script>
 

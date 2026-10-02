@@ -4,7 +4,9 @@
 // فارمولا: dg-khatabook-cache-YYYYMMDD-HHMM (24 گھنٹے کا وقت) — ہر نئی بلڈ پر موجودہ اصل تاریخ/وقت لگائیں،
 // اور index.html میں PK_APP_VERSION بھی اسی وقت پر (DG+DD+MON+DoW+HHMM+AM/PM فارمیٹ میں) اپڈیٹ کریں۔
 
-const CACHE_NAME = 'dg-khatabook-cache-DG210FR006';
+const CACHE_NAME = 'dg-khatabook-cache-DG210FR007';
+// فونٹ کا الگ مستقل ڈبہ — نیا ورژن آنے پر بھی ڈیلیٹ نہیں ہوتا، تاکہ 7 ایم بی فونٹ بار بار ڈاؤن لوڈ نہ ہو
+const FONT_CACHE = 'dg-khatabook-fonts-v1';
 
 const PRECACHE_URLS = [
   './',
@@ -34,7 +36,7 @@ self.addEventListener('activate', function (event) {
     caches.keys().then(function (keys) {
       return Promise.all(
         keys.map(function (key) {
-          if (key !== CACHE_NAME) {
+          if (key !== CACHE_NAME && key !== FONT_CACHE) {
             return caches.delete(key);
           }
         })
@@ -52,6 +54,22 @@ self.addEventListener('fetch', function (event) {
 
   // Never intercept Firebase/Firestore or any other cross-origin / non-GET request
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) { return; }
+
+  // فونٹ: پہلے فون کی کاپی، نہ ہو تو انٹرنیٹ سے لا کر مستقل ڈبے میں رکھو
+  if (new URL(req.url).pathname.indexOf('/fonts/') !== -1) {
+    event.respondWith(
+      caches.open(FONT_CACHE).then(function (cache) {
+        return cache.match(req).then(function (hit) {
+          if (hit) return hit;
+          return fetch(req).then(function (res) {
+            if (res && res.status === 200) cache.put(req, res.clone());
+            return res;
+          });
+        });
+      })
+    );
+    return;
+  }
 
   if (req.mode === 'navigate' || (req.method === 'GET' && req.headers.get('accept') && req.headers.get('accept').indexOf('text/html') !== -1)) {
     event.respondWith(
