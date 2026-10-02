@@ -4,7 +4,7 @@
 // فارمولا: dg-khatabook-cache-YYYYMMDD-HHMM (24 گھنٹے کا وقت) — ہر نئی بلڈ پر موجودہ اصل تاریخ/وقت لگائیں،
 // اور index.html میں PK_APP_VERSION بھی اسی وقت پر (DG+DD+MON+DoW+HHMM+AM/PM فارمیٹ میں) اپڈیٹ کریں۔
 
-const CACHE_NAME = 'dg-khatabook-cache-DG210FR001';
+const CACHE_NAME = 'dg-khatabook-cache-DG210FR002';
 
 const PRECACHE_URLS = [
   './',

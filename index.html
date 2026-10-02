@@ -1108,7 +1108,7 @@ select {
     <div id="pk-lock-strip" style="display:flex;justify-content:center">
       <div id="pk-lock-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-lock-net-row"><span id="pk-lock-net-dot"></span><span id="pk-lock-net-text">Online</span></div>
-        <span id="pk-lock-ver" dir="ltr">DG210FR001</span>
+        <span id="pk-lock-ver" dir="ltr">DG210FR002</span>
       </div>
     </div>
     <div class="lock-body">
@@ -1217,7 +1217,7 @@ select {
       <div style="flex:1"></div>
       <div id="pk-net-indicator" class="pk-online" onclick="dgDevTap()">
         <div id="pk-net-row"><span id="pk-net-dot"></span><span id="pk-net-text">Online</span></div>
-        <div id="pk-app-version" dir="ltr">DG210FR001</div>
+        <div id="pk-app-version" dir="ltr">DG210FR002</div>
       </div>
       <div style="flex:1"></div>
       <div style="display:flex;gap:5px">
@@ -2669,18 +2669,22 @@ function _clearActivationData(){
 // ============================================================
 // 🔐 APP LOCK PIN (4 digits) + recovery by year of birth — all local, nothing sent anywhere
 // ============================================================
+// ریفریش (اوپر سے نیچے کھینچنے) پر دوبارہ پن نہ مانگے: ایک دفعہ پن درست ہو جائے تو جب تک ایپ کھلی ہے یاد رہے۔
+// ایپ مکمل بند کر کے دوبارہ کھولیں گے تو پن دوبارہ مانگے گی۔
 var _dgPinSessionOk = false, _dgPinFails = 0, _dgPinLockUntil = 0;
+try{ _dgPinSessionOk = sessionStorage.getItem('dgPinOk')==='1'; }catch(e){}
+function _dgPinRemember(){ _dgPinSessionOk = true; try{ sessionStorage.setItem('dgPinOk','1'); }catch(e){} }
 var DG_PIN_KEY='dg_app_pin_hash', DG_YOB_KEY='dg_app_yob_hash', DG_PIN_SKIP='dg_app_pin_skipped';
 function _dgPinHash(kind, val){ return hashPin('DGAPP::'+kind+'::'+val); }
 
 function showApp(){
   if(_dgPinSessionOk){ _showAppCore(); return; }
   if(localStorage.getItem(DG_PIN_KEY)){ dgPinShow('enter'); return; }
-  if(localStorage.getItem(DG_PIN_SKIP)==='1'){ _dgPinSessionOk = true; _showAppCore(); return; }
+  if(localStorage.getItem(DG_PIN_SKIP)==='1'){ _dgPinRemember(); _showAppCore(); return; }
   dgPinShow('setup', {first:true});
 }
 function _dgPinDone(){
-  _dgPinSessionOk = true;
+  _dgPinRemember();
   var el = document.getElementById('dg-pin-screen'); if(el) el.style.display='none';
   _showAppCore();
 }
@@ -2783,7 +2787,7 @@ async function dgPinSubmitSetup(first){
   localStorage.setItem(DG_PIN_KEY, await _dgPinHash('pin', a));
   localStorage.setItem(DG_YOB_KEY, await _dgPinHash('yob', y));
   localStorage.removeItem(DG_PIN_SKIP);
-  if(first){ _dgPinDone(); } else { dgPinCancel(); pkToast('✅ ایپ لاک پن محفوظ ہو گیا'); _dgPinSessionOk = true; }
+  if(first){ _dgPinDone(); } else { dgPinCancel(); pkToast('✅ ایپ لاک پن محفوظ ہو گیا'); _dgPinRemember(); }
 }
 async function dgPinSubmitForgot(){
   if(_dgPinCooldown()) return;
@@ -6648,7 +6652,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG210FR001';
+  var PK_APP_VERSION = 'DG210FR002';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
