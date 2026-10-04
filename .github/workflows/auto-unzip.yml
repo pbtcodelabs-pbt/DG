@@ -1,5 +1,8 @@
-# DG Khatabook — زپ فائل اپ لوڈ کریں، باقی کام یہ خود کرے گا
-name: Auto Unzip & Deploy
+# DG Khatabook — خودکار زپ کھولنے والا
+# اصول: صرف وہ زپ کھلے گی جس کا نام "DG" سے شروع ہو (مثلاً DG210FR009.zip)
+# باقی ہر زپ بغیر کھولے خود ڈیلیٹ ہو جائے گی
+
+name: Auto Unzip (DG only)
 
 on:
   push:
@@ -9,7 +12,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
 
 concurrency:
   group: auto-unzip
@@ -21,41 +23,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Unzip
-        id: un
+      - name: DG zip kholo, baqi delete karo
+        shell: bash
         run: |
-          shopt -s nullglob globstar nocaseglob
-          zips=( **/*.zip )
-          if [ ${#zips[@]} -eq 0 ]; then echo "none=1" >> "$GITHUB_OUTPUT"; exit 0; fi
-          names=""
-          for z in "${zips[@]}"; do
-            tmp=$(mktemp -d)
-            unzip -o -q "$z" -d "$tmp"
-            rm -rf "$tmp/__MACOSX"
-            top=( "$tmp"/* )
-            if [ ${#top[@]} -eq 1 ] && [ -d "${top[0]}" ]; then src="${top[0]}"; else src="$tmp"; fi
-            rm -rf "$src/.github" "$src/.git"
-            dest=$(dirname "$z")
-            cp -a "$src"/. "$dest"/
-            git rm -q --cached "$z" 2>/dev/null || true
-            rm -f "$z"
-            rm -rf "$tmp"
-            names="$names $(basename "$z" .zip)"
-          done
-          echo "names=$names" >> "$GITHUB_OUTPUT"
-
-      - name: Commit
-        if: steps.un.outputs.none != '1'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Auto-unzip:${{ steps.un.outputs.names }}"
-          git push
-
-      - name: Rebuild GitHub Pages
-        if: steps.un.outputs.none != '1'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "skip"
+          set -e
+          changed=0
+          while IFS= read -r -d '' z; do
+            name="$(basename "$z")"
+            if [[ "$name" == DG* ]]; then
+              echo "OK: $name — khol rahe hain"
+              tmp="$(mktemp -d)"
+              unzip -oq "$z" -d "$tmp"
+              src="$tmp"
+              only="$(find "$tmp" -mindepth 1 -maxdepth 1)"
+              if [ "$(printf '%s\n' "$only" | wc -l)" = "1" ] && [ -f "$only/index.html" ]; then src="$only"; fi
+              rm -rf "$src/.github" "$src/.git"
+              cp -a "$src"/. .
+              rm -rf "$tmp"
+            else
+              echo "REJECTED: $name — naam DG se shuru nahi hota, delete kar di"
+            fi
