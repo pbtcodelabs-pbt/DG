@@ -2711,13 +2711,92 @@ function _dgPinErr(msg){ var e=document.getElementById('dg-pin-err'); if(e){ e.t
 function _dgPinBtn(text, fn, bg){ return '<button type="button" onclick="'+fn+'" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:14px;background:'+(bg||'linear-gradient(135deg,#2563eb,#1d4ed8)')+';color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit">'+text+'</button>'; }
 function _dgPinLink(text, fn){ return '<div style="text-align:center;margin-top:14px"><a href="javascript:void(0)" onclick="'+fn+'" style="color:#2563eb;font-size:13px;font-weight:800;text-decoration:none">'+text+'</a></div>'; }
 
+// ============================================================
+// 👆 فنگر پرنٹ / فون کے ٹچ سے لاگ اِن (WebAuthn) — DG Khatabook
+// فون کا اپنا بایومیٹرک، فنگر پرنٹ فون سے باہر کبھی نہیں جاتا۔ یہ PIN کا متبادل ہے:
+// PIN اسکرین کھلتے ہی خودبخود فون کا فنگر پرنٹ پاپ اپ آتا ہے (باقی ایپس کی طرح)؛
+// ایک بار دینے کے بعد اسی سیشن میں دوبارہ نہیں مانگتا (dgPinOk نشانی)، صرف ایپ مکمل بند کر کے
+// دوبارہ کھولنے پر مانگتا ہے۔ منسوخ/ناکام ہو تو بندہ PIN لکھ لے یا 👆 نشان دبا کر دوبارہ کر لے۔
+// ============================================================
+var DG_BIO_KEY = 'dg_bioCred';
+function _dgBioB64(buf){ return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function _dgBioUnB64(s){ s=s.replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4) s+='='; var b=atob(s); var a=new Uint8Array(b.length); for(var i=0;i<b.length;i++) a[i]=b.charCodeAt(i); return a.buffer; }
+function dgGetBioCred(){ try{ var c=JSON.parse(localStorage.getItem(DG_BIO_KEY)||'null'); return (c&&c.id)?c:null; }catch(e){ return null; } }
+async function dgIsBioSupported(){ try{ return !!(window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); }catch(e){ return false; } }
+async function dgEnableBio(){
+  if(!(await dgIsBioSupported())){ alert('❌ اس فون یا براؤزر میں فنگر پرنٹ کی سہولت نہیں ملی۔\n\nفون کی سیٹنگ میں فنگر پرنٹ یا سکرین لاک لگا ہو، اور ایپ Chrome میں کھلی ہو۔'); return; }
+  if(!localStorage.getItem(DG_PIN_KEY)){ alert('پہلے 4 ہندسوں کا ایپ لاک پن بنائیں، پھر فنگر پرنٹ آن کریں۔'); return; }
+  try{
+    var uid = localStorage.getItem('ek_uid') || 'dg-user';
+    var cred = await navigator.credentials.create({ publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rp: { name: 'DG Khatabook' },
+      user: { id: new TextEncoder().encode('dg-'+uid), name: 'DG Khatabook', displayName: 'DG Khatabook' },
+      pubKeyCredParams: [{ type:'public-key', alg:-7 }, { type:'public-key', alg:-257 }],
+      authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required', residentKey:'preferred' },
+      timeout: 60000, attestation: 'none'
+    }});
+    if(!cred) throw new Error('no-cred');
+    localStorage.setItem(DG_BIO_KEY, JSON.stringify({ id:_dgBioB64(cred.rawId), at:Date.now() }));
+    if(typeof dgRenderBioSettingsCard==='function') dgRenderBioSettingsCard();
+    alert('✅ فنگر پرنٹ لاگ اِن آن ہو گیا۔\n\nاب اس فون پر ایپ کھولتے ہی ٹچ مانگے گی۔');
+  }catch(e){
+    alert('❌ فنگر پرنٹ آن نہیں ہو سکا' + (e && e.name==='NotAllowedError' ? ' (منسوخ یا وقت ختم)' : '') + '۔');
+  }
+}
+function dgDisableBio(){
+  if(!confirm('اس فون پر فنگر پرنٹ لاگ اِن بند کریں؟ (پن سے لاگ اِن چلتا رہے گا)')) return;
+  try{ localStorage.removeItem(DG_BIO_KEY); }catch(e){}
+  if(typeof dgRenderBioSettingsCard==='function') dgRenderBioSettingsCard();
+}
+var _dgBioBusy = false;
+async function dgBioLogin(){
+  if(_dgBioBusy) return;
+  var c = dgGetBioCred();
+  if(!c){ return; }
+  _dgBioBusy = true;
+  try{
+    var a = await navigator.credentials.get({ publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials: [{ type:'public-key', id:_dgBioUnB64(c.id), transports:['internal'] }],
+      userVerification: 'required', timeout: 60000
+    }});
+    if(a){ _dgBioBusy=false; _dgPinFails=0; _dgPinDone(); return; }
+  }catch(e){
+    var er=document.getElementById('dg-pin-err'); if(er){ er.textContent='❌ ٹچ نہیں ہوا — دوبارہ 👆 دبائیں یا پن لکھیں'; er.style.display='block'; }
+  }
+  _dgBioBusy = false;
+}
+// صرف 👆 آئیکن دکھانا — فنگر پرنٹ آن ہو تو دکھے
+function _dgShowBioIcon(on){ var ic=document.getElementById('dg-bio-icon'); if(ic) ic.style.display = on?'inline-block':'none'; }
+// PIN اسکرین کھلتے ہی خودکار فنگر پرنٹ — صرف ایک بار فی اسکرین
+var _dgBioAutoTried = false;
+async function dgAutoBioPrompt(){
+  var on = !!dgGetBioCred();
+  _dgShowBioIcon(on);
+  if(!on) return;
+  if(!(await dgIsBioSupported())){ _dgShowBioIcon(false); return; }
+  if(_dgBioAutoTried) return;
+  _dgBioAutoTried = true;
+  setTimeout(function(){ try{ dgBioLogin(); }catch(e){} }, 350);
+}
+// ایڈمن سیٹنگز میں فنگر پرنٹ آن/آف کارڈ
+function dgRenderBioSettingsCard(){
+  var box=document.getElementById('dg-bio-settings-body'); if(!box) return;
+  var c=dgGetBioCred();
+  box.innerHTML = c
+    ? '<div style="color:#15803d;font-weight:800;margin-bottom:8px">✅ اس فون پر آن ہے</div><button type="button" class="adm-save-btn" style="background:#fee2e2;color:#b91c1c" onclick="dgDisableBio()">بند کریں</button>'
+    : '<div style="font-size:12px;color:#64748b;font-weight:700;line-height:1.7;margin-bottom:8px">آن کرنے کے بعد اس فون پر ایپ کھولتے ہی فنگر پرنٹ مانگے گی۔ پن بھی ساتھ چلتا رہے گا۔</div><button type="button" class="adm-save-btn" onclick="dgEnableBio()">👆 فنگر پرنٹ لاگ اِن آن کریں</button>';
+}
+
 function dgPinShow(mode, opts){
   opts = opts || {};
   var el = _dgPinEl();
   var head = '<div style="text-align:center;font-size:44px;margin-bottom:4px">🔐</div>';
   var body = '';
   if(mode==='enter'){
-    body = head+'<div style="text-align:center;font-size:20px;font-weight:900;color:#0f172a">DG Khatabook</div>'+
+    body = head+'<div style="display:flex;align-items:center;justify-content:center;gap:10px"><div style="font-size:20px;font-weight:900;color:#0f172a">DG Khatabook</div>'+
+      '<span id="dg-bio-icon" onclick="dgBioLogin()" title="فنگر پرنٹ سے لاگ اِن" style="display:none;font-size:22px;cursor:pointer;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))">👆</span></div>'+
       '<div style="text-align:center;font-size:13px;color:#64748b;font-weight:700;margin-top:4px">اپنا 4 ہندسوں کا پن لکھیں</div>'+
       _dgPinField('dg-pin-in','پن کوڈ',4)+
       '<div id="dg-pin-err" style="display:none;color:#dc2626;font-size:12.5px;font-weight:800;margin-top:8px;text-align:center"></div>'+
@@ -2753,6 +2832,9 @@ function dgPinShow(mode, opts){
   if(mode==='enter'){
     var inp = document.getElementById('dg-pin-in');
     if(inp) inp.addEventListener('input', function(){ if(this.value.length===4) dgPinSubmitEnter(); });
+    // 👆 PIN اسکرین کھلتے ہی خودبخود فون کا فنگر پرنٹ پاپ اپ (اگر آن ہو)
+    _dgBioAutoTried = false;
+    try{ dgAutoBioPrompt(); }catch(e){}
   }
 }
 function dgPinCancel(){ var el=document.getElementById('dg-pin-screen'); if(el) el.style.display='none'; }
@@ -5342,6 +5424,7 @@ function _admOpenPanel(){
   _dgAdmFillSub();
   admTab(0);
   document.getElementById('adm-panel').style.display='block';
+  try{ dgRenderBioSettingsCard(); }catch(e){} // 👆 فنگر پرنٹ آن/آف کارڈ بھریں
   var fnEl = document.getElementById('adm-filename-suggest');
   if(fnEl) fnEl.textContent = generatePKTFileName();
 }
@@ -6392,6 +6475,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   <div class="adm-section" id="adm-s5">
     <div class="adm-card">
       <button class="adm-save-btn" style="margin-bottom:14px" onclick="dgPinOpenSetup()">🔐 ایپ لاک پن (4 ہندسے) بنائیں / بدلیں</button>
+      <!-- 👆 فنگر پرنٹ لاگ اِن آن/آف — ایپ لاک پن کے ساتھ -->
+      <div id="dg-bio-settings-body" style="margin-bottom:14px"></div>
       <div style="font-size:15px;font-weight:900;color:#f59e0b;margin-bottom:14px">🔑 Change PIN</div>
       <div class="adm-label">Current PIN</div>
       <input id="adm-old-pin" class="adm-inp" type="password" inputmode="numeric" maxlength="4" placeholder="••••" style="margin-bottom:12px;letter-spacing:6px;text-align:center;font-size:20px">
@@ -6672,7 +6757,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG210FR007';
+  var PK_APP_VERSION = 'DG13OCTTU0152PM008';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
