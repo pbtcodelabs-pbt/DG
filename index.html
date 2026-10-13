@@ -1985,7 +1985,7 @@ select {
       <button onclick="closeModal('modal-poster')" style="background:#f1f5f9;color:#64748b;width:30px;height:30px;border-radius:50%;font-weight:900">✕</button>
     </div>
     <label class="form-label">Message (Optional)</label>
-    <textarea id="poster-msg" class="form-inp" rows="2" placeholder="Type your message..." oninput="drawPoster()"></textarea>
+    <textarea id="poster-msg" class="form-inp" rows="2" dir="auto" placeholder="Type your message..." oninput="drawPoster()" style="font-family:'JNKasheeda',Arial,sans-serif;font-size:20px;line-height:1.9"></textarea>
     <div class="poster-canvas-wrap">
       <canvas id="poster-canvas" class="poster-canvas"></canvas>
     </div>
@@ -4461,7 +4461,11 @@ function drawPoster(){
   canvas.width=W; canvas.height=H;
   // Fonts
   const NF='Arial,sans-serif';           // Latin / numbers
-  const UF=getAppFontStack();            // App font for message
+  const UF="'JNKasheeda',"+getAppFontStack(); // پیغام: نوری نستعلیق کشیدہ
+  if(document.fonts && !document.fonts.check("40px 'JNKasheeda'",'ا') && !window._dgPosterFontWait){
+    window._dgPosterFontWait=1;
+    document.fonts.load("40px 'JNKasheeda'",'ا').then(function(){ window._dgPosterFontWait=0; drawPoster(); }).catch(function(){ window._dgPosterFontWait=0; });
+  }
   const HF=getAppFontStack();            // UI labels
   const customMsg=document.getElementById('poster-msg').value;
   const shopName=getShop(), shopOwner=getOwner(), shopPhone=getPhone();
@@ -4556,12 +4560,13 @@ function drawPoster(){
   // ── Message text (Nastaleeq, auto-size, no icon) ──
   if(customMsg){
     const maxW=mbW-20;
-    const words=customMsg.split(' ');
+    const words=customMsg.split(/\s+/).filter(Boolean);
+    const _rtl=/[\u0600-\u06FF]/.test(customMsg);
     // Start large, shrink until fits
     let mfs=52;
     const buildLines=(fsize)=>{
-      ctx.font=`700 ${fsize}px ${UF}`;
-      ctx.direction='ltr'; ctx.textAlign='center';
+      ctx.font=`400 ${fsize}px ${UF}`;
+      ctx.direction=_rtl?'rtl':'ltr'; ctx.textAlign='center';
       const lns=[]; let cur='';
       words.forEach(w=>{
         const t=cur+(cur?' ':'')+w;
@@ -4572,11 +4577,11 @@ function drawPoster(){
     };
     let lns=buildLines(mfs);
     // shrink until all lines fit inside box with padding
-    while(lns.length*(mfs+16)>mbH2-24&&mfs>12){mfs--;lns=buildLines(mfs);}
-    const lh=mfs+16;
+    while(lns.length*(mfs*1.75)>mbH2-24&&mfs>12){mfs--;lns=buildLines(mfs);}
+    const lh=mfs*1.75;
     const totalTextH=lns.length*lh;
     const startY=mbY2+(mbH2-totalTextH)/2+mfs+4;
-    ctx.font=`700 ${mfs}px ${UF}`; ctx.direction='ltr'; ctx.textAlign='center';
+    ctx.font=`400 ${mfs}px ${UF}`; ctx.direction=_rtl?'rtl':'ltr'; ctx.textAlign='center';
     lns.forEach((ln,i)=>{ ctx.fillStyle='#14532d'; ctx.fillText(ln,lcx,startY+i*lh); });
   } else {
     ctx.fillStyle='#86efac'; ctx.font=`28px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
@@ -4606,8 +4611,12 @@ function drawPoster(){
 
    // Box 1: Previous Balance — RED
   const s1Y=colY;
-  draw3DBox(rcX,s1Y,rcTotalW,secH,'#ef4444','#b91c1c');
-  ctx.fillStyle='#fecaca'; ctx.font=`bold 13px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
+  const _balClr=n=> n>0 ? {c1:'#ef4444',c2:'#b91c1c',lb:'#fecaca'}
+                  : n<0 ? {c1:'#22c55e',c2:'#15803d',lb:'#dcfce7'}
+                  :       {c1:'#64748b',c2:'#334155',lb:'#e2e8f0'};
+  const _c1=_balClr(prevNet);
+  draw3DBox(rcX,s1Y,rcTotalW,secH,_c1.c1,_c1.c2);
+  ctx.fillStyle=_c1.lb; ctx.font=`bold 13px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
   ctx.fillText('Previous Balance',rcx,s1Y+22);
   ctx.fillStyle='#ffffff'; ctx.font=`900 40px ${NF}`; ctx.direction='ltr'; ctx.textAlign='center';
   ctx.fillText('Rs '+fmt(Math.abs(prevNet)),rcx,s1Y+secH/2+16);
@@ -4623,8 +4632,9 @@ function drawPoster(){
 
    // Box 3: New Balance — GREY (slate)
   const s3Y=s2Y+secH+secGap;
-  draw3DBox(rcX,s3Y,rcTotalW,secH,'#64748b','#334155');
-  ctx.fillStyle='#e2e8f0'; ctx.font=`bold 13px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
+  const _c3=_balClr(newNet);
+  draw3DBox(rcX,s3Y,rcTotalW,secH,_c3.c1,_c3.c2);
+  ctx.fillStyle=_c3.lb; ctx.font=`bold 13px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
   ctx.fillText('New Balance',rcx,s3Y+22);
   ctx.fillStyle='#ffffff'; ctx.font=`900 40px ${NF}`; ctx.direction='ltr'; ctx.textAlign='center';
   ctx.fillText('Rs '+fmt(Math.abs(newNet)),rcx,s3Y+secH/2+16);
@@ -6773,7 +6783,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG1310TU010';
+  var PK_APP_VERSION = 'DG1310TU011';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
