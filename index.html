@@ -2767,15 +2767,33 @@ async function dgBioLogin(){
   }
   _dgBioBusy = false;
 }
-// صرف 👆 آئیکن دکھانا — فنگر پرنٹ آن ہو تو دکھے
-function _dgShowBioIcon(on){ var ic=document.getElementById('dg-bio-icon'); if(ic) ic.style.display = on?'inline-block':'none'; }
+// لاگ اِن اسکرین کے فنگر پرنٹ علاقے کو بھرنا — PIN کے بالکل نیچے، لاگ اِن اسکرین پر ہی
+//   آن ہو → "👆 فنگر پرنٹ سے لاگ اِن" (نمایاں بٹن) + خودکار پاپ اپ
+//   آن نہ ہو مگر فون سپورٹ کرے → "👆 فنگر پرنٹ آن کریں" (پہلی بار یہیں سے آن کرے)
+async function _dgRenderBioLoginArea(){
+  var area = document.getElementById('dg-bio-login-area'); if(!area) return false;
+  var on = !!dgGetBioCred();
+  var supported = await dgIsBioSupported();
+  if(on && supported){
+    area.innerHTML = '<button type="button" onclick="dgBioLogin()" style="width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:22px">👆</span> فنگر پرنٹ سے لاگ اِن</button>';
+    return true;
+  } else if(!on && supported){
+    area.innerHTML = '<button type="button" onclick="dgEnableBioFromLogin()" style="width:100%;padding:13px;border:2px solid #16a34a;border-radius:14px;background:#f0fdf4;color:#15803d;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:20px">👆</span> فنگر پرنٹ لاگ اِن آن کریں</button>';
+    return false;
+  }
+  area.innerHTML = '';
+  return false;
+}
+// لاگ اِن اسکرین سے فنگر پرنٹ آن کرنا — آن ہونے کے بعد علاقہ تازہ کر کے فوراً لاگ اِن کا موقع
+async function dgEnableBioFromLogin(){
+  await dgEnableBio();
+  if(dgGetBioCred()){ _dgBioAutoTried = true; await _dgRenderBioLoginArea(); try{ dgBioLogin(); }catch(e){} }
+}
 // PIN اسکرین کھلتے ہی خودکار فنگر پرنٹ — صرف ایک بار فی اسکرین
 var _dgBioAutoTried = false;
 async function dgAutoBioPrompt(){
-  var on = !!dgGetBioCred();
-  _dgShowBioIcon(on);
-  if(!on) return;
-  if(!(await dgIsBioSupported())){ _dgShowBioIcon(false); return; }
+  var hasBtn = await _dgRenderBioLoginArea();
+  if(!hasBtn) return;              // فنگر پرنٹ آن نہیں — خودکار پاپ اپ نہیں
   if(_dgBioAutoTried) return;
   _dgBioAutoTried = true;
   setTimeout(function(){ try{ dgBioLogin(); }catch(e){} }, 350);
@@ -2795,12 +2813,13 @@ function dgPinShow(mode, opts){
   var head = '<div style="text-align:center;font-size:44px;margin-bottom:4px">🔐</div>';
   var body = '';
   if(mode==='enter'){
-    body = head+'<div style="display:flex;align-items:center;justify-content:center;gap:10px"><div style="font-size:20px;font-weight:900;color:#0f172a">DG Khatabook</div>'+
-      '<span id="dg-bio-icon" onclick="dgBioLogin()" title="فنگر پرنٹ سے لاگ اِن" style="display:none;font-size:22px;cursor:pointer;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))">👆</span></div>'+
+    body = head+'<div style="text-align:center;font-size:20px;font-weight:900;color:#0f172a">DG Khatabook</div>'+
       '<div style="text-align:center;font-size:13px;color:#64748b;font-weight:700;margin-top:4px">اپنا 4 ہندسوں کا پن لکھیں</div>'+
       _dgPinField('dg-pin-in','پن کوڈ',4)+
       '<div id="dg-pin-err" style="display:none;color:#dc2626;font-size:12.5px;font-weight:800;margin-top:8px;text-align:center"></div>'+
       _dgPinBtn('کھولیں 🔓','dgPinSubmitEnter()')+
+      // 👆 فنگر پرنٹ کا بٹن — بالکل PIN کے نیچے، لاگ اِن اسکرین پر ہی (آن ہو تو "سے لاگ اِن"، نہ ہو تو "آن کریں")
+      '<div id="dg-bio-login-area" style="margin-top:10px"></div>'+
       _dgPinLink('پن بھول گئے؟','dgPinShow(\'forgot\')');
   } else if(mode==='setup'){
     body = head+'<div style="text-align:center;font-size:19px;font-weight:900;color:#0f172a">'+(opts.first?'پہلی دفعہ اپنا پن کوڈ بنائیں':'ایپ لاک پن بنائیں / بدلیں')+'</div>'+
@@ -5424,7 +5443,6 @@ function _admOpenPanel(){
   _dgAdmFillSub();
   admTab(0);
   document.getElementById('adm-panel').style.display='block';
-  try{ dgRenderBioSettingsCard(); }catch(e){} // 👆 فنگر پرنٹ آن/آف کارڈ بھریں
   var fnEl = document.getElementById('adm-filename-suggest');
   if(fnEl) fnEl.textContent = generatePKTFileName();
 }
@@ -6475,8 +6493,6 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   <div class="adm-section" id="adm-s5">
     <div class="adm-card">
       <button class="adm-save-btn" style="margin-bottom:14px" onclick="dgPinOpenSetup()">🔐 ایپ لاک پن (4 ہندسے) بنائیں / بدلیں</button>
-      <!-- 👆 فنگر پرنٹ لاگ اِن آن/آف — ایپ لاک پن کے ساتھ -->
-      <div id="dg-bio-settings-body" style="margin-bottom:14px"></div>
       <div style="font-size:15px;font-weight:900;color:#f59e0b;margin-bottom:14px">🔑 Change PIN</div>
       <div class="adm-label">Current PIN</div>
       <input id="adm-old-pin" class="adm-inp" type="password" inputmode="numeric" maxlength="4" placeholder="••••" style="margin-bottom:12px;letter-spacing:6px;text-align:center;font-size:20px">
@@ -6757,7 +6773,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG1310TU009';
+  var PK_APP_VERSION = 'DG1310TU010';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
