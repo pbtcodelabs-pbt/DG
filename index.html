@@ -1,6 +1,26 @@
 <html lang="en" dir="ltr" style="--appfont: 'Arial Narrow',Arial,sans-serif;"><head>
 <meta charset="UTF-8">
 <script>
+// 💳 Play Store ایپ (TWA) کی پہچان — پلے اسٹور والی ایپ میں ایکٹیویشن کوڈ کی جگہ Google Play سبسکرپشن
+(function(){
+  try{
+    var r = document.referrer || '';
+    if(r.indexOf('android-app://com.pbtcodelabs.dgkhata') === 0) sessionStorage.setItem('dgPlayApp','1');
+    if(sessionStorage.getItem('dgPlayApp') === '1' || typeof window.getDigitalGoodsService === 'function'){
+      document.documentElement.classList.add('dg-play');
+    }
+  }catch(e){}
+})();
+</script>
+<style>
+.dg-play .dg-direct-only{display:none!important}
+html:not(.dg-play) .dg-play-only{display:none!important}
+.dg-plan{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:#fff;border:2px solid #c7d2fe;border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;font-family:inherit;text-align:left}
+.dg-plan b{font-size:15px;color:#1e3a8a}
+.dg-plan span{font-size:15px;font-weight:900;color:#16a34a}
+.dg-plan small{display:block;font-size:11px;color:#64748b;font-weight:700}
+</style>
+<script>
 // ============================================================
 // 🔒 DG Khatabook — private storage namespace
 // GitHub Pages / Vercel پر ایک ہی ڈومین کی سب ایپس ایک ہی localStorage شیئر کرتی ہیں۔
@@ -1114,11 +1134,18 @@ select {
     <div class="lock-body">
       <div class="lock-icon" onclick="dgDevTap()" style="cursor:pointer">🔒</div>
       <div id="lock-expired-msg" class="lock-banner" dir="rtl" style="display:none;border-radius:12px;margin-bottom:16px;line-height:1.7;font-size:13px">⚠️ آپ کی سبسکرپشن ایکسپائر ہو چکی ہے۔ دوبارہ سبسکرائب کرنے کے لیے اپنی UID ڈویلپر کو بھیجیں۔ مطمئن رہیں — آپ کا ڈیٹا بالکل محفوظ ہے، ضائع نہیں ہوا۔ سبسکرپشن ملتے ہی آپ کی ایپ دوبارہ کام شروع کر دے گی اور آپ کا مکمل ڈیٹا محفوظ رہے گا۔</div>
-      <h2 style="font-size:22px;font-weight:900;margin-bottom:8px">Software Activation</h2>
-      <p style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:20px;line-height:1.6">Enter activation code to use the app, or start with a 3-day free trial.</p>
+      <h2 class="dg-direct-only" style="font-size:22px;font-weight:900;margin-bottom:8px">Software Activation</h2>
+      <p class="dg-direct-only" style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:20px;line-height:1.6">Enter activation code to use the app, or start with a 3-day free trial.</p>
+      <h2 class="dg-play-only" style="font-size:22px;font-weight:900;margin-bottom:8px">Subscribe</h2>
+      <p class="dg-play-only" style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:20px;line-height:1.6">Start with a 3-day free trial, or choose a Google Play subscription plan.</p>
       <button class="btn-trial" onclick="startTrial()">Start 3-Day Free Trial</button>
       <div class="divider"><div class="divider-line"></div><span class="divider-text">OR</span><div class="divider-line"></div></div>
-      <div class="lock-id-box">
+      <div id="dg-play-box" class="dg-play-only" style="margin-bottom:12px">
+        <div id="dg-play-plans"><div style="text-align:center;color:#94a3b8;font-size:13px;font-weight:800;padding:10px">⏳ Loading plans…</div></div>
+        <button type="button" id="dg-play-restore" onclick="dgPlayRestoreNow(this)" style="width:100%;margin-top:4px;background:#fff;color:#1e3a8a;border:1.5px solid #c7d2fe;border-radius:12px;padding:11px 8px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit">🔄 Restore Purchase (new phone / reinstall)</button>
+        <div style="font-size:11px;color:#94a3b8;font-weight:700;margin-top:8px;line-height:1.6">Payment is handled securely by Google Play. Subscriptions renew automatically — cancel anytime from Play Store → Payments &amp; subscriptions.</div>
+      </div>
+      <div class="lock-id-box dg-direct-only">
         <div class="lock-id-lbl">Your Unique User ID</div>
         <div class="lock-id-val" id="user-id-display">-----</div>
         <div style="font-size:11px;color:#94a3b8;font-weight:700;margin-top:6px;line-height:1.6">This is your unique ID — automatically generated the first time you opened the app. Send this ID to us for subscription, and we will generate an activation code for it.</div>
@@ -1130,8 +1157,8 @@ select {
         <div dir="rtl" style="font-size:11px;color:#c2410c;font-weight:800;margin-top:8px;line-height:1.6">⚠️ میسج سینڈ کرنے سے پہلے اپنا نام ضرور لکھیں — بغیر نام کے کوڈ کی شناخت مشکل ہو جاتی ہے۔</div>
       </div>
 
-      <button type="button" id="dg-lock-more-toggle" onclick="dgLockMoreToggle()" style="width:100%;background:#f1f5f9;color:#334155;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 8px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:10px">🔧 مزید آپشنز (میری سبسکرپشن کی تفصیل) ▾</button>
-      <div id="dg-lock-more" dir="rtl" style="display:none;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:12px;text-align:right">
+      <button type="button" class="dg-direct-only" id="dg-lock-more-toggle" onclick="dgLockMoreToggle()" style="width:100%;background:#f1f5f9;color:#334155;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 8px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:10px">🔧 مزید آپشنز (میری سبسکرپشن کی تفصیل) ▾</button>
+      <div id="dg-lock-more" class="dg-direct-only" dir="rtl" style="display:none;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:12px;text-align:right">
         <div id="dg-lock-more-loading" style="text-align:center;color:#94a3b8;font-size:12px;font-weight:800;padding:6px">⏳ چیک ہو رہا ہے...</div>
         <div id="dg-lock-more-body" style="display:none">
           <div style="font-size:10.5px;color:#94a3b8;font-weight:900;text-transform:uppercase;margin-bottom:4px">Activation Code</div>
@@ -1152,9 +1179,9 @@ select {
         </div>
       </div>
 
-      <input type="text" id="activation-key" class="form-inp" placeholder="Enter Activation Code" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-align:center;letter-spacing:.1em;font-size:18px;margin-bottom:6px">
+      <input type="text" id="activation-key" class="form-inp dg-direct-only" placeholder="Enter Activation Code" dir="ltr" autocapitalize="characters" autocomplete="off" style="text-align:center;letter-spacing:.1em;font-size:18px;margin-bottom:6px">
       <div id="key-error" style="color:#dc2626;font-size:13px;font-weight:700;margin-bottom:10px;display:none">Wrong code! Try again</div>
-      <button class="btn-unlock" onclick="tryUnlock()">Unlock →</button>
+      <button class="btn-unlock dg-direct-only" onclick="tryUnlock()">Unlock →</button>
       
       <!-- DEVELOPER CONTACT BUTTONS - COMPACT SIZE -->
       <div style="margin-top:16px;display:flex;gap:8px;justify-content:center">
@@ -2306,7 +2333,7 @@ function showWAFailureAndSwitchToSMS(){
 function openDevMail(){
   var c = _devContact();
   if(!c.email){ alert('⚠️ Developer email is not set. Set it in Admin Panel > 💬 Developer tab.'); return; }
-  var subject = _isLoginScreen() ? 'Activation Code Request' : 'DG Khatabook - Support / Suggestion';
+  var subject = (_isLoginScreen() && !dgIsPlayApp()) ? 'Activation Code Request' : 'DG Khatabook - Support / Suggestion';
   window.location.href = 'mailto:'+c.email+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(_devChatMessage());
 }
 
@@ -2518,7 +2545,7 @@ async function dgCheckAndLockTrialOnline(fp){
 // ---------- On every app open (paid users): re-check the code online — instant remote revoke if the developer suspends it ----------
 async function dgResyncLicenseOnline(){
   const code = localStorage.getItem('dgSubLastCode');
-  if(!code || code==='DEV') return;
+  if(!code || code==='DEV' || code.indexOf('PLAY:')===0) return;
   try{
     const res = await dgAuthFetch(`licenses/${encodeURIComponent(code)}?key=${DG_FIREBASE_API_KEY}`);
     if(!res.ok) return;
@@ -2538,6 +2565,7 @@ async function dgOnAppOpenSyncChecks(){
   try{
     const fp = await getDeviceFingerprint();
     dgFetchDevContact();
+    if(dgIsPlayApp()) dgPlayRetryAcks();
     if(localStorage.getItem('ek_act')==='YES') dgResyncLicenseOnline();
     else dgCheckAndLockTrialOnline(fp);
   }catch(e){}
@@ -2582,6 +2610,219 @@ async function dgActivateWithCode(code){
   return {success:true};
 }
 
+// ============================================================
+// 💳 GOOGLE PLAY BILLING — صرف پلے اسٹور والی ایپ (TWA) میں۔ ویب/Direct والا ایکٹیویشن کوڈ نظام ویسا ہی ہے۔
+// ⚠️ نیچے کے Product ID بالکل انہی ناموں سے Play Console → Monetize → Subscriptions میں بنانے ہیں۔
+// ایک سبسکرپشن = ایک مدت (Digital Goods API بیس پلان نہیں چن سکتی)۔ مفت ٹرائل ایپ کا اپنا 3 دن والا ہے۔
+// ============================================================
+const DG_PLAY_PACKAGE = 'com.pbtcodelabs.dgkhata';
+const DG_PLAY_PRODUCTS = [
+  { sku: 'dg_khata_1m',  days: 30,  label: '1 Month'  },
+  { sku: 'dg_khata_3m',  days: 90,  label: '3 Months' },
+  { sku: 'dg_khata_6m',  days: 180, label: '6 Months' },
+  { sku: 'dg_khata_12m', days: 365, label: '1 Year'   },
+];
+const DG_PLAY_VERIFY_URL = 'https://aio-pos-verify.pbtcodelabs.workers.dev';
+const DG_PLAY_BILLING = 'https://play.google.com/billing';
+
+function dgIsPlayApp(){ return document.documentElement.classList.contains('dg-play'); }
+function dgPlayAvailable(){ return typeof window.getDigitalGoodsService === 'function'; }
+function _dgWithTimeout(promise, ms){
+  return Promise.race([promise, new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout')); }, ms); })]);
+}
+
+// ---------- سرور (Cloudflare) سے Google کی اصل تصدیق — ختم ہونے کی تاریخ اور acknowledge ----------
+async function dgPlayVerify(purchaseToken, sku){
+  try{
+    const ctrl = new AbortController();
+    const t = setTimeout(function(){ ctrl.abort(); }, 15000);
+    const res = await fetch(DG_PLAY_VERIFY_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ purchaseToken: purchaseToken, sku: sku, packageName: DG_PLAY_PACKAGE }),
+      signal: ctrl.signal
+    });
+    clearTimeout(t);
+    if(!res.ok) return null;
+    const d = await res.json();
+    return (d && typeof d === 'object') ? d : null;
+  }catch(e){ return null; }
+}
+
+// ---------- قیمتیں Play Console سے (ہر بار نیا رابطہ، 4 کوششیں) ----------
+let _dgPlayDetails = null;
+async function dgPlayLoadDetails(){
+  if(!dgPlayAvailable()) return null;
+  if(_dgPlayDetails) return _dgPlayDetails;
+  const waits = [0, 1500, 3000, 5000];
+  for(let i = 0; i < waits.length; i++){
+    if(waits[i]) await new Promise(function(r){ setTimeout(r, waits[i]); });
+    try{
+      const service = await _dgWithTimeout(window.getDigitalGoodsService(DG_PLAY_BILLING), 5000);
+      const details = await _dgWithTimeout(service.getDetails(DG_PLAY_PRODUCTS.map(function(p){ return p.sku; })), 6000);
+      if(details && details.length){ _dgPlayDetails = details; return details; }
+    }catch(e){ console.warn('Play details try '+(i+1)+' failed', e); }
+  }
+  return null;
+}
+
+function _dgPlayPrice(d){
+  try{ return new Intl.NumberFormat(undefined, {style:'currency', currency:d.price.currency}).format(Number(d.price.value)); }
+  catch(e){ return (d && d.price) ? (d.price.currency+' '+d.price.value) : ''; }
+}
+
+async function dgPlayRenderPlans(boxId){
+  boxId = boxId || 'dg-play-plans';
+  const box = document.getElementById(boxId);
+  if(!box) return;
+  if(!dgPlayAvailable()){
+    box.innerHTML = '<div style="text-align:center;color:#c2410c;font-size:12.5px;font-weight:800;padding:8px;line-height:1.6">Subscription plans are available in the app installed from Google Play Store.</div>';
+    return;
+  }
+  box.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:13px;font-weight:800;padding:10px">⏳ Loading plans…</div>';
+  const details = await dgPlayLoadDetails();
+  const plans = details ? DG_PLAY_PRODUCTS.filter(function(p){ return details.some(function(d){ return d.itemId === p.sku; }); }) : [];
+  if(!plans.length){
+    box.innerHTML = '<div style="text-align:center;color:#c2410c;font-size:12.5px;font-weight:800;padding:8px;line-height:1.6">⚠️ Could not load plans from Google Play. Check internet and try again.</div>'+
+      '<button type="button" onclick="dgPlayRenderPlans(\''+boxId+'\')" style="width:100%;background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:10px;padding:10px;font-size:12.5px;font-weight:900;font-family:inherit">🔁 Try again</button>';
+    if(typeof dgFitLock === 'function') dgFitLock();
+    return;
+  }
+  box.innerHTML = plans.map(function(p){
+    const d = details.find(function(x){ return x.itemId === p.sku; });
+    return '<button type="button" class="dg-plan" onclick="dgPlayBuy(\''+p.sku+'\')"><div><b>'+p.label+'</b><small>'+p.days+' days · auto-renews</small></div><span>'+_dgPlayPrice(d)+'</span></button>';
+  }).join('');
+  if(typeof dgFitLock === 'function') dgFitLock();
+}
+
+// ---------- خریداری مکمل ہونے پر مقامی سبسکرپشن (وہی ek_* نظام) ----------
+function _dgPlayApply(fp, expiryYmd, sku){
+  const expEpoch = new Date(expiryYmd+'T23:59:59').getTime();
+  if(!expEpoch || expEpoch < Date.now()) return false;
+  const cur = _dgLocalSubExpiry(fp);
+  if(cur && cur >= expEpoch) return true;
+  _dgSetLocalSub(fp, expEpoch, 'PLAY:'+sku);
+  localStorage.setItem('ek_ever_used', 'YES');
+  return true;
+}
+
+async function dgPlayBuy(sku){
+  if(!dgPlayAvailable()){ alert('❌ This purchase works only in the app installed from Google Play Store.'); return; }
+  const plan = DG_PLAY_PRODUCTS.find(function(p){ return p.sku === sku; });
+  if(!plan) return;
+  try{
+    const request = new PaymentRequest([{ supportedMethods: DG_PLAY_BILLING, data: { sku: sku } }]);
+    const response = await request.show();
+    const purchaseToken = response.details.purchaseToken;
+    await response.complete('success');
+    const fp = await getDeviceFingerprint();
+    const ver = await dgPlayVerify(purchaseToken, sku);
+    // سرور کی بتائی اصل تاریخ؛ سرور جواب نہ دے تو (ادائیگی ابھی ہوئی ہے) پیکج کے دن
+    let exp = (ver && ver.access && ver.expiry) ? ver.expiry : '';
+    if(!exp){ const d = new Date(Date.now() + plan.days*86400000); exp = d.toISOString().slice(0,10); }
+    if(!(ver && ver.acknowledged)) _dgPlayQueueAck(purchaseToken, sku);
+    _dgPlayApply(fp, exp, sku);
+    _clearTrialTimer();
+    dgPlayClosePlans();
+    alert('✅ Subscription activated via Google Play. Thank you!');
+    showApp();
+    _renderSubInfoBar();
+  }catch(err){
+    console.error('Play purchase failed', err);
+    if(err && err.name !== 'AbortError') alert('❌ Purchase could not be completed. Please try again.');
+  }
+}
+function _clearTrialTimer(){ try{ if(_trialTimerInterval) clearInterval(_trialTimerInterval); }catch(e){} }
+
+// ---------- منظوری کی قطار: سرور acknowledge نہ کر سکے تو اگلی بار دوبارہ (ورنہ Google 3 دن میں رقم واپس کر دیتا ہے) ----------
+function _dgPlayQueueAck(token, sku){
+  try{
+    const list = JSON.parse(localStorage.getItem('dgPlayPendingAcks') || '[]');
+    if(!list.some(function(x){ return x.token === token; })) list.push({ token: token, sku: sku, at: Date.now() });
+    localStorage.setItem('dgPlayPendingAcks', JSON.stringify(list));
+  }catch(e){}
+}
+async function dgPlayRetryAcks(){
+  let list = [];
+  try{ list = JSON.parse(localStorage.getItem('dgPlayPendingAcks') || '[]'); }catch(e){}
+  if(!list.length) return;
+  const keep = [];
+  for(const it of list){
+    if(!it || !it.token || (Date.now() - (it.at||0)) > 10*86400000) continue;
+    const v = await dgPlayVerify(it.token, it.sku);
+    if(!(v && v.acknowledged)) keep.push(it);
+  }
+  localStorage.setItem('dgPlayPendingAcks', JSON.stringify(keep));
+}
+
+// ---------- Restore / تجدید: Play کی فہرست سے خریداریاں، سرور سے تصدیق، سب سے آگے والی تاریخ ----------
+async function dgPlayRestoreCore(){
+  if(!dgPlayAvailable()) return { status:'unavailable' };
+  let purchases = null;
+  for(let i = 0; i < 3 && purchases === null; i++){
+    try{
+      const service = await _dgWithTimeout(window.getDigitalGoodsService(DG_PLAY_BILLING), 8000);
+      purchases = await _dgWithTimeout(service.listPurchases(), 10000);
+    }catch(e){ await new Promise(function(r){ setTimeout(r, 1500); }); }
+  }
+  if(purchases === null) return { status:'unavailable' };
+  const mine = purchases.filter(function(p){ return DG_PLAY_PRODUCTS.some(function(x){ return x.sku === p.itemId; }); });
+  if(!mine.length) return { status:'none' };
+  const vers = await Promise.all(mine.map(function(p){ return dgPlayVerify(p.purchaseToken, p.itemId); }));
+  let best = '', bestSku = '', anyReply = false;
+  vers.forEach(function(v, i){
+    if(v) anyReply = true;
+    if(v && v.access && v.expiry && v.expiry > best){ best = v.expiry; bestSku = mine[i].itemId; }
+  });
+  if(!best) return { status: anyReply ? 'expired' : 'unavailable' };
+  const fp = await getDeviceFingerprint();
+  _dgPlayApply(fp, best, bestSku);
+  return { status:'restored', expiry: best };
+}
+
+async function dgPlayRestoreNow(btn){
+  if(!dgPlayAvailable()){ alert('ℹ️ Restore works only in the app installed from Google Play Store.'); return; }
+  const old = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Checking Google Play…'; }
+  let r;
+  try{ r = await dgPlayRestoreCore(); }catch(e){ r = { status:'unavailable' }; }
+  if(btn){ btn.disabled = false; btn.textContent = old; }
+  if(r.status === 'restored'){
+    alert('✅ Purchase restored. Valid until '+r.expiry);
+    if(_isLoginScreen()) showApp(); else { _renderSubInfoBar(); if(typeof _dgAdmFillSub === 'function') _dgAdmFillSub(); }
+  } else if(r.status === 'none'){
+    alert('ℹ️ No subscription found on this Google Play account.\nMake sure the same Gmail is signed in to Play Store.');
+  } else if(r.status === 'expired'){
+    alert('⚠️ Your Google Play subscription has ended. Please choose a plan to continue.');
+  } else {
+    alert('⚠️ Could not reach Google Play. Check internet and try again.');
+  }
+}
+
+// ---------- ایپ کے اندر سے (ٹرائل کے دوران / تجدید کے لیے) پیکج کھولیں ----------
+function dgPlayOpenPlans(){
+  let m = document.getElementById('dg-play-modal');
+  if(!m){
+    m = document.createElement('div');
+    m.id = 'dg-play-modal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:2147482000;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box';
+    m.innerHTML = '<div style="background:#f8fafc;border-radius:18px;padding:18px;width:100%;max-width:380px;max-height:90vh;overflow:auto;box-sizing:border-box">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b style="font-size:18px;color:#0f172a">📦 Subscription Plans</b>'+
+      '<button type="button" onclick="dgPlayClosePlans()" style="background:#e2e8f0;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer">✕</button></div>'+
+      '<div id="dg-play-plans2"></div>'+
+      '<button type="button" onclick="dgPlayRestoreNow(this)" style="width:100%;margin-top:4px;background:#fff;color:#1e3a8a;border:1.5px solid #c7d2fe;border-radius:12px;padding:11px 8px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit">🔄 Restore Purchase</button>'+
+      '<div style="font-size:11px;color:#94a3b8;font-weight:700;margin-top:8px;line-height:1.6">Payment is handled securely by Google Play. Subscriptions renew automatically — cancel anytime from Play Store.</div></div>';
+    m.addEventListener('click', function(e){ if(e.target === m) dgPlayClosePlans(); });
+    document.body.appendChild(m);
+  }
+  m.style.display = 'flex';
+  dgPlayRenderPlans('dg-play-plans2');
+}
+function dgPlayClosePlans(){ const m = document.getElementById('dg-play-modal'); if(m) m.style.display = 'none'; }
+
+function dgPlayManageSubs(){
+  window.open('https://play.google.com/store/account/subscriptions?package='+DG_PLAY_PACKAGE, '_blank');
+}
+
 async function initLock(){
   dgFetchDevContact(); // background — ڈویلپر کا تازہ نمبر کلاؤڈ سے
   // Clean up old empty values and set defaults
@@ -2609,6 +2850,10 @@ async function initLock(){
   // ☁️ Reinstall/data-clear safety net — if this device has no valid local subscription,
   // silently check Firestore devices/{uid} and restore it (does nothing if offline or nothing to restore).
   await Promise.race([dgRestoreSubFromCloud(fp), new Promise(function(r){ setTimeout(r, 7000); })]);
+  // 💳 Play Store ایپ: مقامی سبسکرپشن نہ ہو/ختم ہو تو Google Play سے خاموشی سے تجدید/بحالی (خودکار renew بھی یہیں پکڑی جاتی ہے)
+  if(dgIsPlayApp() && dgPlayAvailable() && !(_dgLocalSubExpiry(fp) > Date.now())){
+    await Promise.race([dgPlayRestoreCore().catch(function(){}), new Promise(function(r){ setTimeout(r, 9000); })]);
+  }
 
   // Activation check — real expiry date synced from Firestore (developer picks the days)
   if(localStorage.getItem('ek_act') === 'YES'){
@@ -2652,7 +2897,9 @@ async function initLock(){
   localStorage.setItem('ek_uid', fp);
   const expiredMsgEl = document.getElementById('lock-expired-msg');
   if(expiredMsgEl) expiredMsgEl.style.display = (localStorage.getItem('ek_ever_used') === 'YES') ? 'block' : 'none';
+  if(expiredMsgEl && dgIsPlayApp()) expiredMsgEl.textContent = '⚠️ آپ کی سبسکرپشن / ٹرائل ختم ہو چکا ہے۔ آگے چلانے کے لیے نیچے سے کوئی پیکج چنیں۔ آپ کا ڈیٹا بالکل محفوظ ہے۔';
   document.getElementById('lock-screen').style.display = 'flex';
+  if(dgIsPlayApp()) dgPlayRenderPlans();
   dgFitLock(); setTimeout(dgFitLock, 250); setTimeout(dgFitLock, 1200);
   const dcfWrap = document.querySelector('.dcf-wrap');
   if(dcfWrap) dcfWrap.style.display = 'none'; // hide floating bubble on lock screen — compact WhatsApp/Gmail/SMS buttons already shown below
@@ -2933,6 +3180,7 @@ function _fmtDate(d){
 function _renderSubInfoBar(){
   const bar = document.getElementById('sub-info-bar');
   if(!bar) return;
+  if(dgIsPlayApp()){ bar.style.cursor='pointer'; bar.onclick = dgPlayOpenPlans; }
   const activated = localStorage.getItem('ek_act');
 
   if(activated === 'YES'){
@@ -2955,7 +3203,7 @@ function _renderSubInfoBar(){
     const endDate = new Date(startTs + 3*86400000);
     const remainingDays = Math.max(0, Math.ceil((endDate - Date.now())/86400000));
     bar.style.display = 'block';
-    bar.innerHTML = `🔶 Trial Started: ${_fmtDate(startDate)} &nbsp;|&nbsp; Trial Expires: ${_fmtDate(endDate)} &nbsp;|&nbsp; Remaining Days: ${remainingDays}`;
+    bar.innerHTML = `🔶 Trial Started: ${_fmtDate(startDate)} &nbsp;|&nbsp; Trial Expires: ${_fmtDate(endDate)} &nbsp;|&nbsp; Remaining Days: ${remainingDays}${dgIsPlayApp() ? ' &nbsp;|&nbsp; 📦 Tap to Subscribe' : ''}`;
   }
 }
 
@@ -2980,7 +3228,7 @@ function _startTrialTimer(){
       clearInterval(_trialTimerInterval);
       document.getElementById('app').style.display='none';
       _clearTrialData();
-      alert('⛔ Your 3-day free trial has ended!\nEnter activation code or contact 0320 6 793 793.');
+      alert(dgIsPlayApp() ? '⛔ Your 3-day free trial has ended!\nPlease choose a Google Play subscription plan.' : '⛔ Your 3-day free trial has ended!\nEnter activation code or contact 0320 6 793 793.');
       location.reload();
       return;
     }
@@ -3081,7 +3329,7 @@ async function startTrial(){
   if(existing){
     const oldTs = _decodeTime(existing);
     const elapsed = (Date.now()-oldTs)/86400000;
-    if(elapsed >= 3){ alert('⛔ Your 3-day trial has ended. Enter activation code.'); return; }
+    if(elapsed >= 3){ alert(dgIsPlayApp() ? '⛔ Your 3-day trial has ended. Please choose a subscription plan.' : '⛔ Your 3-day trial has ended. Enter activation code.'); return; }
   }
   // اگر اس ڈیوائس کا ٹرائل پہلے سرور پر درج ہے تو نیا ٹرائل شروع ہی نہ کریں (اندر جا کر باہر نکلنے کا چکر نہ بنے)
   try{
@@ -3090,7 +3338,7 @@ async function startTrial(){
       localStorage.setItem('ek_ever_used','YES');
       const em = document.getElementById('lock-expired-msg'); if(em) em.style.display='block';
       dgFitLock();
-      alert('⛔ اس ڈیوائس پر مفت ٹرائل پہلے استعمال ہو چکا ہے۔\nسبسکرپشن کے لیے اپنی UID ڈویلپر کو بھیجیں۔');
+      alert(dgIsPlayApp() ? '⛔ اس ڈیوائس پر مفت ٹرائل پہلے استعمال ہو چکا ہے۔\nآگے چلانے کے لیے نیچے سے کوئی پیکج چنیں۔' : '⛔ اس ڈیوائس پر مفت ٹرائل پہلے استعمال ہو چکا ہے۔\nسبسکرپشن کے لیے اپنی UID ڈویلپر کو بھیجیں۔');
       return;
     }
   }catch(e){ /* offline — اجازت دیں، بعد میں آن لائن چیک ہوگا */ }
@@ -6496,7 +6744,10 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
         <span>باقی دن</span><span id="adm-sub-days">—</span>
       </div>
     </div>
-    <button class="btn-unlock" style="background:#0ea5e9;margin:0 0 10px" onclick="dgAdmRefreshSub()">🔄 سرور سے تازہ کریں</button>
+    <button class="btn-unlock dg-play-only" style="background:#ea580c;margin:0 0 10px" onclick="dgPlayOpenPlans()">📦 پیکج خریدیں / تجدید کریں</button>
+    <button class="btn-unlock dg-play-only" style="background:#16a34a;margin:0 0 10px" onclick="dgPlayRestoreNow(this)">🔄 Google Play سے تازہ کریں / Restore</button>
+    <button class="btn-unlock dg-play-only" style="background:#1e3a8a;margin:0 0 10px" onclick="dgPlayManageSubs()">⚙️ Google Play سبسکرپشن (منسوخ / تبدیل)</button>
+    <button class="btn-unlock dg-direct-only" style="background:#0ea5e9;margin:0 0 10px" onclick="dgAdmRefreshSub()">🔄 سرور سے تازہ کریں</button>
     <div style="font-size:11px;color:#64748b;font-weight:700;line-height:1.7">اگر کبھی ایپ لاک ہو جائے یا سبسکرپشن غائب نظر آئے تو پہلے اوپر "🔄 سرور سے تازہ کریں" آزمائیں۔ کام نہ کرے تو یہ Activation Code کاپی کر کے لاک سکرین کے "Enter Activation Code" خانے میں لکھ کر Unlock دبائیں۔</div>
   </div>
 
@@ -6783,7 +7034,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG1310TU011';
+  var PK_APP_VERSION = 'DG1410WE012';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
