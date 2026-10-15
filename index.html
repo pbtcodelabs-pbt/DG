@@ -1242,9 +1242,9 @@ select {
     <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:2px">
       <button onclick="showEditHeader()" title="نام میں ترمیم" style="background:rgba(255,255,255,.18);border:none;color:#fff;width:24px;height:24px;min-width:24px;border-radius:50%;font-size:11px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0">✏️</button>
       <button onclick="pkRefreshApp()" title="تازہ کریں" style="background:rgba(255,255,255,.18);border:none;color:#fff;width:24px;height:24px;min-width:24px;border-radius:50%;font-size:12px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0">🔄</button>
-      <div class="hdr-sub" id="hdr-shopname" style="margin:0">Piarey Bhai Traders | Abdul Hafeez Gujjar</div>
+      <div class="hdr-sub" id="hdr-shopname" style="margin:0;cursor:pointer" onclick="showEditHeader()">My Shop</div>
     </div>
-    <div class="hdr-phone" id="hdr-phone">📱 ‎0320 6 793 793‎</div>
+    <div class="hdr-phone" id="hdr-phone" style="cursor:pointer" onclick="showEditHeader()">✏️ Edit Number</div>
     <!-- Compact action row -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px;gap:5px">
       
@@ -2187,7 +2187,15 @@ function _markActiveFontOption(key){
   document.documentElement.style.setProperty('--appfont', APP_FONT_STACKS[key] || APP_FONT_STACKS.arialblack);
 })();
 
-function getShop(){ return localStorage.getItem('custom_shop_name')||'Piarey Bhai Traders'; }
+function getShop(){ return localStorage.getItem('custom_shop_name')||'My Shop'; }
+// خالی چیزیں چھوڑ کر جوڑیں (نام/نمبر نہ لکھا ہو تو رسید پر خالی " | " نہ آئے)
+function _nz(sep, arr){ return arr.filter(function(x){ return x && String(x).trim(); }).join(sep); }
+// ہیڈر: دکان | مالک — نمبر نہ ہو تو "✏️ Edit Number" (ٹیپ سے ترمیم)
+function dgPaintHeader(){
+  var a=document.getElementById('hdr-shopname'), b=document.getElementById('hdr-phone');
+  if(a) a.textContent=_nz(' | ',[getShop(),getOwner()]);
+  if(b) b.textContent=getPhone()?('📱 '+getPhone()):'✏️ Edit Number';
+}
 
  // Automatic filename generator — every new file always uses this formula
  // Formula: PKT + day(no leading zero) + month(no leading zero) + 2-letter day name + hour:minute(24hr) + .html
@@ -2203,8 +2211,8 @@ function generatePKTFileName(){
   return 'GG'+ggStamp()+'.html';
 }
 window.APP_FILE_NAME = generatePKTFileName();
-function getOwner(){ return localStorage.getItem('custom_owner_name')||'Abdul Hafeez Gujjar'; }
-function getPhone(){ return localStorage.getItem('custom_phone')||'‎0320 6 793 793‎'; }
+function getOwner(){ return localStorage.getItem('custom_owner_name')||''; }
+function getPhone(){ return localStorage.getItem('custom_phone')||''; }
 
  // Developer chat bubble (same setting works on both login page and main home page)
 function _devContact(){
@@ -3166,9 +3174,7 @@ function _showAppCore(){
   document.getElementById('app').style.display='flex';
   const dcfWrap = document.querySelector('.dcf-wrap');
   if(dcfWrap) dcfWrap.style.display = 'flex'; // show floating bubble again inside the main app
-  const shop=getShop(), owner=getOwner(), phone=getPhone();
-  document.getElementById('hdr-shopname').textContent=shop+' | '+owner;
-  document.getElementById('hdr-phone').textContent='📱 '+phone;
+  dgPaintHeader();
   loadData(); renderStats(); renderList();
   // start subscription/trial timer and info bar
   _startTrialTimer();
@@ -3801,7 +3807,7 @@ async function printAllReport(){
   // Shop | Owner | Phone — one line
   ctx.font='bold 15px '+UF; ctx.direction='ltr'; ctx.textAlign='center';
   ctx.fillStyle='rgba(255,255,255,0.92)';
-  ctx.fillText(getShop()+' | '+getOwner()+'  |  '+getPhone(),W/2,PAD+60);
+  ctx.fillText(_nz('  |  ',[getShop(),getOwner(),getPhone()]),W/2,PAD+60);
 
   // ── Info strip
   const stripY=PAD+HDR-PAD;
@@ -3941,7 +3947,7 @@ async function printAllReport(){
   ctx.beginPath(); ctx.roundRect(PAD,fy+FOOT-20,W-PAD*2,20,{upperLeft:0,upperRight:0,lowerLeft:18,lowerRight:18}); ctx.fill();
 
   ctx.fillStyle='#0f172a'; ctx.font='900 18px '+UF; ctx.textAlign='center'; ctx.direction='ltr';
-  ctx.fillText('GG Khatabook  |  '+getShop()+'  |  '+getPhone(),W/2,fy+28);
+  ctx.fillText(_nz('  |  ',['GG Khatabook',getShop(),getPhone()]),W/2,fy+28);
   ctx.fillStyle='#64748b'; ctx.font='bold 15px '+UF; ctx.direction='ltr'; ctx.textAlign='center';
   ctx.fillText('This report was generated automatically — '+today,W/2,fy+54);
 
@@ -4394,7 +4400,7 @@ function saveEditProfile(){
 // EDIT HEADER
 // ============================================================
 function showEditHeader(){
-  document.getElementById('eh-shop').value=getShop();
+  document.getElementById('eh-shop').value=localStorage.getItem('custom_shop_name')||'';
   document.getElementById('eh-owner').value=getOwner();
   document.getElementById('eh-phone').value=getPhone();
   document.getElementById('modal-edit-header').style.display='flex';
@@ -4402,8 +4408,7 @@ function showEditHeader(){
 function saveHeader(){
   const s=document.getElementById('eh-shop').value.trim(), o=document.getElementById('eh-owner').value.trim(), p=document.getElementById('eh-phone').value.trim();
   localStorage.setItem('custom_shop_name',s); localStorage.setItem('custom_owner_name',o); localStorage.setItem('custom_phone',p);
-  document.getElementById('hdr-shopname').textContent=s+' | '+o;
-  document.getElementById('hdr-phone').textContent='📱 '+p;
+  dgPaintHeader();
   closeModal('modal-edit-header');
 }
 
@@ -4480,7 +4485,7 @@ function showMsgModal(type){
   const prevLbl=prevNet>=0?'Received':'Paid';
   const prevAmtStr=fmt(Math.abs(prevNet))+' Rupees';
 
-  const shopSig=`\n— ${getShop()}\n${getOwner()}\n📱 ${getPhone()}`;
+  const shopSig='\n— '+_nz('\n',[getShop(),getOwner(),getPhone()?('📱 '+getPhone()):'']);
   const msgs=[
     {lbl:'Balance Reminder',clr:'#2563eb',text:`As-salamu alaykum wa rahmatullahi wa barakatuh\nDear brother ${currentCustomer}!\nOur current balance owed to us:\n💰 ${freshAmt}\nPlease settle it at your earliest convenience.\nJazakAllah Khair${shopSig}`},
     {lbl:'Received Receipt',clr:'#16a34a',text:`As-salamu alaykum wa rahmatullahi wa barakatuh\nDear brother ${currentCustomer}!\n\nPrevious balance: ${prevAmtStr}\nPayment received: ${lastAmt}\nRemaining balance: ${freshAmt}\n\nThank you!${shopSig}`},
@@ -4590,7 +4595,7 @@ function printLedger(){
   ctx.font=`bold 28px ${NF}`; ctx.textAlign='center'; ctx.direction='ltr';
   ctx.fillText('GG KHATABOOK',W/2,26);
   ctx.font=`bold 18px ${F}`; ctx.direction='ltr'; ctx.textAlign='center';
-  ctx.fillText(getShop()+' | '+getOwner(),W/2,48);
+  ctx.fillText(_nz(' | ',[getShop(),getOwner()]),W/2,48);
 
   // Phone + date row
   ctx.fillStyle='#1e293b'; ctx.fillRect(0,58,W,26);
@@ -4672,7 +4677,7 @@ function printLedger(){
   // ===== Footer =====
   const fy=thY+32+rows.length*rowH+10;
   ctx.fillStyle='#64748b'; ctx.font=`11px ${F}`; ctx.textAlign='center'; ctx.direction='ltr';
-  ctx.fillText('GG KHATABOOK — '+getShop()+' — '+getPhone(),W/2,fy+20);
+  ctx.fillText(_nz(' — ',['GG KHATABOOK',getShop(),getPhone()]),W/2,fy+20);
 
   // Show portrait popup
   const img=canvas.toDataURL('image/png');
@@ -5780,8 +5785,8 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 function _admUpdateWAPreview(){
   var header=document.getElementById('adm-wa-header')?.value||localStorage.getItem('pk_wa_header')||'';
-  var shop=localStorage.getItem('custom_shop_name')||'Piarey Bhai Traders';
-  var phone=localStorage.getItem('custom_phone')||'0320 6 793 793';
+  var shop=localStorage.getItem('custom_shop_name')||'My Shop';
+  var phone=localStorage.getItem('custom_phone')||'Edit Number';
   var preview=header
     .replace('{shop}',shop)
     .replace('{phone}',phone)
@@ -6647,9 +6652,9 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     <div class="adm-card">
       <div style="font-size:15px;font-weight:900;color:#f59e0b;margin-bottom:14px">🏪 Business Information</div>
       <div class="adm-label">Shop / Business Name</div>
-      <input id="adm-shop" class="adm-inp adm-inp-rtl" placeholder="e.g. Piarey Bhai Traders" style="margin-bottom:12px">
+      <input id="adm-shop" class="adm-inp adm-inp-rtl" placeholder="e.g. Al-Madina General Store" style="margin-bottom:12px">
       <div class="adm-label">Owner Name</div>
-      <input id="adm-owner" class="adm-inp adm-inp-rtl" placeholder="e.g. Abdul Hafeez Gujjar" style="margin-bottom:12px">
+      <input id="adm-owner" class="adm-inp adm-inp-rtl" placeholder="e.g. Ali Raza" style="margin-bottom:12px">
       <div class="adm-label">Mobile Number</div>
       <input id="adm-phone" class="adm-inp" placeholder="0300 1234567" style="margin-bottom:4px;direction:ltr">
       <div class="adm-hint">This number will be used in posters and WhatsApp messages</div>
@@ -6711,8 +6716,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     </div>
     <div class="adm-card">
       <div style="font-size:13px;font-weight:900;color:#94a3b8;margin-bottom:8px">📋 Message Example</div>
-      <div id="adm-wa-preview" style="background:#075e54;border-radius:12px;padding:12px;font-size:12px;color:#dcf8c6;direction:ltr;line-height:1.7;white-space:pre-wrap">🏪 Piarey Bhai Traders
-📞 0320 6 793 793
+      <div id="adm-wa-preview" style="background:#075e54;border-radius:12px;padding:12px;font-size:12px;color:#dcf8c6;direction:ltr;line-height:1.7;white-space:pre-wrap">🏪 My Shop
+📞 Edit Number
 
 ━━━━━━━━━━
 📋 Detail:
@@ -7039,7 +7044,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG1510TH018';
+  var PK_APP_VERSION = 'GG1510TH019';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
