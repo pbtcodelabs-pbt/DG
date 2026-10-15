@@ -5053,14 +5053,14 @@ async function backupDataAsync(){
     const parsed = JSON.parse(data);
     if(parsed.length===0){ alert('No data available — add a customer first'); return; }
     const now = new Date();
-    // Filename format: BkGG + ggStamp() + .json — مثال BkGG1510TH0640AM.json
+    // Filename format: BKGG + ggStamp() + .json — مثال BKGG1510TH0739AM.json
     const dd=now.getDate();
     const mo=now.getMonth()+1;
     const dayAbbrevs=['SU','MO','TU','WE','TH','FR','SA'];
     const dayAbbr=dayAbbrevs[now.getDay()];
     const hh=String(now.getHours()).padStart(2,'0');
     const mm=String(now.getMinutes()).padStart(2,'0');
-    const fname = `BkGG${ggStamp()}.json`;
+    const fname = `BKGG${ggStamp()}.json`;
 
     let savedToFolder = false;
     const dir = await pkGetBackupDir(true);
@@ -7039,7 +7039,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG1510TH019';
+  var PK_APP_VERSION = 'GG1510TH018';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7098,8 +7098,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   }
   function fmtTime(ms){ var d=new Date(Number(ms)); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()+'  '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
   function today(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
-  // BkGG1510TH0640AM : Bk + GG + تاریخ + مہینہ + دن(2 حرف) + وقت (12 گھنٹے) + AM/PM
-  function fileStamp(){ return 'BkGG'+ggStamp(); }
+  // BKGG1510TH0739AM : BK + GG + تاریخ + مہینہ + دن(2 حرف) + وقت (12 گھنٹے) + AM/PM
+  function fileStamp(){ return 'BKGG'+ggStamp(); }
 
 
   // ---------- progress bar (top of home page) ----------
@@ -7202,7 +7202,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   }
   async function download(tok, id){ return api('/drive/v3/files/'+id+'?alt=media', tok, {text:true}); }
   async function listBackups(tok, fid, size){
-    var l=await api('/drive/v3/files?fields=files(id,name,createdTime,modifiedTime,appProperties)&orderBy=createdTime%20desc&pageSize='+(size||30)+'&q='+q("'"+fid+"' in parents and (name contains 'BkGG' or name contains 'BkAHG' or name contains 'BkDGK') and trashed=false"), tok);
+    var l=await api('/drive/v3/files?fields=files(id,name,createdTime,modifiedTime,appProperties)&orderBy=createdTime%20desc&pageSize='+(size||30)+'&q='+q("'"+fid+"' in parents and (name contains 'BKGG' or name contains 'BkGG' or name contains 'BkAHG' or name contains 'BkDGK') and trashed=false"), tok);
     return l.files||[];
   }
 
