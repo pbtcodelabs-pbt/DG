@@ -1,10 +1,9 @@
 // AHG Khatabook — Service Worker
 // Cache name is tied to the app version (PK_APP_VERSION in index.html).
 // Bump CACHE_NAME every time you bump PK_APP_VERSION so old caches are cleared automatically.
-// فارمولا: dg-khatabook-cache-YYYYMMDD-HHMM (24 گھنٹے کا وقت) — ہر نئی بلڈ پر موجودہ اصل تاریخ/وقت لگائیں،
-// اور index.html میں PK_APP_VERSION بھی اسی وقت پر (DG+DD+MON+DoW+HHMM+AM/PM فارمیٹ میں) اپڈیٹ کریں۔
+// ورژن کی شکل: AHG + DD + MM + دن کے دو حروف + تین ہندسوں کا سیریل (مثلاً AHG1510TH018) — index.html کے PK_APP_VERSION کے ساتھ ہی بدلیں۔
 
-const CACHE_NAME = 'dg-khatabook-cache-DG1510TH017';
+const CACHE_NAME = 'ahg-khatabook-cache-AHG1510TH018';
 // فونٹ کا الگ مستقل ڈبہ — نیا ورژن آنے پر بھی ڈیلیٹ نہیں ہوتا، تاکہ 7 ایم بی فونٹ بار بار ڈاؤن لوڈ نہ ہو
 const FONT_CACHE = 'dg-khatabook-fonts-v1';
 
