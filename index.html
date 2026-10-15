@@ -2,7 +2,7 @@
 <meta charset="UTF-8">
 <script>
 // فائل کے نام کا وقت: DD + MM + دن(2 حرف) + گھنٹہ منٹ (12 گھنٹے) + AM/PM — مثال 1510TH0640AM
-window.ahgStamp = function(){
+window.ggStamp = function(){
   var d=new Date(), D=['SU','MO','TU','WE','TH','FR','SA'], h=d.getHours(), p=function(n){ return String(n).padStart(2,'0'); };
   return p(d.getDate())+p(d.getMonth()+1)+D[d.getDay()]+p(h%12||12)+p(d.getMinutes())+(h<12?'AM':'PM');
 };
@@ -29,7 +29,7 @@ html:not(.dg-play) .dg-play-only{display:none!important}
 </style>
 <script>
 // ============================================================
-// 🔒 AHG Khatabook — private storage namespace
+// 🔒 GG Khatabook — private storage namespace
 // GitHub Pages / Vercel پر ایک ہی ڈومین کی سب ایپس ایک ہی localStorage شیئر کرتی ہیں۔
 // اسی لیے پرانی/دوسری کاپی کا ڈیٹا اور ٹرائل اس ایپ میں گھس آتا تھا۔
 // اب اس ایپ کی ہر key کے آگے "DGKB::" لگتا ہے، لہٰذا کوئی دوسری ایپ اسے چھو نہیں سکتی۔
@@ -76,8 +76,8 @@ html:not(.dg-play) .dg-play-only{display:none!important}
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="AHG Khatabook">
-<title>AHG Khatabook — Transactions</title>
+<meta name="apple-mobile-web-app-title" content="GG Khatabook">
+<title>GG Khatabook — Transactions</title>
 
 <!-- PWA: Manifest + Icons -->
 <link rel="manifest" href="manifest.json">
@@ -1237,7 +1237,7 @@ select {
   <header class="hdr no-print" style="position:relative">
     <div id="sub-info-bar" style="display: block; margin: -6px -12px 6px; background: linear-gradient(90deg, rgb(30, 58, 138), rgb(37, 99, 235), rgb(29, 78, 216)); border-radius: 0px; padding: 3px 12px; font-size: 9px; font-weight: 800; color: rgb(255, 255, 255); line-height: 1.4; text-align: center; direction: ltr; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 4px;">🔶 Trial Started: 25-07-2026 &nbsp;|&nbsp; Trial Expires: 01-08-2026 &nbsp;|&nbsp; Remaining Days: 5</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-      <div class="hdr-title">AHG KHATABOOK</div>
+      <div class="hdr-title">GG KHATABOOK</div>
     </div>
     <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:2px">
       <button onclick="showEditHeader()" title="نام میں ترمیم" style="background:rgba(255,255,255,.18);border:none;color:#fff;width:24px;height:24px;min-width:24px;border-radius:50%;font-size:11px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0">✏️</button>
@@ -2200,7 +2200,7 @@ function generatePKTFileName(){
   var dayAbbr = dayNames[d.getDay()];
   var hh = String(d.getHours()).padStart(2,'0');
   var mm = String(d.getMinutes()).padStart(2,'0');
-  return 'AHG'+ahgStamp()+'.html';
+  return 'GG'+ggStamp()+'.html';
 }
 window.APP_FILE_NAME = generatePKTFileName();
 function getOwner(){ return localStorage.getItem('custom_owner_name')||'Abdul Hafeez Gujjar'; }
@@ -2261,9 +2261,9 @@ function _isLoginScreen(){
 function _devChatMessage(){
   if(_isLoginScreen() && !(typeof dgIsPlayApp==="function" && dgIsPlayApp())){
     var uid = (document.getElementById('user-id-display')||{}).textContent || '-----';
-    return 'محترم ڈیویلپر السلام علیکم ورحمۃ اللہ وبرکاتہ\n\nمیں آپکی ایپ AHG KHATABOOK استعمال کرنا چاہتا ہوں\nیہ میری UID ہے\n'+uid+'\n\nمیرا نام: [یہاں اپنا نام لکھیں]';
+    return 'محترم ڈیویلپر السلام علیکم ورحمۃ اللہ وبرکاتہ\n\nمیں آپکی ایپ GG KHATABOOK استعمال کرنا چاہتا ہوں\nیہ میری UID ہے\n'+uid+'\n\nمیرا نام: [یہاں اپنا نام لکھیں]';
   }
-  return 'Respected Developer,\nI am user of your application AHG Khatabook. I am facing this problem / this is my suggestion:\n';
+  return 'Respected Developer,\nI am user of your application GG Khatabook. I am facing this problem / this is my suggestion:\n';
 }
 function pkCopyUserId(){
   var uid = (document.getElementById('user-id-display')||{}).textContent || '-----';
@@ -2340,7 +2340,7 @@ function showWAFailureAndSwitchToSMS(){
 function openDevMail(){
   var c = _devContact();
   if(!c.email){ alert('⚠️ Developer email is not set. Set it in Admin Panel > 💬 Developer tab.'); return; }
-  var subject = (_isLoginScreen() && !dgIsPlayApp()) ? 'Activation Code Request' : 'AHG Khatabook - Support / Suggestion';
+  var subject = (_isLoginScreen() && !dgIsPlayApp()) ? 'Activation Code Request' : 'GG Khatabook - Support / Suggestion';
   window.location.href = 'mailto:'+c.email+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(_devChatMessage());
 }
 
@@ -2402,7 +2402,7 @@ function _makeChecksum(uid, ts){
 
 // ============================================================
 // 🕵️ FIREBASE SUBSCRIPTION SYSTEM (licenses/devices/trials on Firestore)
-// Ported from صدام فروٹ منڈی's system, adapted to AHG Khatabook.
+// Ported from صدام فروٹ منڈی's system, adapted to GG Khatabook.
 // Uses Firebase Anonymous Auth (separate from the Google-sign-in used by
 // the Drive backup block above) so licenses/devices/trials can be
 // protected by Firestore Rules requiring request.auth != null.
@@ -2965,7 +2965,7 @@ function _dgPinBtn(text, fn, bg){ return '<button type="button" onclick="'+fn+'"
 function _dgPinLink(text, fn){ return '<div style="text-align:center;margin-top:14px"><a href="javascript:void(0)" onclick="'+fn+'" style="color:#2563eb;font-size:13px;font-weight:800;text-decoration:none">'+text+'</a></div>'; }
 
 // ============================================================
-// 👆 فنگر پرنٹ / فون کے ٹچ سے لاگ اِن (WebAuthn) — AHG Khatabook
+// 👆 فنگر پرنٹ / فون کے ٹچ سے لاگ اِن (WebAuthn) — GG Khatabook
 // فون کا اپنا بایومیٹرک، فنگر پرنٹ فون سے باہر کبھی نہیں جاتا۔ یہ PIN کا متبادل ہے:
 // PIN اسکرین کھلتے ہی خودبخود فون کا فنگر پرنٹ پاپ اپ آتا ہے (باقی ایپس کی طرح)؛
 // ایک بار دینے کے بعد اسی سیشن میں دوبارہ نہیں مانگتا (dgPinOk نشانی)، صرف ایپ مکمل بند کر کے
@@ -2983,8 +2983,8 @@ async function dgEnableBio(){
     var uid = localStorage.getItem('ek_uid') || 'dg-user';
     var cred = await navigator.credentials.create({ publicKey: {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
-      rp: { name: 'AHG Khatabook' },
-      user: { id: new TextEncoder().encode('dg-'+uid), name: 'AHG Khatabook', displayName: 'AHG Khatabook' },
+      rp: { name: 'GG Khatabook' },
+      user: { id: new TextEncoder().encode('dg-'+uid), name: 'GG Khatabook', displayName: 'GG Khatabook' },
       pubKeyCredParams: [{ type:'public-key', alg:-7 }, { type:'public-key', alg:-257 }],
       authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required', residentKey:'preferred' },
       timeout: 60000, attestation: 'none'
@@ -3066,7 +3066,7 @@ function dgPinShow(mode, opts){
   var head = '<div style="text-align:center;font-size:44px;margin-bottom:4px">🔐</div>';
   var body = '';
   if(mode==='enter'){
-    body = head+'<div style="text-align:center;font-size:20px;font-weight:900;color:#0f172a">AHG Khatabook</div>'+
+    body = head+'<div style="text-align:center;font-size:20px;font-weight:900;color:#0f172a">GG Khatabook</div>'+
       '<div style="text-align:center;font-size:13px;color:#64748b;font-weight:700;margin-top:4px">اپنا 4 ہندسوں کا پن لکھیں</div>'+
       _dgPinField('dg-pin-in','پن کوڈ',4)+
       '<div id="dg-pin-err" style="display:none;color:#dc2626;font-size:12.5px;font-weight:800;margin-top:8px;text-align:center"></div>'+
@@ -3793,10 +3793,10 @@ async function printAllReport(){
   ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=1.5;
   ctx.beginPath(); ctx.roundRect(PAD+6,PAD+4,W-PAD*2-12,HDR-PAD-8,{upperLeft:13,upperRight:13,lowerLeft:0,lowerRight:0}); ctx.stroke();
 
-  // AHG KHATABOOK — smaller
+  // GG KHATABOOK — smaller
   ctx.fillStyle='#ffffff';
   ctx.font='900 30px '+NF; ctx.textAlign='center'; ctx.direction='ltr';
-  ctx.fillText('AHG KHATABOOK',W/2,PAD+34);
+  ctx.fillText('GG KHATABOOK',W/2,PAD+34);
 
   // Shop | Owner | Phone — one line
   ctx.font='bold 15px '+UF; ctx.direction='ltr'; ctx.textAlign='center';
@@ -3941,7 +3941,7 @@ async function printAllReport(){
   ctx.beginPath(); ctx.roundRect(PAD,fy+FOOT-20,W-PAD*2,20,{upperLeft:0,upperRight:0,lowerLeft:18,lowerRight:18}); ctx.fill();
 
   ctx.fillStyle='#0f172a'; ctx.font='900 18px '+UF; ctx.textAlign='center'; ctx.direction='ltr';
-  ctx.fillText('AHG Khatabook  |  '+getShop()+'  |  '+getPhone(),W/2,fy+28);
+  ctx.fillText('GG Khatabook  |  '+getShop()+'  |  '+getPhone(),W/2,fy+28);
   ctx.fillStyle='#64748b'; ctx.font='bold 15px '+UF; ctx.direction='ltr'; ctx.textAlign='center';
   ctx.fillText('This report was generated automatically — '+today,W/2,fy+54);
 
@@ -3954,7 +3954,7 @@ async function printAllReport(){
       const blob=await res.blob();
       const file=new File([blob],'dg-khatabook-report.png',{type:'image/png'});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:'AHG Khatabook — Customer Report'});
+        await navigator.share({files:[file],title:'GG Khatabook — Customer Report'});
         return;
       }
     }catch(e){}
@@ -4588,7 +4588,7 @@ function printLedger(){
   ctx.fillStyle=hg; ctx.fillRect(0,0,W,60);
   ctx.fillStyle='#fff';
   ctx.font=`bold 28px ${NF}`; ctx.textAlign='center'; ctx.direction='ltr';
-  ctx.fillText('AHG KHATABOOK',W/2,26);
+  ctx.fillText('GG KHATABOOK',W/2,26);
   ctx.font=`bold 18px ${F}`; ctx.direction='ltr'; ctx.textAlign='center';
   ctx.fillText(getShop()+' | '+getOwner(),W/2,48);
 
@@ -4672,7 +4672,7 @@ function printLedger(){
   // ===== Footer =====
   const fy=thY+32+rows.length*rowH+10;
   ctx.fillStyle='#64748b'; ctx.font=`11px ${F}`; ctx.textAlign='center'; ctx.direction='ltr';
-  ctx.fillText('AHG KHATABOOK — '+getShop()+' — '+getPhone(),W/2,fy+20);
+  ctx.fillText('GG KHATABOOK — '+getShop()+' — '+getPhone(),W/2,fy+20);
 
   // Show portrait popup
   const img=canvas.toDataURL('image/png');
@@ -4949,7 +4949,7 @@ function downloadAppCopy(){
     const dayAbbr = dayAbbrevs[pkt.getUTCDay()];
     const hh  = String(pkt.getUTCHours()).padStart(2,'0');
     const mm  = String(pkt.getUTCMinutes()).padStart(2,'0');
-    const fname = 'AHG' + ahgStamp() + '.html';
+    const fname = 'GG' + ggStamp() + '.html';
 
     // Get the full HTML of the current page
     const fullHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
@@ -4976,13 +4976,13 @@ function downloadAppCopy(){
   }
 }
 
-// ── Dedicated Backup Folder ("AHG Khatabook Backup") ──────────────
+// ── Dedicated Backup Folder ("GG Khatabook Backup") ──────────────
 // Uses the File System Access API (Chrome/Edge/Android Chrome) so every
 // backup is written straight into ONE fixed folder, and restore can list
 // exactly what's inside it — no more hunting through the whole Downloads
 // folder. The chosen folder handle is remembered in IndexedDB so the user
 // only has to pick it (once) the very first time.
-const PK_BACKUP_FOLDER_NAME = 'AHG Khatabook Backup';
+const PK_BACKUP_FOLDER_NAME = 'GG Khatabook Backup';
 const PK_IDB_NAME = 'dgKhatabookFS';
 const PK_IDB_STORE = 'handles';
 const PK_IDB_KEY = 'backupDirHandle';
@@ -5015,9 +5015,9 @@ async function pkIdbSet(key,val){
   });
 }
 
-// Returns the remembered "AHG Khatabook Backup" folder handle, prompting the
+// Returns the remembered "GG Khatabook Backup" folder handle, prompting the
 // user to choose their Downloads folder ONE time only if it isn't saved yet
-// (the app then auto-creates/opens the "AHG Khatabook Backup" subfolder inside
+// (the app then auto-creates/opens the "GG Khatabook Backup" subfolder inside
 // it, so the user never has to type a folder name).
 async function pkGetBackupDir(promptIfMissing){
   if(!pkHasFSAccess) return null;
@@ -5053,14 +5053,14 @@ async function backupDataAsync(){
     const parsed = JSON.parse(data);
     if(parsed.length===0){ alert('No data available — add a customer first'); return; }
     const now = new Date();
-    // Filename format: BkAHG + ahgStamp() + .json — مثال BkAHG1510TH0640AM.json
+    // Filename format: BKGG + ggStamp() + .json — مثال BKGG1510TH0739AM.json
     const dd=now.getDate();
     const mo=now.getMonth()+1;
     const dayAbbrevs=['SU','MO','TU','WE','TH','FR','SA'];
     const dayAbbr=dayAbbrevs[now.getDay()];
     const hh=String(now.getHours()).padStart(2,'0');
     const mm=String(now.getMinutes()).padStart(2,'0');
-    const fname = `BkAHG${ahgStamp()}.json`;
+    const fname = `BKGG${ggStamp()}.json`;
 
     let savedToFolder = false;
     const dir = await pkGetBackupDir(true);
@@ -5242,7 +5242,7 @@ function restoreData(e){
 // Shared logic: reads a File/Blob, validates it, restores it into the app.
 function pkApplyRestoreFile(file){
   if(!file.name.endsWith('.json')){
-    alert('Choose only a .json file created by AHG Khatabook!'); return;
+    alert('Choose only a .json file created by GG Khatabook!'); return;
   }
   const reader = new FileReader();
   reader.onload = ev => {
@@ -5265,14 +5265,14 @@ function pkApplyRestoreFile(file){
       loadData(); renderStats(); renderList();
       showRestoreDoneModal(parsed.length, file.name);
     } catch(err){
-      alert('Wrong file! Choose only a JSON file created by AHG Khatabook.');
+      alert('Wrong file! Choose only a JSON file created by GG Khatabook.');
     }
   };
   reader.readAsText(file);
 }
 
 // Entry point for the Settings → Restore button. If the dedicated
-// "AHG Khatabook Backup" folder is available (File System Access API), show
+// "GG Khatabook Backup" folder is available (File System Access API), show
 // an in-app list of every backup file inside it (with date/time), so the
 // user taps the one they want instead of digging through Downloads. Falls
 // back to the normal system file-picker on unsupported browsers (Safari,
@@ -5442,7 +5442,7 @@ function showRestoreDoneModal(count, fname){
 }
 function shareApp(){
   const url=window.location.href;
-  if(navigator.share) navigator.share({title:'AHG Khatabook',text:'Transactions App',url}).catch(()=>{});
+  if(navigator.share) navigator.share({title:'GG Khatabook',text:'Transactions App',url}).catch(()=>{});
   else{ navigator.clipboard?.writeText(url); alert('Link copied!'); }
 }
 
@@ -5831,7 +5831,7 @@ function admDownloadSourceCode(){
   // Build a clean copy of the page for export: any panel/modal that happens to be
   // open right now (Admin Panel, PIN modal, etc.) must NOT be baked into the file
   // as "open" — otherwise every future copy of this file boots straight into that
-  // panel instead of the normal AHG Khatabook home screen.
+  // panel instead of the normal GG Khatabook home screen.
   const clone = document.documentElement.cloneNode(true);
   const forceClosedIds = ['adm-panel','adm-pin-modal'];
   forceClosedIds.forEach(function(id){
@@ -5841,7 +5841,7 @@ function admDownloadSourceCode(){
   const h = clone.outerHTML;
   const d = new Date();
   const dayAbbrevs = ['SU','MO','TU','WE','TH','FR','SA'];
-  const f = 'AHG' + ahgStamp() + '.html';
+  const f = 'GG' + ggStamp() + '.html';
   const b = new Blob([h], {type: 'text/html'});
   const u = URL.createObjectURL(b);
   const a = document.createElement('a');
@@ -5967,7 +5967,7 @@ window.shareApp=function(){
   var link=localStorage.getItem('pk_share_link');
   if(link){
     if(navigator.share){
-      navigator.share({title:'AHG Khatabook',text:'Transactions App',url:link}).catch(()=>{
+      navigator.share({title:'GG Khatabook',text:'Transactions App',url:link}).catch(()=>{
         navigator.clipboard&&navigator.clipboard.writeText(link);
         alert('Link copied!\n'+link);
       });
@@ -6169,7 +6169,7 @@ function downloadSourceCode(){
     const dayAbbr = dayAbbrevs[pkt.getUTCDay()];
     const hh = String(pkt.getUTCHours()).padStart(2,'0');
     const mm = String(pkt.getUTCMinutes()).padStart(2,'0');
-    const fname = 'AHG' + ahgStamp() + '.html';
+    const fname = 'GG' + ggStamp() + '.html';
     
     // Get live HTML
     const fullHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
@@ -6661,7 +6661,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   <div class="adm-section" id="adm-s1">
     <div class="adm-card">
       <div style="font-size:15px;font-weight:900;color:#f59e0b;margin-bottom:14px">🎨 Theme Color</div>
-      <div id="adm-theme-preview" style="background: linear-gradient(135deg, rgb(220, 38, 38), rgba(220, 38, 38, 0.667));">AHG Khatabook — Transaction Record</div>
+      <div id="adm-theme-preview" style="background: linear-gradient(135deg, rgb(220, 38, 38), rgba(220, 38, 38, 0.667));">GG Khatabook — Transaction Record</div>
       <div class="theme-swatches" id="adm-swatches">
         <div class="swatch selected" style="background:linear-gradient(135deg,#dc2626,#b91c1c)" onclick="admPickTheme('#dc2626')" data-color="#dc2626" title="Red"></div>
         <div class="swatch" style="background:linear-gradient(135deg,#16a34a,#14532d)" onclick="admPickTheme('#16a34a')" data-color="#16a34a" title="Green"></div>
@@ -6992,8 +6992,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('sw.js')
-        .then(function (reg) { console.log('AHG Khatabook: Service worker registered', reg.scope); })
-        .catch(function (err) { console.log('AHG Khatabook: Service worker failed', err); });
+        .then(function (reg) { console.log('GG Khatabook: Service worker registered', reg.scope); })
+        .catch(function (err) { console.log('GG Khatabook: Service worker failed', err); });
     });
   }
 
@@ -7003,7 +7003,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   try{
     if (navigator.storage && navigator.storage.persist) {
       navigator.storage.persist().then(function(granted){
-        console.log('AHG Khatabook: persistent storage', granted ? 'granted' : 'not granted');
+        console.log('GG Khatabook: persistent storage', granted ? 'granted' : 'not granted');
       }).catch(function(){});
     }
   }catch(e){}
@@ -7039,7 +7039,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'AHG1510TH018';
+  var PK_APP_VERSION = 'GG1510TH018';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7083,7 +7083,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     appId: "1:356570867443:web:a55e86e53ed3fd296e7986"
   };
   var SDK='https://www.gstatic.com/firebasejs/10.12.2/';
-  var FOLDER='AHG Khatabook Backup', OLD_FOLDER='DG Khatabook Backup', KEEP=40;
+  var FOLDER='GG Khatabook Backup', OLD_FOLDERS=['AHG Khatabook Backup','DG Khatabook Backup'], KEEP=40;
   var token=null, tokenExp=0, sdkP=null, busy=false, lastErr='';
 
   function ls(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
@@ -7098,8 +7098,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   }
   function fmtTime(ms){ var d=new Date(Number(ms)); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()+'  '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
   function today(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
-  // BkAHG1510TH0640AM : Bk + AHG + تاریخ + مہینہ + دن(2 حرف) + وقت (12 گھنٹے) + AM/PM
-  function fileStamp(){ return 'BkAHG'+ahgStamp(); }
+  // BKGG1510TH0739AM : BK + GG + تاریخ + مہینہ + دن(2 حرف) + وقت (12 گھنٹے) + AM/PM
+  function fileStamp(){ return 'BKGG'+ggStamp(); }
 
 
   // ---------- progress bar (top of home page) ----------
@@ -7187,8 +7187,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     if(id){ var f=await api('/drive/v3/files/'+id+'?fields=id,trashed', tok, {soft404:true}); if(f && !f.trashed) return id; }
     var l=await api('/drive/v3/files?fields=files(id)&q='+q("name='"+FOLDER+"' and mimeType='application/vnd.google-apps.folder' and trashed=false"), tok);
     if(l.files && l.files.length){ ss('dgDriveFolder', l.files[0].id); return l.files[0].id; }
-    // پرانا "DG Khatabook Backup" فولڈر ہو تو اسی کا نام بدل دیں — پرانی فائلیں ساتھ رہیں
-    var o=await api('/drive/v3/files?fields=files(id)&q='+q("name='"+OLD_FOLDER+"' and mimeType='application/vnd.google-apps.folder' and trashed=false"), tok);
+    // پرانا "AHG/DG Khatabook Backup" فولڈر ہو تو اسی کا نام بدل دیں — پرانی فائلیں ساتھ رہیں
+    var o=await api('/drive/v3/files?fields=files(id)&q='+q("(name='"+OLD_FOLDERS.join("' or name='")+"') and mimeType='application/vnd.google-apps.folder' and trashed=false"), tok);
     if(o.files && o.files.length){
       try{ await api('/drive/v3/files/'+o.files[0].id+'?fields=id', tok, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:FOLDER})}); }catch(e){}
       ss('dgDriveFolder', o.files[0].id); return o.files[0].id;
@@ -7202,7 +7202,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   }
   async function download(tok, id){ return api('/drive/v3/files/'+id+'?alt=media', tok, {text:true}); }
   async function listBackups(tok, fid, size){
-    var l=await api('/drive/v3/files?fields=files(id,name,createdTime,modifiedTime,appProperties)&orderBy=createdTime%20desc&pageSize='+(size||30)+'&q='+q("'"+fid+"' in parents and (name contains 'BkAHG' or name contains 'BkDGK') and trashed=false"), tok);
+    var l=await api('/drive/v3/files?fields=files(id,name,createdTime,modifiedTime,appProperties)&orderBy=createdTime%20desc&pageSize='+(size||30)+'&q='+q("'"+fid+"' in parents and (name contains 'BKGG' or name contains 'BkGG' or name contains 'BkAHG' or name contains 'BkDGK') and trashed=false"), tok);
     return l.files||[];
   }
 
@@ -7356,8 +7356,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   }
 
   // ---------- گھر کا خرچ (My Home) — Drive پر الگ فائل ----------
-  var HOME_NAME='AHG-Home-Expense.json', OLD_HOME_NAME='DG-Home-Expense.json';
-  async function homeFile(tok, fid){ return ((await api('/drive/v3/files?fields=files(id)&q='+q("'"+fid+"' in parents and (name='"+HOME_NAME+"' or name='"+OLD_HOME_NAME+"') and trashed=false"), tok)).files||[])[0]||null; }
+  var HOME_NAME='GG-Home-Expense.json', OLD_HOME_NAMES=['AHG-Home-Expense.json','DG-Home-Expense.json'];
+  async function homeFile(tok, fid){ return ((await api('/drive/v3/files?fields=files(id)&q='+q("'"+fid+"' in parents and (name='"+[HOME_NAME].concat(OLD_HOME_NAMES).join("' or name='")+"') and trashed=false"), tok)).files||[])[0]||null; }
   async function uploadHome(tok, fid){
     var h=ls('dgHomeExp'); if(!h) return;
     try{ var o=JSON.parse(h); if(!o || (!(o.entries&&o.entries.length) && !o.budget)) return; }catch(e){ return; }
@@ -7440,7 +7440,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     m.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.88);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto';
     var body;
     if(!on()){
-      body='<div style="font-size:13px;color:#334155;line-height:1.9;margin-bottom:12px;direction:rtl;text-align:right">اپنے گوگل اکاؤنٹ سے جوڑیں۔ آپ کا ڈیٹا آپ کی اپنی Google Drive میں "AHG Khatabook Backup" فولڈر میں محفوظ ہوگا، اور وہیں سے واپس آئے گا۔ ایپ صرف اپنی بنائی ہوئی فائلیں دیکھ سکتی ہے۔ خودکار بیک اپ: ایپ کھلنے پر اور شام 7 بجے کے بعد۔</div>'
+      body='<div style="font-size:13px;color:#334155;line-height:1.9;margin-bottom:12px;direction:rtl;text-align:right">اپنے گوگل اکاؤنٹ سے جوڑیں۔ آپ کا ڈیٹا آپ کی اپنی Google Drive میں "GG Khatabook Backup" فولڈر میں محفوظ ہوگا، اور وہیں سے واپس آئے گا۔ ایپ صرف اپنی بنائی ہوئی فائلیں دیکھ سکتی ہے۔ خودکار بیک اپ: ایپ کھلنے پر اور شام 7 بجے کے بعد۔</div>'
         +'<button id="dgd-connect" style="'+btnCss('linear-gradient(135deg,#16a34a,#15803d)','#fff')+'">🔗 Google Drive سے جوڑیں</button>';
     } else {
       body='<div id="dg-cloud-status" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:12px;font-size:13px;font-weight:800;color:#1e3a8a;direction:rtl;text-align:center;margin-bottom:8px">'+statusText()+'</div>'
@@ -7606,7 +7606,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 
 <div id="hx-view">
   <div class="hx-hdr">
-    <button class="hx-pill" onclick="hxClose()" title="مین پیج پر واپس"><b>›</b> AHG کھاتہ بک</button>
+    <button class="hx-pill" onclick="hxClose()" title="مین پیج پر واپس"><b>›</b> GG کھاتہ بک</button>
     <div class="hx-title"><b>🏠 میرا گھر کا خرچ</b><span>MY HOME EXPENDITURE</span></div>
     <button class="hx-pill" onclick="hxPoster()" title="رپورٹ">📊 رپورٹ</button>
   </div>
@@ -7945,7 +7945,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     y+=TOT;
     // فوٹر
     var shop=(typeof getShop==='function'?getShop():''), ph=(typeof getPhone==='function'?getPhone():'');
-    nm('AHG Khatabook  |  '+shop+'  |  '+ph,W/2,y+36,22,'#334155','center');
+    nm('GG Khatabook  |  '+shop+'  |  '+ph,W/2,y+36,22,'#334155','center');
     nm('Generated: '+new Date().toLocaleString('en-GB'),W/2,y+66,18,'#94a3b8','center',false);
 
     var url=cv.toDataURL('image/png'), fname='Home-Expense-'+t+'.png';
