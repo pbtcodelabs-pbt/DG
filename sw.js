@@ -1,9 +1,9 @@
 // GG Khatabook — Service Worker
 // Cache name is tied to the app version (PK_APP_VERSION in index.html).
 // Bump CACHE_NAME every time you bump PK_APP_VERSION so old caches are cleared automatically.
-// ورژن کی شکل: GG + DD + MM + دن کے دو حروف + تین ہندسوں کا سیریل (مثلاً GG1510TH019) — index.html کے PK_APP_VERSION کے ساتھ ہی بدلیں۔
+// ورژن کی شکل: GG + DD + MM + دن کے دو حروف + تین ہندسوں کا سیریل (مثلاً GG1510TH020) — index.html کے PK_APP_VERSION کے ساتھ ہی بدلیں۔
 
-const CACHE_NAME = 'gg-khatabook-cache-GG1510TH019';
+const CACHE_NAME = 'gg-khatabook-cache-GG1510TH020';
 // فونٹ کا الگ مستقل ڈبہ — نیا ورژن آنے پر بھی ڈیلیٹ نہیں ہوتا، تاکہ 7 ایم بی فونٹ بار بار ڈاؤن لوڈ نہ ہو
 const FONT_CACHE = 'dg-khatabook-fonts-v1';
 

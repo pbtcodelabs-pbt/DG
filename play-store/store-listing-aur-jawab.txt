@@ -116,11 +116,11 @@ Data safety:
 3) پیکج (Monetize → Subscriptions) — AAB اپ لوڈ ہونے کے بعد
 -------------------------------------------------------------
 Product ID (1 مہینہ):
-dg_khata_1m
+gg_khatabook_1m
 قیمت: Rs 300 — Billing period: 1 month — Free trial: کوئی نہیں (ایپ کا اپنا 3 دن ٹرائل ہے)
 
 Product ID (1 سال):
-dg_khata_12m
+gg_khatabook_12m
 قیمت: Rs 3,000 — Billing period: 1 year
 
 دونوں کو Activate کرنا نہ بھولیں۔
