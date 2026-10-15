@@ -129,3 +129,21 @@ dg_khata_12m
 4) ملک
 ------
 Countries/regions: صرف Pakistan
+
+
+5) RELEASE (Test and release → Internal testing → Create new release)
+--------------------------------------------------------------------
+AAB فائل (یہی اپ لوڈ کریں):
+https://github.com/pbtcodelabs-pbt/APP-BUILDER/releases/download/app-com.pbtcodelabs.dgkhata/GG1510TH0842-PlayStore.aab
+
+Release name:
+GG Khatabook 1.16
+
+Release notes (What's new):
+<en-US>
+First release of GG Khatabook — easy udhaar khata with WhatsApp receipts and Google Drive backup.
+</en-US>
+
+Testers: Internal testing → Testers → اپنی Gmail لسٹ بنائیں (100 تک)
+
+اپ لوڈ کے بعد: App integrity → App signing key certificate → SHA-256 کاپی کر کے Claude کو بھیجیں۔
