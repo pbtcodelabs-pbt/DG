@@ -1,6 +1,11 @@
 <html lang="en" dir="ltr" style="--appfont: 'Arial Narrow',Arial,sans-serif;"><head>
 <meta charset="UTF-8">
 <script>
+// فائل کے نام کا وقت: DD + MM + دن(2 حرف) + گھنٹہ منٹ (12 گھنٹے) + AM/PM — مثال 1510TH0640AM
+window.ahgStamp = function(){
+  var d=new Date(), D=['SU','MO','TU','WE','TH','FR','SA'], h=d.getHours(), p=function(n){ return String(n).padStart(2,'0'); };
+  return p(d.getDate())+p(d.getMonth()+1)+D[d.getDay()]+p(h%12||12)+p(d.getMinutes())+(h<12?'AM':'PM');
+};
 // 💳 Play Store ایپ (TWA) کی پہچان — پلے اسٹور والی ایپ میں ایکٹیویشن کوڈ کی جگہ Google Play سبسکرپشن
 (function(){
   try{
@@ -2193,7 +2198,7 @@ function generatePKTFileName(){
   var dayAbbr = dayNames[d.getDay()];
   var hh = String(d.getHours()).padStart(2,'0');
   var mm = String(d.getMinutes()).padStart(2,'0');
-  return 'PKT'+day+month+dayAbbr+hh+mm+'.html';
+  return 'AHG'+ahgStamp()+'.html';
 }
 window.APP_FILE_NAME = generatePKTFileName();
 function getOwner(){ return localStorage.getItem('custom_owner_name')||'Abdul Hafeez Gujjar'; }
@@ -4941,7 +4946,7 @@ function downloadAppCopy(){
     const dayAbbr = dayAbbrevs[pkt.getUTCDay()];
     const hh  = String(pkt.getUTCHours()).padStart(2,'0');
     const mm  = String(pkt.getUTCMinutes()).padStart(2,'0');
-    const fname = 'PKT' + dd + m + dayAbbr + hh + mm + '.html';
+    const fname = 'AHG' + ahgStamp() + '.html';
 
     // Get the full HTML of the current page
     const fullHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
@@ -4968,13 +4973,13 @@ function downloadAppCopy(){
   }
 }
 
-// ── Dedicated Backup Folder ("DG Khatabook Backup") ──────────────
+// ── Dedicated Backup Folder ("AHG Khatabook Backup") ──────────────
 // Uses the File System Access API (Chrome/Edge/Android Chrome) so every
 // backup is written straight into ONE fixed folder, and restore can list
 // exactly what's inside it — no more hunting through the whole Downloads
 // folder. The chosen folder handle is remembered in IndexedDB so the user
 // only has to pick it (once) the very first time.
-const PK_BACKUP_FOLDER_NAME = 'DG Khatabook Backup';
+const PK_BACKUP_FOLDER_NAME = 'AHG Khatabook Backup';
 const PK_IDB_NAME = 'dgKhatabookFS';
 const PK_IDB_STORE = 'handles';
 const PK_IDB_KEY = 'backupDirHandle';
@@ -5007,9 +5012,9 @@ async function pkIdbSet(key,val){
   });
 }
 
-// Returns the remembered "DG Khatabook Backup" folder handle, prompting the
+// Returns the remembered "AHG Khatabook Backup" folder handle, prompting the
 // user to choose their Downloads folder ONE time only if it isn't saved yet
-// (the app then auto-creates/opens the "DG Khatabook Backup" subfolder inside
+// (the app then auto-creates/opens the "AHG Khatabook Backup" subfolder inside
 // it, so the user never has to type a folder name).
 async function pkGetBackupDir(promptIfMissing){
   if(!pkHasFSAccess) return null;
@@ -5045,15 +5050,14 @@ async function backupDataAsync(){
     const parsed = JSON.parse(data);
     if(parsed.length===0){ alert('No data available — add a customer first'); return; }
     const now = new Date();
-    // Filename format: BK.PKT + day + month + 2-letter day name + hour:minute(24hr) + .json
-    // Example: 19 July Sunday 06:37 → BK.PKT197SU0637.json
+    // Filename format: BkAHG + ahgStamp() + .json — مثال BkAHG1510TH0640AM.json
     const dd=now.getDate();
     const mo=now.getMonth()+1;
     const dayAbbrevs=['SU','MO','TU','WE','TH','FR','SA'];
     const dayAbbr=dayAbbrevs[now.getDay()];
     const hh=String(now.getHours()).padStart(2,'0');
     const mm=String(now.getMinutes()).padStart(2,'0');
-    const fname = `BK.PKT${dd}${mo}${dayAbbr}${hh}${mm}.json`;
+    const fname = `BkAHG${ahgStamp()}.json`;
 
     let savedToFolder = false;
     const dir = await pkGetBackupDir(true);
@@ -5265,7 +5269,7 @@ function pkApplyRestoreFile(file){
 }
 
 // Entry point for the Settings → Restore button. If the dedicated
-// "DG Khatabook Backup" folder is available (File System Access API), show
+// "AHG Khatabook Backup" folder is available (File System Access API), show
 // an in-app list of every backup file inside it (with date/time), so the
 // user taps the one they want instead of digging through Downloads. Falls
 // back to the normal system file-picker on unsupported browsers (Safari,
@@ -5834,8 +5838,7 @@ function admDownloadSourceCode(){
   const h = clone.outerHTML;
   const d = new Date();
   const dayAbbrevs = ['SU','MO','TU','WE','TH','FR','SA'];
-  const f = 'PKT' + d.getDate() + (d.getMonth()+1) + dayAbbrevs[d.getDay()] + 
-            String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + '.html';
+  const f = 'AHG' + ahgStamp() + '.html';
   const b = new Blob([h], {type: 'text/html'});
   const u = URL.createObjectURL(b);
   const a = document.createElement('a');
@@ -6163,7 +6166,7 @@ function downloadSourceCode(){
     const dayAbbr = dayAbbrevs[pkt.getUTCDay()];
     const hh = String(pkt.getUTCHours()).padStart(2,'0');
     const mm = String(pkt.getUTCMinutes()).padStart(2,'0');
-    const fname = 'PKT' + dd + m + dayAbbr + hh + mm + '.html';
+    const fname = 'AHG' + ahgStamp() + '.html';
     
     // Get live HTML
     const fullHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
@@ -7033,7 +7036,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG1510TH015';
+  var PK_APP_VERSION = 'DG1510TH016';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7077,7 +7080,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     appId: "1:356570867443:web:a55e86e53ed3fd296e7986"
   };
   var SDK='https://www.gstatic.com/firebasejs/10.12.2/';
-  var FOLDER='DG Khatabook Backup', KEEP=40;
+  var FOLDER='AHG Khatabook Backup', OLD_FOLDER='DG Khatabook Backup', KEEP=40;
   var token=null, tokenExp=0, sdkP=null, busy=false, lastErr='';
 
   function ls(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
@@ -7092,11 +7095,9 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   }
   function fmtTime(ms){ var d=new Date(Number(ms)); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()+'  '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
   function today(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
-  // BkDGK24SEPTH0312 : Bk + DGK + تاریخ + مہینہ + دن(2 حرف) + وقت (24 گھنٹے، HHMM)
-  function fileStamp(){
-    var d=new Date(), M=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'], D=['SU','MO','TU','WE','TH','FR','SA'];
-    return 'BkDGK'+String(d.getDate()).padStart(2,'0')+M[d.getMonth()]+D[d.getDay()]+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');
-  }
+  // BkAHG1510TH0640AM : Bk + AHG + تاریخ + مہینہ + دن(2 حرف) + وقت (12 گھنٹے) + AM/PM
+  function fileStamp(){ return 'BkAHG'+ahgStamp(); }
+
 
   // ---------- progress bar (top of home page) ----------
   var pCur=0, pTgt=0, pTimer=null, pHide=null, pFinal='';
@@ -7181,6 +7182,12 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     if(id){ var f=await api('/drive/v3/files/'+id+'?fields=id,trashed', tok, {soft404:true}); if(f && !f.trashed) return id; }
     var l=await api('/drive/v3/files?fields=files(id)&q='+q("name='"+FOLDER+"' and mimeType='application/vnd.google-apps.folder' and trashed=false"), tok);
     if(l.files && l.files.length){ ss('dgDriveFolder', l.files[0].id); return l.files[0].id; }
+    // پرانا "DG Khatabook Backup" فولڈر ہو تو اسی کا نام بدل دیں — پرانی فائلیں ساتھ رہیں
+    var o=await api('/drive/v3/files?fields=files(id)&q='+q("name='"+OLD_FOLDER+"' and mimeType='application/vnd.google-apps.folder' and trashed=false"), tok);
+    if(o.files && o.files.length){
+      try{ await api('/drive/v3/files/'+o.files[0].id+'?fields=id', tok, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:FOLDER})}); }catch(e){}
+      ss('dgDriveFolder', o.files[0].id); return o.files[0].id;
+    }
     var c=await api('/drive/v3/files?fields=id', tok, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:FOLDER, mimeType:'application/vnd.google-apps.folder'})});
     ss('dgDriveFolder', c.id); return c.id;
   }
@@ -7190,7 +7197,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   }
   async function download(tok, id){ return api('/drive/v3/files/'+id+'?alt=media', tok, {text:true}); }
   async function listBackups(tok, fid, size){
-    var l=await api('/drive/v3/files?fields=files(id,name,createdTime,modifiedTime,appProperties)&orderBy=createdTime%20desc&pageSize='+(size||30)+'&q='+q("'"+fid+"' in parents and name contains 'BkDGK' and trashed=false"), tok);
+    var l=await api('/drive/v3/files?fields=files(id,name,createdTime,modifiedTime,appProperties)&orderBy=createdTime%20desc&pageSize='+(size||30)+'&q='+q("'"+fid+"' in parents and (name contains 'BkAHG' or name contains 'BkDGK') and trashed=false"), tok);
     return l.files||[];
   }
 
@@ -7423,7 +7430,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     m.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.88);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto';
     var body;
     if(!on()){
-      body='<div style="font-size:13px;color:#334155;line-height:1.9;margin-bottom:12px;direction:rtl;text-align:right">اپنے گوگل اکاؤنٹ سے جوڑیں۔ آپ کا ڈیٹا آپ کی اپنی Google Drive میں "DG Khatabook Backup" فولڈر میں محفوظ ہوگا، اور وہیں سے واپس آئے گا۔ ایپ صرف اپنی بنائی ہوئی فائلیں دیکھ سکتی ہے۔ خودکار بیک اپ: ایپ کھلنے پر اور شام 7 بجے کے بعد۔</div>'
+      body='<div style="font-size:13px;color:#334155;line-height:1.9;margin-bottom:12px;direction:rtl;text-align:right">اپنے گوگل اکاؤنٹ سے جوڑیں۔ آپ کا ڈیٹا آپ کی اپنی Google Drive میں "AHG Khatabook Backup" فولڈر میں محفوظ ہوگا، اور وہیں سے واپس آئے گا۔ ایپ صرف اپنی بنائی ہوئی فائلیں دیکھ سکتی ہے۔ خودکار بیک اپ: ایپ کھلنے پر اور شام 7 بجے کے بعد۔</div>'
         +'<button id="dgd-connect" style="'+btnCss('linear-gradient(135deg,#16a34a,#15803d)','#fff')+'">🔗 Google Drive سے جوڑیں</button>';
     } else {
       body='<div id="dg-cloud-status" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:12px;font-size:13px;font-weight:800;color:#1e3a8a;direction:rtl;text-align:center;margin-bottom:8px">'+statusText()+'</div>'
