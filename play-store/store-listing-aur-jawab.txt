@@ -1,0 +1,131 @@
+GG KHATABOOK — پلے اسٹور کا سارا سامان
+=====================================
+اس فولڈر میں:
+  app-icon-512.png ............ App icon (512x512)
+  feature-graphic-1024x500.png  Feature graphic
+  screenshot-1..4.png ......... Phone screenshots (1080x1920)
+  store-listing-aur-jawab.txt . یہ فائل (نیچے سب کاپی والا متن)
+
+
+1) STORE LISTING  (Grow users → Store presence → Main store listing)
+-------------------------------------------------------------------
+
+App name (30 حروف تک):
+GG Khatabook: Udhaar Hisaab
+
+Short description (80 حروف تک):
+Easy udhaar khata: customer balance, WhatsApp receipts & Google Drive backup
+
+Full description (انگلش):
+GG Khatabook is a simple and fast digital khata (ledger) for shopkeepers and small businesses in Pakistan.
+
+Keep every customer's udhaar (credit) and payments in one place — no more paper registers.
+
+KEY FEATURES
+• Add customers with name and phone number
+• Record "Received" and "Paid" amounts in one tap
+• See each customer's running balance and full history
+• Total received, paid and net balance on the home screen
+• Share colourful receipts and reminders on WhatsApp and SMS
+• Print or save customer reports
+• Automatic backup to your own Google Drive (morning and after 7 PM)
+• One-tap restore on a new phone
+• PIN lock and fingerprint login to keep your khata private
+• Urdu-friendly design with Nastaleeq receipts
+• Works offline — your data stays on your phone
+
+SUBSCRIPTION
+Start with a 3-day free trial. Then choose a Google Play subscription:
+• 1 Month
+• 1 Year (best value)
+Cancel anytime from Google Play → Payments & subscriptions.
+
+Your data is yours: records are stored on your device and backed up only to your own Google Drive.
+
+Full description (اردو حصہ — انگلش کے نیچے ساتھ لگا دیں):
+GG Khatabook — دکانداروں کے لیے ادھار کا آسان ڈیجیٹل کھاتہ۔
+• ہر گاہک کا حساب ایک جگہ
+• وصول اور ادا کی گئی رقم ایک ٹیپ میں
+• واٹس ایپ پر خوبصورت رسید اور یاد دہانی
+• اپنی گوگل ڈرائیو پر خودکار بیک اپ
+• پن لاک اور فنگر پرنٹ سے محفوظ
+• 3 دن مفت، پھر Google Play سے ماہانہ یا سالانہ پیکج
+
+App category:  Business  (یا Finance)
+Tags: Accounting, Business, Finance tools (جو ملیں)
+Contact email:
+pbtcodelabs@gmail.com
+Privacy policy URL:
+https://pbtcodelabs-pbt.github.io/DG/privacy.html
+
+
+2) APP CONTENT (Policy → App content) — سوالناموں کے جواب
+----------------------------------------------------------
+
+Privacy policy:  اوپر والا لنک
+
+Ads:  No, my app does not contain ads
+
+App access:
+  "All or some functionality is restricted" چنیں، اور Instructions میں یہ لکھیں:
+The app opens directly. On the first screen tap "Start 3-Day Free Trial" to use all features. A PIN screen may appear — tap "ابھی چھوڑیں (پن نہیں لگانا)" (Skip) at the bottom. No username or password is needed.
+
+Content rating (IARC questionnaire):
+  Category: "All other app types" / Utility, Productivity...
+  Violence, sexual content, language, drugs, gambling: سب No
+  Users interact / share content with other users: No
+  Shares user location: No
+  Digital purchases: Yes (subscriptions)
+  → نتیجہ عموماً: Everyone / 3+
+
+Target audience and content:
+  Age groups: 18 and over  (صرف یہی)
+  Appeals to children: No
+
+News app:  No
+Government app:  No
+COVID-19 app:  No (اگر پوچھے)
+Health apps:  No (My app does not have any health features)
+
+Financial features (Financial features declaration):
+  "My app doesn't provide any financial features" ... اگر صرف یہ ہو تو یہی؛
+  اگر فہرست میں ہو تو "Other / Bookkeeping, record keeping" — یہ ایپ پیسے کا لین دین، قرض یا بینکنگ نہیں کرتی، صرف حساب لکھتی ہے۔
+
+Data safety:
+  Does your app collect or share user data?  Yes
+  Is all data encrypted in transit?  Yes
+  Do you provide a way to request deletion?  Yes (email: pbtcodelabs@gmail.com)
+  Account creation: "My app does not allow users to create an account" (Google sign-in صرف ڈرائیو بیک اپ کے لیے)
+
+  Data types — COLLECTED (Shared: No):
+   • Personal info → Name, Phone number  (گاہکوں کے نام/نمبر — صرف آپ کی گوگل ڈرائیو بیک اپ میں)
+       Optional, Purpose: App functionality
+   • Personal info → Email address  (ڈرائیو بیک اپ کے لیے گوگل سائن اِن)
+       Optional, Purpose: App functionality, Account management
+   • Financial info → Purchase history  (Google Play خریداری کی تصدیق)
+       Required, Purpose: App functionality
+   • Financial info → Other financial info  (کھاتے کی رقمیں — صرف آپ کی گوگل ڈرائیو بیک اپ میں)
+       Optional, Purpose: App functionality
+   • App info and performance / Device or other IDs → Device or other IDs  (ایپ کی User ID — لائسنس کے لیے)
+       Required, Purpose: App functionality, Fraud prevention
+
+  Data processed ephemerally: No
+  Location, contacts list, photos, messages: Not collected
+
+
+3) پیکج (Monetize → Subscriptions) — AAB اپ لوڈ ہونے کے بعد
+-------------------------------------------------------------
+Product ID (1 مہینہ):
+dg_khata_1m
+قیمت: Rs 300 — Billing period: 1 month — Free trial: کوئی نہیں (ایپ کا اپنا 3 دن ٹرائل ہے)
+
+Product ID (1 سال):
+dg_khata_12m
+قیمت: Rs 3,000 — Billing period: 1 year
+
+دونوں کو Activate کرنا نہ بھولیں۔
+
+
+4) ملک
+------
+Countries/regions: صرف Pakistan
