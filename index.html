@@ -10,7 +10,7 @@ window.ggStamp = function(){
 (function(){
   try{
     var r = document.referrer || '';
-    if(r.indexOf('android-app://com.pbtcodelabs.dgkhata') === 0) sessionStorage.setItem('dgPlayApp','1');
+    if(r.indexOf('android-app://com.pbtcodelabs.ggkhatabook') === 0 || r.indexOf('android-app://com.pbtcodelabs.dgkhata') === 0) sessionStorage.setItem('dgPlayApp','1');
     // پکی نشانی: پلے اسٹور والی ایپ ہمیشہ ?src=play سے کھلتی ہے (APP-BUILDER)
     if(/[?&]src=play\b/.test(location.search)) sessionStorage.setItem('dgPlayApp','1');
     if(sessionStorage.getItem('dgPlayApp') === '1' || typeof window.getDigitalGoodsService === 'function'){
@@ -2631,10 +2631,10 @@ async function dgActivateWithCode(code){
 // ⚠️ نیچے کے Product ID بالکل انہی ناموں سے Play Console → Monetize → Subscriptions میں بنانے ہیں۔
 // ایک سبسکرپشن = ایک مدت (Digital Goods API بیس پلان نہیں چن سکتی)۔ مفت ٹرائل ایپ کا اپنا 3 دن والا ہے۔
 // ============================================================
-const DG_PLAY_PACKAGE = 'com.pbtcodelabs.dgkhata';
+const DG_PLAY_PACKAGE = 'com.pbtcodelabs.ggkhatabook';
 const DG_PLAY_PRODUCTS = [
-  { sku: 'dg_khata_1m',  days: 30,  label: '1 Month'  },
-  { sku: 'dg_khata_12m', days: 365, label: '1 Year'   },
+  { sku: 'gg_khatabook_1m',  days: 30,  label: '1 Month'  },
+  { sku: 'gg_khatabook_12m', days: 365, label: '1 Year'   },
 ];
 const DG_PLAY_VERIFY_URL = 'https://aio-pos-verify.pbtcodelabs.workers.dev';
 const DG_PLAY_BILLING = 'https://play.google.com/billing';
@@ -7044,7 +7044,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG1510TH019';
+  var PK_APP_VERSION = 'GG1510TH020';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
