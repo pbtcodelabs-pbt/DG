@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "DG Khatabook",
-  "short_name": "DG Khatabook",
-  "description": "DG Khatabook — Customer Ledger & Transactions App",
+  "name": "AHG Khatabook",
+  "short_name": "AHG Khatabook",
+  "description": "AHG Khatabook — Customer Ledger & Transactions App",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

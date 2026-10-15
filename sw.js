@@ -1,10 +1,10 @@
-// DG Khatabook — Service Worker
+// AHG Khatabook — Service Worker
 // Cache name is tied to the app version (PK_APP_VERSION in index.html).
 // Bump CACHE_NAME every time you bump PK_APP_VERSION so old caches are cleared automatically.
 // فارمولا: dg-khatabook-cache-YYYYMMDD-HHMM (24 گھنٹے کا وقت) — ہر نئی بلڈ پر موجودہ اصل تاریخ/وقت لگائیں،
 // اور index.html میں PK_APP_VERSION بھی اسی وقت پر (DG+DD+MON+DoW+HHMM+AM/PM فارمیٹ میں) اپڈیٹ کریں۔
 
-const CACHE_NAME = 'dg-khatabook-cache-DG1410WE014';
+const CACHE_NAME = 'dg-khatabook-cache-DG1510TH015';
 // فونٹ کا الگ مستقل ڈبہ — نیا ورژن آنے پر بھی ڈیلیٹ نہیں ہوتا، تاکہ 7 ایم بی فونٹ بار بار ڈاؤن لوڈ نہ ہو
 const FONT_CACHE = 'dg-khatabook-fonts-v1';
 
@@ -24,7 +24,7 @@ self.addEventListener('install', function (event) {
     caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll(PRECACHE_URLS).catch(function (err) {
         // Don't fail install if one optional asset (e.g. an icon) is missing
-        console.log('DG Khatabook SW: precache warning', err);
+        console.log('AHG Khatabook SW: precache warning', err);
       });
     })
   );
