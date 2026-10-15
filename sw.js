@@ -4,7 +4,7 @@
 // فارمولا: dg-khatabook-cache-YYYYMMDD-HHMM (24 گھنٹے کا وقت) — ہر نئی بلڈ پر موجودہ اصل تاریخ/وقت لگائیں،
 // اور index.html میں PK_APP_VERSION بھی اسی وقت پر (DG+DD+MON+DoW+HHMM+AM/PM فارمیٹ میں) اپڈیٹ کریں۔
 
-const CACHE_NAME = 'dg-khatabook-cache-DG1510TH016';
+const CACHE_NAME = 'dg-khatabook-cache-DG1510TH017';
 // فونٹ کا الگ مستقل ڈبہ — نیا ورژن آنے پر بھی ڈیلیٹ نہیں ہوتا، تاکہ 7 ایم بی فونٹ بار بار ڈاؤن لوڈ نہ ہو
 const FONT_CACHE = 'dg-khatabook-fonts-v1';
 
