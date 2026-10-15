@@ -7036,7 +7036,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG1510TH016';
+  var PK_APP_VERSION = 'DG1510TH017';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7143,6 +7143,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     return sdkP;
   }
   async function getToken(interactive){
+    if(!token){ var sv=(ls('dgDriveTok')||'').split('|'); if(sv[0] && Number(sv[1])>Date.now()){ token=sv[0]; tokenExp=Number(sv[1]); } }
     if(token && Date.now()<tokenExp) return token;
     if(!interactive) throw new Error('NEEDS_LOGIN');
     await initSDK();
@@ -7156,6 +7157,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       throw new Error('غلط اکاؤنٹ ('+em+') — صرف '+saved+' سے چلے گا');
     }
     token=r.credential.accessToken; tokenExp=Date.now()+50*60000;
+    ss('dgDriveTok', token+'|'+tokenExp);   // ایپ دوبارہ کھلنے پر بار بار لاگ ان نہ مانگے
     if(em) ss('dgDriveEmail', em);
     hideBanner();
     return token;
@@ -7252,11 +7254,16 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       var all=await listBackups(tok, fid, 60);
       for(var i=KEEP;i<all.length;i++){ try{ await api('/drive/v3/files/'+all[i].id, tok, {method:'DELETE'}); }catch(e){} }
       ss('dgDriveLast', String(Date.now())); lastErr=''; ok=true;
+      ss('dgDriveAuto', slotKey()); hideBanner();   // بیک اپ ہو گیا — بینر ہٹائیں، اس وقت کا خودکار بیک اپ بھی پورا
       progDone('✅ آپ کا بیک اپ ہو گیا ہے — 100% مکمل ('+st.customers+' کسٹمرز، '+st.records+' ریکارڈز)');
     }catch(e){
       var m3=(e&&e.message)||'ناکام';
       if(m3==='NEEDS_LOGIN'){
-        showBanner(why==='auto'?'☁️ خودکار بیک اپ کا وقت ہے — یہاں ٹیپ کریں':null);
+        if(why!=='auto' || ls('dgDriveAsked')!==slotKey()){
+          if(why==='auto') ss('dgDriveAsked', slotKey());
+          showBanner(why==='auto'?'☁️ خودکار بیک اپ کا وقت ہے — یہاں ٹیپ کریں':null);
+          setTimeout(hideBanner, 20000);
+        }
         if(why==='auto' && !window.__dgArm){   // اسکرین پر پہلی ٹچ خود بیک اپ چلا دے (ایک الگ ٹیپ کی ضرورت نہیں)
           window.__dgArm=true;
           var fire=function(ev){
@@ -7281,8 +7288,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     if(!on()) return;
     clearTimeout(_saveT);
     _saveT=setTimeout(function(){
-      if(token && Date.now()<tokenExp) backup(false,'save');
-      else showBanner('☁️ نئی انٹری کا بیک اپ باقی ہے — یہاں ٹیپ کریں');
+      getToken(false).then(function(){ backup(false,'save'); }).catch(function(){});   // لاگ ان نہ ہو تو خاموش — صبح/شام والا خودکار بیک اپ کر لے گا
     },20000);
   };
   window.dgCloudSchedule=function(){ if(window.dgDriveAfterSave) window.dgDriveAfterSave(); }; // پرانا ہُک — اب ہر سیو پر نہیں، اوپننگ اور شام 7 بجے کے بعد خودکار بیک اپ ہوتا ہے
@@ -7292,10 +7298,11 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     var a=document.getElementById('app'), l=document.getElementById('lock-screen');
     return a && a.style.display!=='none' && (!l || l.style.display==='none') && document.visibilityState==='visible';
   }
+  function slotKey(){ return today()+'|'+((new Date().getHours()>=19)?'eve':'day'); }
   async function autoCheck(){
     if(!on() || busy || !appVisible()) return;
-    var slot=(new Date().getHours()>=19)?'eve':'day', key=today()+'|'+slot;
-    if(ls('dgDriveAuto')===key) return;
+    var key=slotKey();
+    if(ls('dgDriveAuto')===key || ls('dgDriveAsked')===key) return;
     if(!stats(localJSON()) || !stats(localJSON()).records) return;
     if(!navigator.onLine) return;
     var ok=await backup(false,'auto');
@@ -7450,7 +7457,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       document.getElementById('dgd-rest').onclick=showList;
       document.getElementById('dgd-off').onclick=function(){
         if(!confirm('Google Drive بیک اپ بند کر دیں؟')) return;
-        ['dgDriveOn','dgDriveLast','dgDriveEmail','dgDriveFolder','dgDriveAuto'].forEach(rm);
+        ['dgDriveOn','dgDriveLast','dgDriveEmail','dgDriveFolder','dgDriveAuto','dgDriveAsked','dgDriveTok'].forEach(rm);
         token=null; lastErr=''; hideBanner(); paintBtn(); openModal();
       };
     }
