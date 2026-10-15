@@ -11,6 +11,8 @@ window.ahgStamp = function(){
   try{
     var r = document.referrer || '';
     if(r.indexOf('android-app://com.pbtcodelabs.dgkhata') === 0) sessionStorage.setItem('dgPlayApp','1');
+    // پکی نشانی: پلے اسٹور والی ایپ ہمیشہ ?src=play سے کھلتی ہے (APP-BUILDER)
+    if(/[?&]src=play\b/.test(location.search)) sessionStorage.setItem('dgPlayApp','1');
     if(sessionStorage.getItem('dgPlayApp') === '1' || typeof window.getDigitalGoodsService === 'function'){
       document.documentElement.classList.add('dg-play');
     }
@@ -3391,6 +3393,7 @@ async function hashPin(pin){
 
 let _dgTapCount = 0, _dgTapTimer = null;
 function dgDevTap(){
+  if(typeof dgIsPlayApp==='function' && dgIsPlayApp()) return;   // پلے اسٹور والی ایپ میں ڈیولپر پینل کبھی نہیں کھلتا — صرف ویب (GitHub) والی ایپ میں
   _dgTapCount++;
   clearTimeout(_dgTapTimer);
   _dgTapTimer = setTimeout(()=>{ _dgTapCount=0; }, 2500);
@@ -7036,7 +7039,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'DG1510TH017';
+  var PK_APP_VERSION = 'AHG1510TH018';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7353,13 +7356,13 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   }
 
   // ---------- گھر کا خرچ (My Home) — Drive پر الگ فائل ----------
-  var HOME_NAME='DG-Home-Expense.json';
-  async function homeFile(tok, fid){ return ((await api('/drive/v3/files?fields=files(id)&q='+q("'"+fid+"' in parents and name='"+HOME_NAME+"' and trashed=false"), tok)).files||[])[0]||null; }
+  var HOME_NAME='AHG-Home-Expense.json', OLD_HOME_NAME='DG-Home-Expense.json';
+  async function homeFile(tok, fid){ return ((await api('/drive/v3/files?fields=files(id)&q='+q("'"+fid+"' in parents and (name='"+HOME_NAME+"' or name='"+OLD_HOME_NAME+"') and trashed=false"), tok)).files||[])[0]||null; }
   async function uploadHome(tok, fid){
     var h=ls('dgHomeExp'); if(!h) return;
     try{ var o=JSON.parse(h); if(!o || (!(o.entries&&o.entries.length) && !o.budget)) return; }catch(e){ return; }
     var f=await homeFile(tok, fid);
-    if(f){ var m=multipart({}, h); await api('/upload/drive/v3/files/'+f.id+'?uploadType=multipart&fields=id', tok, {method:'PATCH', headers:{'Content-Type':m.ct}, body:m.body}); }
+    if(f){ var m=multipart({name:HOME_NAME}, h); await api('/upload/drive/v3/files/'+f.id+'?uploadType=multipart&fields=id', tok, {method:'PATCH', headers:{'Content-Type':m.ct}, body:m.body}); }
     else { var m2=multipart({name:HOME_NAME, parents:[fid]}, h); await api('/upload/drive/v3/files?uploadType=multipart&fields=id', tok, {method:'POST', headers:{'Content-Type':m2.ct}, body:m2.body}); }
   }
   async function restoreHomeIfEmpty(tok, fid){
