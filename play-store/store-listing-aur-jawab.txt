@@ -7,6 +7,12 @@ GG KHATABOOK — پلے اسٹور کا سارا سامان
   store-listing-aur-jawab.txt . یہ فائل (نیچے سب کاپی والا متن)
 
 
+0) CREATE APP
+------------
+Package name:
+com.pbtcodelabs.ggkhatabook
+
+
 1) STORE LISTING  (Grow users → Store presence → Main store listing)
 -------------------------------------------------------------------
 
@@ -134,7 +140,7 @@ Countries/regions: صرف Pakistan
 5) RELEASE (Test and release → Internal testing → Create new release)
 --------------------------------------------------------------------
 AAB فائل (یہی اپ لوڈ کریں):
-https://github.com/pbtcodelabs-pbt/APP-BUILDER/releases/download/app-com.pbtcodelabs.dgkhata/GG1510TH0842-PlayStore.aab
+https://github.com/pbtcodelabs-pbt/APP-BUILDER/releases/download/app-com.pbtcodelabs.ggkhatabook/GG1510TH1101-PlayStore.aab
 
 Release name:
 GG Khatabook 1.16
