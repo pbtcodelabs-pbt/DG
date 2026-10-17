@@ -6734,6 +6734,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   <div class="adm-section" id="adm-s4">
     <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:8px">📄 میری سبسکرپشن</div>
     <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:14px">
+      <div class="dg-direct-only">
       <div style="font-size:10.5px;color:#94a3b8;font-weight:900;text-transform:uppercase;margin-bottom:4px">Device UID</div>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
         <div id="adm-sub-uid" dir="ltr" style="flex:1;font-family:monospace;font-size:17px;font-weight:900;color:#0f172a;word-break:break-all">-----</div>
@@ -6743,6 +6744,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
         <div id="adm-sub-code" dir="ltr" style="flex:1;font-family:monospace;font-size:17px;font-weight:900;color:#0f172a;word-break:break-all">-----</div>
         <button type="button" onclick="dgAdmCopy('adm-sub-code')" style="background:#eff6ff;color:#1e3a8a;border:1.5px solid #bfdbfe;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:900;flex-shrink:0">Copy</button>
+      </div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12.5px;color:#475569;font-weight:800;padding:7px 0;border-top:1px dashed #e2e8f0">
         <span>شروع کی تاریخ</span><span id="adm-sub-start">—</span>
@@ -6758,7 +6760,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     <button class="btn-unlock dg-play-only" style="background:#16a34a;margin:0 0 10px" onclick="dgPlayRestoreNow(this)">🔄 Google Play سے تازہ کریں / Restore</button>
     <button class="btn-unlock dg-play-only" style="background:#1e3a8a;margin:0 0 10px" onclick="dgPlayManageSubs()">⚙️ Google Play سبسکرپشن (منسوخ / تبدیل)</button>
     <button class="btn-unlock dg-direct-only" style="background:#0ea5e9;margin:0 0 10px" onclick="dgAdmRefreshSub()">🔄 سرور سے تازہ کریں</button>
-    <div style="font-size:11px;color:#64748b;font-weight:700;line-height:1.7">اگر کبھی ایپ لاک ہو جائے یا سبسکرپشن غائب نظر آئے تو پہلے اوپر "🔄 سرور سے تازہ کریں" آزمائیں۔ کام نہ کرے تو یہ Activation Code کاپی کر کے لاک سکرین کے "Enter Activation Code" خانے میں لکھ کر Unlock دبائیں۔</div>
+    <div class="dg-play-only" style="font-size:11px;color:#64748b;font-weight:700;line-height:1.7">اگر سبسکرپشن نظر نہ آئے تو اوپر "🔄 Google Play سے تازہ کریں / Restore" دبائیں۔ سبسکرپشن منسوخ یا تبدیل کرنے کے لیے نیلا بٹن دبائیں۔</div>
+    <div class="dg-direct-only" style="font-size:11px;color:#64748b;font-weight:700;line-height:1.7">اگر کبھی ایپ لاک ہو جائے یا سبسکرپشن غائب نظر آئے تو پہلے اوپر "🔄 سرور سے تازہ کریں" آزمائیں۔ کام نہ کرے تو یہ Activation Code کاپی کر کے لاک سکرین کے "Enter Activation Code" خانے میں لکھ کر Unlock دبائیں۔</div>
   </div>
 
   <div class="adm-section" id="adm-s5">
@@ -7044,7 +7047,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG1510TH020';
+  var PK_APP_VERSION = 'GG1710SA021';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
