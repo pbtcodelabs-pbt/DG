@@ -2257,6 +2257,45 @@ function _dgIntlPhone(raw){
   if(d.length===10 && d.charAt(0)==='3') return '92'+d;
   return d;
 }
+// ── کسٹمر کی اپنی WhatsApp چیٹ میں پوسٹر ──
+// ویب ایپ سے WhatsApp کسی خاص نمبر پر تصویر خود نہیں بھیجنے دیتا؛ اس لیے: تصویر کلپ بورڈ میں کاپی
+// + اسی کسٹمر کے محفوظ نمبر کی چیٹ سیدھی کھلتی ہے، وہاں دبا کر Paste کریں۔ نمبر نہ ہو تو پرانا Share۔
+function _dgCustPhone(name){
+  name=String(name||'').trim();
+  var r=records.find(function(x){ return x.name.trim()===name && x.phone; });
+  return _dgIntlPhone(r ? r.phone : '');
+}
+function _dgToast(msg){
+  var t=document.getElementById('dg-wa-toast');
+  if(!t){
+    t=document.createElement('div'); t.id='dg-wa-toast';
+    t.style.cssText='position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:12px 18px;border-radius:14px;font-weight:800;font-size:14px;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:90vw;text-align:center;direction:rtl;transition:opacity .3s';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },4500);
+}
+// blobPromise: تصویر کا Promise<Blob> — کلک کے فوراً بعد ہی بنایا جائے تاکہ کلپ بورڈ کی اجازت ملے
+async function _dgOpenCustChat(num, blobPromise){
+  var copied=false;
+  try{
+    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      await Promise.race([
+        navigator.clipboard.write([new ClipboardItem({'image/png':blobPromise})]).then(function(){ copied=true; }),
+        new Promise(function(res){ setTimeout(res,1500); })
+      ]);
+    }
+  }catch(e){}
+  _dgToast(copied ? '📋 پوسٹر کاپی ہو گیا — چیٹ میں دبا کر رکھیں اور Paste کریں' : '📎 چیٹ میں گیلری سے پوسٹر لگائیں (Download سے محفوظ کریں)');
+  var appUrl='whatsapp://send?phone='+num, webUrl='https://wa.me/'+num;
+  var left=false, onHide=function(){ if(document.hidden) left=true; };
+  document.addEventListener('visibilitychange',onHide);
+  try{ location.href=appUrl; }catch(e){}
+  setTimeout(function(){
+    document.removeEventListener('visibilitychange',onHide);
+    if(!left && !document.hidden){ var a=document.createElement('a'); a.href=webUrl; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); }
+  },1500);
+}
 function toggleDevChat(){
   var m = document.getElementById('dcf-menu');
   if(m) m.classList.toggle('open');
@@ -4696,7 +4735,7 @@ function printLedger(){
     </div>
     <div style="display:flex;gap:8px">
       <a href="${img}" download="Ledger_${currentCustomer}.png" style="flex:1;background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;color:#fff;padding:11px;border-radius:12px;font-weight:900;font-size:13px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 3px 0 #1e3a8a">⬇ Download</a>
-      <button onclick="(async()=>{try{const r=document.getElementById('print-popup');const imgEl=r.querySelector('img');const res=await fetch(imgEl.src);const blob=await res.blob();const file=new File([blob],'ledger.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return;}}catch(e){}window.open('https://wa.me/','_blank');})()" style="flex:1.5;background:#25D366;color:#fff;padding:11px;border-radius:12px;font-weight:900;font-size:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px">📱 WhatsApp</button>
+      <button onclick="(async()=>{const r=document.getElementById('print-popup');const imgEl=r.querySelector('img');const num=_dgCustPhone(currentCustomer);if(num){_dgOpenCustChat(num,fetch(imgEl.src).then(x=>x.blob()));return;}try{const imgEl=r.querySelector('img');const res=await fetch(imgEl.src);const blob=await res.blob();const file=new File([blob],'ledger.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return;}}catch(e){}window.open('https://wa.me/','_blank');})()" style="flex:1.5;background:#25D366;color:#fff;padding:11px;border-radius:12px;font-weight:900;font-size:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px">📱 WhatsApp</button>
     </div>
   </div>`;
   document.body.appendChild(popup);
@@ -4929,6 +4968,8 @@ function downloadPoster(){
 }
 async function sharePosterWhatsApp(){
   const c=document.getElementById('poster-canvas');
+  const num=posterRecord?_dgCustPhone(posterRecord.name):'';
+  if(num){ _dgOpenCustChat(num, new Promise(res=>c.toBlob(res,'image/png'))); return; }
   try{
     const blob=await new Promise(res=>c.toBlob(res));
     const file=new File([blob],'poster.png',{type:'image/png'});
@@ -7047,7 +7088,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG1710SA021';
+  var PK_APP_VERSION = 'GG2110WE022';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;

@@ -3,7 +3,7 @@
 // Bump CACHE_NAME every time you bump PK_APP_VERSION so old caches are cleared automatically.
 // ورژن کی شکل: GG + DD + MM + دن کے دو حروف + تین ہندسوں کا سیریل (مثلاً GG1710SA021) — index.html کے PK_APP_VERSION کے ساتھ ہی بدلیں۔
 
-const CACHE_NAME = 'gg-khatabook-cache-GG1710SA021';
+const CACHE_NAME = 'gg-khatabook-cache-GG2110WE022';
 // فونٹ کا الگ مستقل ڈبہ — نیا ورژن آنے پر بھی ڈیلیٹ نہیں ہوتا، تاکہ 7 ایم بی فونٹ بار بار ڈاؤن لوڈ نہ ہو
 const FONT_CACHE = 'dg-khatabook-fonts-v1';
 
