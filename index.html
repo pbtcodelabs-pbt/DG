@@ -4415,6 +4415,7 @@ function saveEntry(){
   records.push(rec);
   saveData(); renderLedger();
   closeModal('modal-entry');
+  openPoster(rec.id); // لین دین محفوظ ہوتے ہی پوسٹر تیار — WhatsApp کے لیے
 }
 
 // ============================================================
@@ -4748,9 +4749,14 @@ function openPoster(recordId){
   posterRecord=records.find(r=>r.id===recordId);
   if(!posterRecord) return;
   document.getElementById('poster-msg').value='';
+  drawPoster(); // فوراً بنائیں، انتظار نہیں
   document.getElementById('modal-poster').style.display='flex';
-  setTimeout(drawPoster,50);
 }
+// پوسٹر کا نستعلیق فونٹ (7 ایم بی) ایپ کھلتے ہی پس منظر میں تیار — تاکہ پوسٹر کھولتے وقت دیر نہ ہو
+(function(){
+  function pre(){ try{ if(document.fonts) document.fonts.load("40px 'JNKasheeda'",'ا'); }catch(e){} }
+  if(document.readyState==='complete') setTimeout(pre,300); else window.addEventListener('load',function(){ setTimeout(pre,300); });
+})();
 
 function drawPoster(){
   const r=posterRecord; if(!r) return;
@@ -4960,8 +4966,14 @@ function drawPoster(){
   ctx.fillStyle='#ffffff'; ctx.font=`900 17px ${NF}`; ctx.textAlign='left'; ctx.direction='ltr';
   ctx.fillText(shopPhone,pad+24,ftY+38);
   ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+  _dgPosterReady();
 }
 
+let posterBlobP=null; // آخری بنے پوسٹر کی تصویر — WhatsApp دبانے پر فوراً تیار
+function _dgPosterReady(){
+  const c=document.getElementById('poster-canvas');
+  posterBlobP=new Promise(res=>c.toBlob(res,'image/png'));
+}
 function downloadPoster(){
   const c=document.getElementById('poster-canvas');
   const a=document.createElement('a'); a.download=`Poster_${posterRecord?.name||'khata'}.png`; a.href=c.toDataURL('image/png'); a.click();
@@ -4969,9 +4981,10 @@ function downloadPoster(){
 async function sharePosterWhatsApp(){
   const c=document.getElementById('poster-canvas');
   const num=posterRecord?_dgCustPhone(posterRecord.name):'';
-  if(num){ _dgOpenCustChat(num, new Promise(res=>c.toBlob(res,'image/png'))); return; }
+  if(!posterBlobP) _dgPosterReady();
+  if(num){ _dgOpenCustChat(num, posterBlobP); return; }
   try{
-    const blob=await new Promise(res=>c.toBlob(res));
+    const blob=await posterBlobP;
     const file=new File([blob],'poster.png',{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return;}
   }catch(e){}
@@ -7088,7 +7101,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2110WE022';
+  var PK_APP_VERSION = 'GG2110WE023';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
