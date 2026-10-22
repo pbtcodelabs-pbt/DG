@@ -212,8 +212,8 @@ html:not(.dg-play) .dg-play-only{display:none!important}
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 /* اردو حروف ہمیشہ نوری نستعلیق کشیدہ میں (صرف اردو حروف پر — انگریزی اور ہندسے Arial ہی رہیں) */
-@font-face{font-family:'JNNoori';src:url('fonts/JameelNooriNastaleeq-Regular.woff2') format('woff2'),url('fonts/JameelNooriNastaleeqRegular.ttf') format('truetype');font-display:swap}
-@font-face{font-family:'UrduNoori';src:url('fonts/JameelNooriNastaleeq-Kasheeda.woff2') format('woff2'),url('fonts/JNKasheeda.woff') format('woff'),url('fonts/JameelNooriNastaleeqKasheeda.ttf') format('truetype');font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF,U+200C-200F}
+@font-face{font-family:'JNNoori';src:url('fonts/JameelNooriNastaleeq-Regular.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'UrduNoori';src:url('fonts/JameelNooriNastaleeq-Kasheeda.woff2') format('woff2');font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF,U+200C-200F}
 :root{--appfont:'UrduNoori','Arial Black',Arial,sans-serif;}
 body{font-family:var(--appfont);background:#eef2f7;direction:ltr;min-height:100vh;font-weight:700}
 button{cursor:pointer;font-family:inherit;transition:all .15s;border:none}
@@ -7226,7 +7226,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2210TH025';
+  var PK_APP_VERSION = 'GG2210TH026';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7674,7 +7674,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 
 <!-- 🏠 MY HOME EXPENDITURE — میرا گھر کا خرچ -->
 <style>
-@font-face{font-family:'JNKasheeda';src:url('fonts/JameelNooriNastaleeq-Kasheeda.woff2') format('woff2'),url('fonts/JNKasheeda.woff') format('woff'),url('fonts/JameelNooriNastaleeqKasheeda.ttf') format('truetype');font-display:swap}
+@font-face{font-family:'JNKasheeda';src:url('fonts/JameelNooriNastaleeq-Kasheeda.woff2') format('woff2');font-display:swap}
 #hx-view{position:fixed;inset:0;z-index:250;background:#f1f5f9;overflow-y:auto;display:none;direction:rtl;font-family:'JNKasheeda',var(--appfont);-webkit-overflow-scrolling:touch;line-height:1.75;color:#0f172a}
 #hx-view *{box-sizing:border-box}
 #hx-view .ar,#hx-view .n,#hx-view input[type=date],#hx-view input[inputmode=numeric]{font-family:Arial,sans-serif;line-height:1.3}
