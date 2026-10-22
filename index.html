@@ -1,4 +1,4 @@
-<html lang="en" dir="ltr" style="--appfont: 'Arial Narrow',Arial,sans-serif;"><head>
+<html lang="en" dir="ltr" style="--appfont: 'UrduNoori','Arial Narrow',Arial,sans-serif;"><head>
 <meta charset="UTF-8">
 <script>
 // فائل کے نام کا وقت: DD + MM + دن(2 حرف) + گھنٹہ منٹ (12 گھنٹے) + AM/PM — مثال 1510TH0640AM
@@ -211,7 +211,10 @@ html:not(.dg-play) .dg-play-only{display:none!important}
 </style>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--appfont:'Arial Black',Arial,sans-serif;}
+/* اردو حروف ہمیشہ نوری نستعلیق کشیدہ میں (صرف اردو حروف پر — انگریزی اور ہندسے Arial ہی رہیں) */
+@font-face{font-family:'JNNoori';src:url('fonts/JameelNooriNastaleeq-Regular.woff2') format('woff2'),url('fonts/JameelNooriNastaleeqRegular.ttf') format('truetype');font-display:swap}
+@font-face{font-family:'UrduNoori';src:url('fonts/JameelNooriNastaleeq-Kasheeda.woff2') format('woff2'),url('fonts/JNKasheeda.woff') format('woff'),url('fonts/JameelNooriNastaleeqKasheeda.ttf') format('truetype');font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF,U+200C-200F}
+:root{--appfont:'UrduNoori','Arial Black',Arial,sans-serif;}
 body{font-family:var(--appfont);background:#eef2f7;direction:ltr;min-height:100vh;font-weight:700}
 button{cursor:pointer;font-family:inherit;transition:all .15s;border:none}
 button:active{transform:scale(.96)}
@@ -2163,9 +2166,9 @@ window.addEventListener('focus', _pkRefreshFromStorageIfSafe);
 function fmt(n){ return Number(n||0).toLocaleString('en-US'); }
 // ── APP FONT TOGGLE — Arial Black / Arial Narrow / Calibri ──
 const APP_FONT_STACKS = {
-  arialblack: "'Arial Black',Arial,sans-serif",
-  arialnarrow: "'Arial Narrow',Arial,sans-serif",
-  calibri: "Calibri,Arial,sans-serif"
+  arialblack: "'UrduNoori','Arial Black',Arial,sans-serif",
+  arialnarrow: "'UrduNoori','Arial Narrow',Arial,sans-serif",
+  calibri: "'UrduNoori',Calibri,Arial,sans-serif"
 };
 function getAppFontStack(){
   const key = localStorage.getItem('app_font') || 'arialblack';
@@ -4690,8 +4693,9 @@ function drawKhataReport(name){
   t('GG Khatabook  •  '+custRecs.length+' entries',W/2,y+112,'700 16px '+NF,MUTE,'center');
   return cv;
 }
-function openKhataReport(){
+async function openKhataReport(){
   const name=currentCustomer; if(!name) return;
+  try{ if(document.fonts && !document.fonts.check("22px 'UrduNoori'",'ا')) await Promise.race([document.fonts.load("22px 'UrduNoori'",'ا'),new Promise(r=>setTimeout(r,2500))]); }catch(e){}
   const cv=drawKhataReport(name);
   const old=document.getElementById('khata-report'); if(old) old.remove();
   const ov=document.createElement('div'); ov.id='khata-report';
@@ -4875,7 +4879,7 @@ function openPoster(recordId){
 }
 // پوسٹر کا نستعلیق فونٹ (7 ایم بی) ایپ کھلتے ہی پس منظر میں تیار — تاکہ پوسٹر کھولتے وقت دیر نہ ہو
 (function(){
-  function pre(){ try{ if(document.fonts) document.fonts.load("40px 'JNKasheeda'",'ا'); }catch(e){} }
+  function pre(){ try{ if(document.fonts){ document.fonts.load("40px 'JNKasheeda'",'ا'); document.fonts.load("40px 'UrduNoori'",'ا'); } }catch(e){} }
   if(document.readyState==='complete') setTimeout(pre,300); else window.addEventListener('load',function(){ setTimeout(pre,300); });
 })();
 
@@ -7222,7 +7226,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2210TH024';
+  var PK_APP_VERSION = 'GG2210TH025';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7670,7 +7674,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 
 <!-- 🏠 MY HOME EXPENDITURE — میرا گھر کا خرچ -->
 <style>
-@font-face{font-family:'JNKasheeda';src:url('fonts/JNKasheeda.woff') format('woff'),url('fonts/JameelNooriNastaleeqKasheeda.ttf') format('truetype');font-display:swap}
+@font-face{font-family:'JNKasheeda';src:url('fonts/JameelNooriNastaleeq-Kasheeda.woff2') format('woff2'),url('fonts/JNKasheeda.woff') format('woff'),url('fonts/JameelNooriNastaleeqKasheeda.ttf') format('truetype');font-display:swap}
 #hx-view{position:fixed;inset:0;z-index:250;background:#f1f5f9;overflow-y:auto;display:none;direction:rtl;font-family:'JNKasheeda',var(--appfont);-webkit-overflow-scrolling:touch;line-height:1.75;color:#0f172a}
 #hx-view *{box-sizing:border-box}
 #hx-view .ar,#hx-view .n,#hx-view input[type=date],#hx-view input[inputmode=numeric]{font-family:Arial,sans-serif;line-height:1.3}
