@@ -196,7 +196,7 @@ html:not(.dg-play) .dg-play-only{display:none!important}
 </style>
 <style>
 /* v7 OVERRIDES: Big buttons + poster readability */
-.detail-action-btn { font-size: 18px !important; padding: 12px 6px !important; }
+.detail-action-btn { font-size: 15px !important; padding: 12px 3px !important; }
 .btn-download { font-size: 18px !important; padding: 14px !important; }
 .btn-whatsapp { font-size: 18px !important; padding: 14px !important; }
 .btn-primary { font-size: 20px !important; padding: 16px !important; }
@@ -334,7 +334,7 @@ input,textarea,select{font-family:inherit;outline:none}
 .detail-back{background:rgba(255,255,255,.2);color:#fff;width:36px;height:36px;border-radius:50%;font-size:20px}
 .detail-net{text-align:center;padding:16px;background:#fff;border-bottom:1px solid #e2e8f0}
 .detail-net-val{font-size:36px;font-weight:900;direction:ltr;font-family:Arial,sans-serif}
-.detail-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;background:#fff;border-bottom:1px solid #e2e8f0}
+.detail-actions{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:10px;background:#fff;border-bottom:1px solid #e2e8f0}
 .detail-action-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border-radius:12px;border:1.5px solid #e2e8f0!important;background:linear-gradient(145deg,#f8fafc,#f1f5f9);font-size:18px;font-weight:900;color:#475569;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
 
 /* ===== LEDGER TABLE ===== */
@@ -1400,6 +1400,7 @@ select {
     <button class="detail-action-btn" onclick="showMsgModal('whatsapp')"><span style="font-size:20px">💬</span>WhatsApp</button>
     <button class="detail-action-btn" onclick="printLedger()"><span style="font-size:20px">🖨️</span>Print</button>
     <button class="detail-action-btn" onclick="deleteCustomer()" style="color:#dc2626"><span style="font-size:20px">🗑️</span>Delete</button>
+    <button class="detail-action-btn" onclick="openKhataReport()" style="color:#0f172a"><span style="font-size:20px">📄</span>Report</button>
   </div>
   <div class="ledger-wrap" id="ledger-wrap">
     <table class="ledger-table">
@@ -4601,6 +4602,126 @@ function sendReminderWhatsApp(){
 // ============================================================
 // PRINT LEDGER
 // ============================================================
+// ============================================================
+// 📄 KHATA REPORT — ایک کھاتے کی مکمل، سادہ اور صاف رپورٹ (پورا صفحہ)
+// ============================================================
+function drawKhataReport(name){
+  const custRecs=records.filter(r=>r.name.trim()===name).sort((a,b)=>a.id-b.id);
+  const phone=custRecs.find(r=>r.phone)?.phone||'';
+  const HF=getAppFontStack(), NF='Arial,sans-serif';
+  const W=1000, PAD=36, HEAD=230, SUM=150, TH=58, ROW=64, TOT=70, FOOT=150;
+  const H=PAD+HEAD+SUM+TH+Math.max(1,custRecs.length)*ROW+TOT+FOOT+PAD;
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const c=cv.getContext('2d');
+  const INK='#0f172a', MUTE='#64748b', LINE='#cbd5e1';
+  const RED='#b91c1c', RED_BG='#fef2f2', RED_LN='#fca5a5';
+  const GRN='#15803d', GRN_BG='#f0fdf4', GRN_LN='#86efac';
+  const t=(txt,x,y,font,clr,align,dir)=>{ c.font=font; c.fillStyle=clr; c.textAlign=align||'left'; c.direction=dir||'ltr'; c.fillText(txt,x,y); };
+  const box=(x,y,w,h,bg,ln,r)=>{ c.beginPath(); c.roundRect(x,y,w,h,r||10); if(bg){c.fillStyle=bg;c.fill();} if(ln){c.strokeStyle=ln;c.lineWidth=2;c.stroke();} };
+  const fit=(txt,max,font)=>{ c.font=font; if(c.measureText(txt).width<=max) return txt; while(txt.length>1 && c.measureText(txt+'…').width>max) txt=txt.slice(0,-1); return txt+'…'; };
+  c.fillStyle='#fff'; c.fillRect(0,0,W,H);
+
+  // ── سرخی
+  let y=PAD;
+  t(getShop(),W/2,y+44,'900 38px '+HF,INK,'center');
+  const sub=[getOwner(),getPhone()].filter(Boolean).join('   |   ');
+  if(sub) t(sub,W/2,y+84,'700 20px '+HF,MUTE,'center');
+  c.strokeStyle=INK; c.lineWidth=3; c.beginPath(); c.moveTo(PAD,y+106); c.lineTo(W-PAD,y+106); c.stroke();
+  t('ACCOUNT STATEMENT',PAD,y+148,'900 22px '+NF,MUTE,'left');
+  t('Date: '+new Date().toLocaleDateString('en-GB'),W-PAD,y+148,'700 20px '+NF,MUTE,'right');
+  t(name,PAD,y+196,'900 34px '+HF,INK,'left','ltr');
+  if(phone) t(phone,W-PAD,y+196,'700 22px '+NF,INK,'right');
+
+  // ── خلاصہ: دیے / لیے / بقایا
+  let paid=0, got=0; custRecs.forEach(r=>{ if(r.type==='got') got+=r.amount; else paid+=r.amount; });
+  const net=got-paid;
+  y=PAD+HEAD; const bw=(W-PAD*2-24)/3, bh=SUM-30;
+  const sumBox=(i,lbl,val,clr,bg,ln)=>{ const x=PAD+i*(bw+12); box(x,y,bw,bh,bg,ln,14);
+    t(lbl,x+bw/2,y+38,'800 19px '+NF,clr,'center'); t('Rs '+fmt(val),x+bw/2,y+86,'900 32px '+NF,clr,'center'); };
+  sumBox(0,'TOTAL PAID (Debit)',paid,RED,RED_BG,RED_LN);
+  sumBox(1,'TOTAL RECEIVED (Credit)',got,GRN,GRN_BG,GRN_LN);
+  sumBox(2,net>=0?'BALANCE — PROFIT':'BALANCE — LOSS',Math.abs(net),INK,'#f8fafc',INK);
+
+  // ── جدول
+  const cols=[{k:'#',w:52},{k:'Date',w:140},{k:'Detail',w:0},{k:'Paid (Debit)',w:170},{k:'Received (Credit)',w:170},{k:'Balance',w:160}];
+  const fixed=cols.reduce((a,x)=>a+x.w,0); cols[2].w=W-PAD*2-fixed;
+  let x=PAD; cols.forEach(cl=>{ cl.x=x; x+=cl.w; });
+  y=PAD+HEAD+SUM;
+  c.fillStyle=INK; c.fillRect(PAD,y,W-PAD*2,TH);
+  cols.forEach(cl=>t(cl.k,cl.x+cl.w/2,y+TH/2+7,'800 18px '+NF,'#fff','center'));
+  y+=TH;
+  let run=0;
+  if(!custRecs.length){ t('No entries',W/2,y+ROW/2+8,'700 20px '+NF,MUTE,'center'); y+=ROW; }
+  custRecs.forEach((r,i)=>{
+    const isGot=r.type==='got'; run+=isGot?r.amount:-r.amount;
+    if(i%2) { c.fillStyle='#f8fafc'; c.fillRect(PAD,y,W-PAD*2,ROW); }
+    const my=y+ROW/2+8;
+    t(String(i+1),cols[0].x+cols[0].w/2,my,'700 18px '+NF,MUTE,'center');
+    t(String(r.date||''),cols[1].x+cols[1].w/2,my,'700 18px '+NF,INK,'center');
+    const nf='700 22px '+HF, note=String(r.note||(isGot?'Received':'Paid'));
+    const rtl=/[؀-ۿ]/.test(note);
+    t(fit(note,cols[2].w-20,nf), rtl?cols[2].x+cols[2].w-10:cols[2].x+10, my+2, nf, INK, rtl?'right':'left', rtl?'rtl':'ltr');
+    // دیے اور لیے — الگ الگ ڈبے
+    const cell=(cl,on,clr,bg,ln)=>{ if(on){ box(cl.x+8,y+9,cl.w-16,ROW-18,bg,ln,8); t('Rs '+fmt(r.amount),cl.x+cl.w/2,my,'900 20px '+NF,clr,'center'); }
+      else t('—',cl.x+cl.w/2,my,'700 18px '+NF,LINE,'center'); };
+    cell(cols[3],!isGot,RED,RED_BG,RED_LN);
+    cell(cols[4],isGot,GRN,GRN_BG,GRN_LN);
+    t('Rs '+fmt(Math.abs(run)),cols[5].x+cols[5].w-12,my,'800 19px '+NF,run>=0?GRN:RED,'right');
+    c.strokeStyle='#e2e8f0'; c.lineWidth=1; c.beginPath(); c.moveTo(PAD,y+ROW); c.lineTo(W-PAD,y+ROW); c.stroke();
+    y+=ROW;
+  });
+  // کالموں کی لکیریں
+  c.strokeStyle='#e2e8f0'; c.lineWidth=1;
+  cols.slice(1).forEach(cl=>{ c.beginPath(); c.moveTo(cl.x,PAD+HEAD+SUM+TH); c.lineTo(cl.x,y); c.stroke(); });
+  // ── ٹوٹل
+  c.fillStyle='#f1f5f9'; c.fillRect(PAD,y,W-PAD*2,TOT);
+  c.strokeStyle=INK; c.lineWidth=2.5; c.beginPath(); c.moveTo(PAD,y); c.lineTo(W-PAD,y); c.stroke();
+  const ty=y+TOT/2+8;
+  t('TOTAL',cols[2].x+cols[2].w-12,ty,'900 22px '+NF,INK,'right');
+  t('Rs '+fmt(paid),cols[3].x+cols[3].w/2,ty,'900 21px '+NF,RED,'center');
+  t('Rs '+fmt(got),cols[4].x+cols[4].w/2,ty,'900 21px '+NF,GRN,'center');
+  t('Rs '+fmt(Math.abs(net)),cols[5].x+cols[5].w-12,ty,'900 21px '+NF,net>=0?GRN:RED,'right');
+  y+=TOT;
+  c.strokeStyle=LINE; c.lineWidth=1.5; c.strokeRect(PAD,PAD+HEAD+SUM,W-PAD*2,y-(PAD+HEAD+SUM));
+  // ── نتیجہ
+  y+=24;
+  box(PAD,y,W-PAD*2,78,net>=0?GRN_BG:RED_BG,net>=0?GRN:RED,14);
+  t('Total Received Rs '+fmt(got)+'  −  Total Paid Rs '+fmt(paid)+'  =  Rs '+fmt(Math.abs(net))+(net>=0?'  (Profit)':'  (Loss)'),W/2,y+48,'900 22px '+NF,net>=0?GRN:RED,'center');
+  t('GG Khatabook  •  '+custRecs.length+' entries',W/2,y+112,'700 16px '+NF,MUTE,'center');
+  return cv;
+}
+function openKhataReport(){
+  const name=currentCustomer; if(!name) return;
+  const cv=drawKhataReport(name);
+  const old=document.getElementById('khata-report'); if(old) old.remove();
+  const ov=document.createElement('div'); ov.id='khata-report';
+  ov.style.cssText='position:fixed;inset:0;background:#e2e8f0;z-index:9500;display:flex;flex-direction:column';
+  ov.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px;background:#0f172a;color:#fff">
+      <button id="kr-close" style="background:#334155;color:#fff;border:none;width:40px;height:40px;border-radius:50%;font-size:18px;font-weight:900;cursor:pointer">✕</button>
+      <div style="flex:1;font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📄 ${name.replace(/</g,'&lt;')} — Report</div>
+    </div>
+    <div style="flex:1;overflow:auto;padding:8px"><img id="kr-img" style="width:100%;display:block;background:#fff;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.15)"/></div>
+    <div style="display:flex;gap:8px;padding:10px 10px calc(env(safe-area-inset-bottom,0px) + 10px);background:#fff;border-top:1px solid #cbd5e1">
+      <button id="kr-dl" style="flex:1;background:#1d4ed8;color:#fff;border:none;padding:14px;border-radius:12px;font-weight:900;font-size:16px;cursor:pointer">⬇ Download</button>
+      <button id="kr-wa" style="flex:1.4;background:#25D366;color:#fff;border:none;padding:14px;border-radius:12px;font-weight:900;font-size:16px;cursor:pointer">📱 WhatsApp</button>
+    </div>`;
+  document.body.appendChild(ov);
+  const dcf=document.querySelector('.dcf-wrap'), dcfDisp=dcf?dcf.style.display:'';
+  if(dcf) dcf.style.display='none'; // چیٹ کا گول بٹن رپورٹ کے اوپر نہ آئے
+  const blobP=new Promise(res=>cv.toBlob(res,'image/png'));
+  const fname='Report_'+name.replace(/[^\w؀-ۿ]+/g,'_')+'.png';
+  blobP.then(b=>{ ov.querySelector('#kr-img').src=URL.createObjectURL(b); });
+  ov.querySelector('#kr-close').onclick=()=>{ ov.remove(); if(dcf) dcf.style.display=dcfDisp; };
+  ov.querySelector('#kr-dl').onclick=()=>blobP.then(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=fname; a.click(); });
+  ov.querySelector('#kr-wa').onclick=async()=>{
+    const num=_dgCustPhone(name);
+    if(num){ _dgOpenCustChat(num,blobP); return; }
+    try{ const f=new File([await blobP],fname,{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+    ov.querySelector('#kr-dl').click();
+  };
+}
+
 function printLedger(){
   if(!currentCustomer) return;
   const custRecs=records.filter(r=>r.name.trim()===currentCustomer).sort((a,b)=>a.id-b.id);
@@ -7101,7 +7222,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2110WE023';
+  var PK_APP_VERSION = 'GG2210TH024';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -7187,6 +7308,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       if(pCur>=100){ clearInterval(pTimer); pPaint(pFinal); pHide=setTimeout(progHide,2800); }
     },40);
   }
+  function _progSet(pct,label){ progSet(pct,label); }
   function progSet(pct,label){ if(pct>pTgt) pTgt=pct; if(label) pPaint(label); }
   function progDone(text){ pFinal=text; pTgt=100; var e=document.getElementById('dg-prog'); if(e) e.style.background='#166534'; }
   function progFail(text){
@@ -7299,9 +7421,11 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     var data=localJSON(), st=stats(data);
     if(!st || !st.records){ if(interactive) alert('ڈیٹا خالی ہے — پہلے کوئی کسٹمر شامل کریں۔ (خالی ڈیٹا Drive پر کبھی نہیں لکھا جاتا)'); return false; }
     busy=true; var ok=false, started=false;
+    // اوپر والی بیک اپ پٹی صرف تب جب آپ خود بیک اپ کریں؛ خودکار/سیو والا بیک اپ خاموشی سے
+    var loud=(why==='manual'), progSet=loud?_progSet:function(){};
     try{
       var tok=await getToken(interactive);
-      started=true; progStart('☁️ Google Drive پر بیک اپ ہو رہا ہے…');
+      started=loud; if(loud) progStart('☁️ Google Drive پر بیک اپ ہو رہا ہے…');
       progSet(15);
       var fid=await getFolder(tok); progSet(35);
       var name=fileStamp()+'.json', props={customers:String(st.customers), records:String(st.records), rev:String(Date.now())};
@@ -7320,7 +7444,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
       for(var i=KEEP;i<all.length;i++){ try{ await api('/drive/v3/files/'+all[i].id, tok, {method:'DELETE'}); }catch(e){} }
       ss('dgDriveLast', String(Date.now())); lastErr=''; ok=true;
       ss('dgDriveAuto', slotKey()); hideBanner();   // بیک اپ ہو گیا — بینر ہٹائیں، اس وقت کا خودکار بیک اپ بھی پورا
-      progDone('✅ آپ کا بیک اپ ہو گیا ہے — 100% مکمل ('+st.customers+' کسٹمرز، '+st.records+' ریکارڈز)');
+      if(loud) progDone('✅ آپ کا بیک اپ ہو گیا ہے — 100% مکمل ('+st.customers+' کسٹمرز، '+st.records+' ریکارڈز)');
     }catch(e){
       var m3=(e&&e.message)||'ناکام';
       if(m3==='NEEDS_LOGIN'){
@@ -7370,6 +7494,8 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     if(ls('dgDriveAuto')===key || ls('dgDriveAsked')===key) return;
     if(!stats(localJSON()) || !stats(localJSON()).records) return;
     if(!navigator.onLine) return;
+    if(Date.now()-(window.__dgAutoTry||0) < 15*60000) return;   // ناکام ہو تو ہر منٹ نہیں، 15 منٹ بعد دوبارہ
+    window.__dgAutoTry=Date.now();
     var ok=await backup(false,'auto');
     if(ok) ss('dgDriveAuto', key);
   }
