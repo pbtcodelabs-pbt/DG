@@ -3,7 +3,7 @@
 // Bump CACHE_NAME every time you bump PK_APP_VERSION so old caches are cleared automatically.
 // ورژن کی شکل: GG + DD + MM + دن کے دو حروف + تین ہندسوں کا سیریل (مثلاً GG1710SA021) — index.html کے PK_APP_VERSION کے ساتھ ہی بدلیں۔
 
-const CACHE_NAME = 'gg-khatabook-cache-GG2210TH027';
+const CACHE_NAME = 'gg-khatabook-cache-GG2310FR028';
 // فونٹ کا الگ مستقل ڈبہ — نیا ورژن آنے پر بھی ڈیلیٹ نہیں ہوتا، تاکہ 7 ایم بی فونٹ بار بار ڈاؤن لوڈ نہ ہو
 const FONT_CACHE = 'dg-khatabook-fonts-v1';
 
@@ -35,7 +35,8 @@ self.addEventListener('activate', function (event) {
     caches.keys().then(function (keys) {
       return Promise.all(
         keys.map(function (key) {
-          if (key !== CACHE_NAME && key !== FONT_CACHE) {
+          // 🛡️ صرف اسی ایپ کے پرانے کیش — اسی ویب سائٹ کی دوسری ایپس کے کبھی نہیں
+          if ((key.indexOf('gg-khatabook-cache-') === 0 || key.indexOf('dg-khatabook-') === 0) && key !== CACHE_NAME && key !== FONT_CACHE) {
             return caches.delete(key);
           }
         })
