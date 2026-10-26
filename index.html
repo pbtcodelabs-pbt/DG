@@ -13,7 +13,10 @@ window.ggStamp = function(){
     if(r.indexOf('android-app://com.pbtcodelabs.ggkhatabook') === 0 || r.indexOf('android-app://com.pbtcodelabs.dgkhata') === 0) sessionStorage.setItem('dgPlayApp','1');
     // پکی نشانی: پلے اسٹور والی ایپ ہمیشہ ?src=play سے کھلتی ہے (APP-BUILDER)
     if(/[?&]src=play\b/.test(location.search)) sessionStorage.setItem('dgPlayApp','1');
-    if(sessionStorage.getItem('dgPlayApp') === '1' || typeof window.getDigitalGoodsService === 'function'){
+    // Direct APK (com.pbtcodelabs.ggdirect) ہمیشہ ایکٹیویشن کوڈ والی — کبھی Play نہیں
+    if(r.indexOf('android-app://com.pbtcodelabs.ggdirect') === 0) sessionStorage.removeItem('dgPlayApp');
+    // صرف پکی نشانی (?src=play یا Play ایپ کا referrer) — getDigitalGoodsService نہیں، وہ نئے Chrome میں ہر APK میں ہوتا ہے
+    if(sessionStorage.getItem('dgPlayApp') === '1'){
       document.documentElement.classList.add('dg-play');
     }
   }catch(e){}
@@ -7279,7 +7282,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2310FR028';
+  var PK_APP_VERSION = 'GG2610MO029';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
