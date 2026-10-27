@@ -1816,7 +1816,7 @@ select {
 
     <!-- Unlocked panel -->
     <div id="dg-dev-unlocked" style="display:none">
-      <!-- GG2710TU032: اوپر کیپسول بٹن — جو دبائیں صرف وہی حصہ سامنے، لمبا اسکرول نہیں -->
+      <!-- GG2710TU033: اوپر کیپسول بٹن — جو دبائیں صرف وہی حصہ سامنے، لمبا اسکرول نہیں -->
       <div class="devTabs" id="dg-dev-tabs" role="tablist">
         <button type="button" class="devTab" role="tab" data-sec="unlock" onclick="dgDevShowSec('unlock')"><b>🔓 ڈویلپر ان لاک</b><small>یہ ایپ اس فون پر ہمیشہ کھلی</small></button>
         <button type="button" class="devTab" role="tab" data-sec="gen" onclick="dgDevShowSec('gen')"><b>🎁 کوڈ بنائیں</b><small>گاہک کے لیے نیا کوڈ</small></button>
@@ -1925,7 +1925,7 @@ select {
 </div>
 
 <style>
-/* GG2710TU032: ڈویلپر پینل کے کیپسول بٹن */
+/* GG2710TU033: ڈویلپر پینل کے کیپسول بٹن */
 .devTabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:0 0 14px}
 .devTab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;padding:8px 8px;border:1.5px solid #dbe1ea;border-radius:20px;background:linear-gradient(180deg,#fff,#eef2f7);box-shadow:0 2px 0 #cbd5e1,0 4px 10px rgba(15,23,42,.08);color:#0f172a;cursor:pointer;text-align:center;font-family:inherit;-webkit-tap-highlight-color:transparent}
 .devTab b{font-size:13px;font-weight:800;line-height:1.25}
@@ -2962,7 +2962,7 @@ async function initLock(){
   // Developer bypass — owner UID always unlocks, lifetime, no Firestore involved
   const DEV_UIDS = ['74065']; // Your UID is here
   const fp        = await getDeviceFingerprint();
-  if(dgDevPermUnlocked()){ showApp(); return; } // 🔓 GG2710TU032: ڈویلپر ان لاک — صرف اسی فون پر
+  if(dgDevPermUnlocked()){ showApp(); return; } // 🔓 GG2710TU033: ڈویلپر ان لاک — صرف اسی فون پر
   if(DEV_UIDS.includes(fp)){
     if(!localStorage.getItem('ek_act')){
       _dgSetLocalSub(fp, Date.now()+36500*86400000, 'DEV');
@@ -3539,7 +3539,7 @@ async function dgDevUnlock(){
   dgDevLoadCodes();
 }
 
-// ---------- 🔓 GG2710TU032: ڈویلپر ان لاک — یہ ایپ صرف اسی فون پر ہمیشہ کھلی (ٹرائل/ایکسپائری لاگو نہیں)۔
+// ---------- 🔓 GG2710TU033: ڈویلپر ان لاک — یہ ایپ صرف اسی فون پر ہمیشہ کھلی (ٹرائل/ایکسپائری لاگو نہیں)۔
 // اپنی الگ کلید (dgDevPermUnlock) — کلاؤڈ/بیک اپ میں کبھی نہیں جاتی، کسی گاہک کے فون پر خود نہیں پہنچتی ----------
 function dgDevPermUnlocked(){ try{ return localStorage.getItem('dgDevPermUnlock') === '1'; }catch(e){ return false; } }
 function dgDevShowSec(key){
@@ -7459,7 +7459,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2710TU032';
+  var PK_APP_VERSION = 'GG2710TU033';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -8434,7 +8434,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 </script>
 
 <script>
-/* 👁️ (ہر PIN/پاس ورڈ خانہ) GG2710TU032: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
+/* 👁️ (ہر PIN/پاس ورڈ خانہ) GG2710TU033: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
    جب تک خود نہ دبائیں، ویسا ہی رہتا ہے (دبائے رکھنے کی ضرورت نہیں) */
 (function(){
   var SVG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
@@ -8448,7 +8448,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
     wrap.style.cssText = 'position:relative; display:block; margin:' + cs.marginTop + ' ' + cs.marginRight + ' ' + cs.marginBottom + ' ' + cs.marginLeft + ';';
     var pd = inp.parentElement ? getComputedStyle(inp.parentElement).display : '';
     if(/flex|grid/.test(pd)){ wrap.style.flex = cs.flexGrow + ' ' + cs.flexShrink + ' ' + cs.flexBasis; wrap.style.minWidth = '0'; wrap.style.alignSelf = cs.alignSelf; }
-    else if(/inline/.test(cs.display) && !/100%/.test(inp.style.width || '')){ wrap.style.display = 'inline-block'; wrap.style.verticalAlign = 'middle'; }
+    else if(/inline/.test(cs.display) && (/px/.test(inp.style.width || '') || (inp.offsetWidth > 0 && inp.parentElement && inp.offsetWidth < inp.parentElement.clientWidth * 0.9))){ wrap.style.display = 'inline-block'; wrap.style.verticalAlign = 'middle'; }
     inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
     inp.style.margin = '0'; inp.style.boxSizing = 'border-box';
     var rtl = cs.direction === 'rtl';
