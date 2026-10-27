@@ -1816,7 +1816,7 @@ select {
 
     <!-- Unlocked panel -->
     <div id="dg-dev-unlocked" style="display:none">
-      <!-- GG2710TU030: اوپر کیپسول بٹن — جو دبائیں صرف وہی حصہ سامنے، لمبا اسکرول نہیں -->
+      <!-- GG2710TU031: اوپر کیپسول بٹن — جو دبائیں صرف وہی حصہ سامنے، لمبا اسکرول نہیں -->
       <div class="devTabs" id="dg-dev-tabs" role="tablist">
         <button type="button" class="devTab" role="tab" data-sec="unlock" onclick="dgDevShowSec('unlock')"><b>🔓 ڈویلپر ان لاک</b><small>یہ ایپ اس فون پر ہمیشہ کھلی</small></button>
         <button type="button" class="devTab" role="tab" data-sec="gen" onclick="dgDevShowSec('gen')"><b>🎁 کوڈ بنائیں</b><small>گاہک کے لیے نیا کوڈ</small></button>
@@ -1925,7 +1925,7 @@ select {
 </div>
 
 <style>
-/* GG2710TU030: ڈویلپر پینل کے کیپسول بٹن */
+/* GG2710TU031: ڈویلپر پینل کے کیپسول بٹن */
 .devTabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:0 0 14px}
 .devTab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;padding:8px 8px;border:1.5px solid #dbe1ea;border-radius:20px;background:linear-gradient(180deg,#fff,#eef2f7);box-shadow:0 2px 0 #cbd5e1,0 4px 10px rgba(15,23,42,.08);color:#0f172a;cursor:pointer;text-align:center;font-family:inherit;-webkit-tap-highlight-color:transparent}
 .devTab b{font-size:13px;font-weight:800;line-height:1.25}
@@ -2962,7 +2962,7 @@ async function initLock(){
   // Developer bypass — owner UID always unlocks, lifetime, no Firestore involved
   const DEV_UIDS = ['74065']; // Your UID is here
   const fp        = await getDeviceFingerprint();
-  if(dgDevPermUnlocked()){ showApp(); return; } // 🔓 GG2710TU030: ڈویلپر ان لاک — صرف اسی فون پر
+  if(dgDevPermUnlocked()){ showApp(); return; } // 🔓 GG2710TU031: ڈویلپر ان لاک — صرف اسی فون پر
   if(DEV_UIDS.includes(fp)){
     if(!localStorage.getItem('ek_act')){
       _dgSetLocalSub(fp, Date.now()+36500*86400000, 'DEV');
@@ -3539,7 +3539,7 @@ async function dgDevUnlock(){
   dgDevLoadCodes();
 }
 
-// ---------- 🔓 GG2710TU030: ڈویلپر ان لاک — یہ ایپ صرف اسی فون پر ہمیشہ کھلی (ٹرائل/ایکسپائری لاگو نہیں)۔
+// ---------- 🔓 GG2710TU031: ڈویلپر ان لاک — یہ ایپ صرف اسی فون پر ہمیشہ کھلی (ٹرائل/ایکسپائری لاگو نہیں)۔
 // اپنی الگ کلید (dgDevPermUnlock) — کلاؤڈ/بیک اپ میں کبھی نہیں جاتی، کسی گاہک کے فون پر خود نہیں پہنچتی ----------
 function dgDevPermUnlocked(){ try{ return localStorage.getItem('dgDevPermUnlock') === '1'; }catch(e){ return false; } }
 function dgDevShowSec(key){
@@ -7459,7 +7459,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2710TU030';
+  var PK_APP_VERSION = 'GG2710TU031';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -8433,4 +8433,45 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
 })();
 </script>
 
+<script>
+/* 👁️ GG2710TU031: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
+   جب تک خود نہ دبائیں، ویسا ہی رہتا ہے (دبائے رکھنے کی ضرورت نہیں) */
+(function(){
+  var IDS = ["dg-dev-pass-input", "dg-dev-new-pass"];
+  var SVG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  var EYE = SVG + '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var EYE_OFF = SVG + '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  function attach(inp){
+    if(!inp || inp.getAttribute('data-pw-eye')) return;
+    inp.setAttribute('data-pw-eye', '1');
+    var cs = getComputedStyle(inp);
+    var wrap = document.createElement('span');
+    wrap.style.cssText = 'position:relative; display:block; margin-top:' + cs.marginTop + '; margin-bottom:' + cs.marginBottom + ';';
+    inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+    inp.style.marginTop = '0'; inp.style.marginBottom = '0'; inp.style.boxSizing = 'border-box';
+    var rtl = cs.direction === 'rtl';
+    inp.style[rtl ? 'paddingLeft' : 'paddingRight'] = '48px';
+    if(cs.textAlign === 'center') inp.style[rtl ? 'paddingRight' : 'paddingLeft'] = '48px';
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.style.cssText = 'position:absolute; top:50%; transform:translateY(-50%); ' + (rtl ? 'left' : 'right') + ':6px; width:38px; height:38px; border:none; border-radius:50%; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; margin:0; -webkit-tap-highlight-color:transparent;';
+    function paint(){
+      var shown = inp.type === 'text';
+      b.innerHTML = shown ? EYE_OFF : EYE;
+      b.title = shown ? 'Hide password — پاس ورڈ چھپائیں' : 'Show password — پاس ورڈ دکھائیں';
+      b.setAttribute('aria-label', b.title);
+      b.setAttribute('aria-pressed', shown ? 'true' : 'false');
+      b.style.color = shown ? '#0f766e' : '#64748b';
+      b.style.background = shown ? 'rgba(15,118,110,.12)' : 'transparent';
+    }
+    b.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); inp.type = inp.type === 'password' ? 'text' : 'password'; paint(); try{ inp.focus(); }catch(_){} });
+    paint();
+    wrap.appendChild(b);
+  }
+  var queued = false;
+  function scan(){ queued = false; IDS.forEach(function(id){ var list = document.querySelectorAll('[id="' + id + '"]'); for(var i = 0; i < list.length; i++) attach(list[i]); }); }
+  scan();
+  try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
+})();
+</script>
 </body></html>
