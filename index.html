@@ -433,9 +433,19 @@ input,textarea,select{font-family:inherit;outline:none}
 
 /* ===== POSTER ===== */
 .poster-modal{position:fixed;inset:0;background:rgba(15,23,42,.85);z-index:800;display:flex;align-items:center;justify-content:center;padding:12px;backdrop-filter:blur(6px)}
-.poster-inner{background:#fff;border-radius:24px;width:100%;max-width:420px;max-height:92vh;overflow-y:auto;padding:16px}
-.poster-canvas-wrap{border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;background:#f8fafc;padding:8px;margin-bottom:12px}
-.poster-canvas{width:100%;display:block;border-radius:8px}
+.poster-inner{position:relative;background:#fff;border-radius:24px;width:100%;max-width:420px;max-height:96vh;max-height:96dvh;display:flex;flex-direction:column;gap:8px;padding:12px;overflow:hidden}
+.pst-close{position:absolute;top:8px;right:8px;z-index:2;background:rgba(241,245,249,.95);color:#64748b;width:32px;height:32px;border-radius:50%;font-weight:900;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.pst-tools{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
+.pst-row{display:flex;align-items:center;gap:8px;direction:rtl}
+.pst-lbl{flex:none;width:52px;font-size:15px;font-weight:900;color:#334155;text-align:right}
+.pst-sw{flex:1;display:flex;gap:6px;overflow-x:auto;padding:3px 2px;direction:ltr}
+.pst-sw button{flex:none;width:29px;height:29px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #94a3b8;padding:0}
+.pst-sw button.on{box-shadow:0 0 0 3px #2563eb}
+.pst-font{flex:1;padding:8px 10px;border:1.5px solid #cbd5e1;border-radius:10px;background:#f8fafc;font-size:17px;font-weight:700;direction:rtl}
+.pst-msg{margin:0!important;font-size:20px;line-height:1.9}
+.btn-share{flex:1;background:linear-gradient(135deg,#475569,#334155);color:#fff;padding:12px;border-radius:12px;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;gap:6px}
+.poster-canvas-wrap{flex:none;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;background:#f8fafc;padding:6px;display:flex;justify-content:center}
+.poster-canvas{display:block;border-radius:8px;width:auto;max-width:100%;height:auto;max-height:46vh;max-height:46dvh}
 .poster-btns{display:flex;gap:8px}
 .btn-download{flex:1;background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none!important;color:#fff;padding:12px;border-radius:12px;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 0 #1e3a8a,0 4px 10px rgba(37,99,235,.35)}
 .btn-whatsapp{flex:1.5;background:#25D366;color:#fff;padding:12px;border-radius:12px;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;gap:6px}
@@ -2022,17 +2032,21 @@ select {
 <!-- POSTER MODAL -->
 <div id="modal-poster" class="poster-modal" style="display:none">
   <div class="poster-inner">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-      <button onclick="closeModal('modal-poster')" style="background:#f1f5f9;color:#64748b;width:30px;height:30px;border-radius:50%;font-weight:900">✕</button>
-    </div>
-    <label class="form-label">Message (Optional)</label>
-    <textarea id="poster-msg" class="form-inp" rows="2" dir="auto" placeholder="Type your message..." oninput="drawPoster()" style="font-family:'JNKasheeda',Arial,sans-serif;font-size:20px;line-height:1.9"></textarea>
+    <button class="pst-close" onclick="closeModal('modal-poster')">✕</button>
+    <!-- پوسٹر ہمیشہ اوپر نظر آتا رہے -->
     <div class="poster-canvas-wrap">
       <canvas id="poster-canvas" class="poster-canvas"></canvas>
     </div>
+    <!-- سب اختیارات نیچے -->
+    <div class="pst-tools">
+      <div class="pst-row"><span class="pst-lbl">رنگ</span><div id="pst-themes" class="pst-sw"></div></div>
+      <div class="pst-row"><span class="pst-lbl">لکھائی</span><div id="pst-inks" class="pst-sw"></div></div>
+      <div class="pst-row"><span class="pst-lbl">فونٹ</span><select id="pst-font" class="pst-font" onchange="posterSetOpt('font',this.value)"></select></div>
+      <textarea id="poster-msg" class="form-inp pst-msg" rows="2" dir="auto" placeholder="پیغام لکھیں (اختیاری)…" oninput="drawPoster()"></textarea>
+    </div>
     <div class="poster-btns">
-      <button class="btn-download" onclick="downloadPoster()">⬇ Download</button>
       <button class="btn-whatsapp" onclick="sharePosterWhatsApp()">📱 WhatsApp</button>
+      <button class="btn-share" onclick="sharePosterAny()">🔗 Share</button>
     </div>
   </div>
 </div>
@@ -2289,7 +2303,7 @@ async function _dgOpenCustChat(num, blobPromise){
     if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
       await Promise.race([
         navigator.clipboard.write([new ClipboardItem({'image/png':blobPromise})]).then(function(){ copied=true; }),
-        new Promise(function(res){ setTimeout(res,1500); })
+        new Promise(function(res){ setTimeout(res,700); })
       ]);
     }
   }catch(e){}
@@ -4926,16 +4940,68 @@ function printLedger(){
 // ============================================================
  // POSTER — clean and simple
 // ============================================================
+// ── پوسٹر کا انداز: رنگ / لکھائی کا رنگ / فونٹ — فون میں یاد رہتا ہے۔ لین دین والے تین ڈبوں کے رنگ پکے ہیں، نہیں بدلتے
+// t1/t2 = اوپر نیچے کی پٹیاں، l1/l2 = پیغام کا ڈبہ، ln = کنارہ
+const POSTER_THEMES={
+  auto:  null, // لین دین کے حساب سے: وصول = سبز، دیا = سرخ
+  green: {t1:'#14532d',t2:'#166534',l1:'#f0fdf4',l2:'#dcfce7',ln:'#86efac',ink:'#14532d'},
+  red:   {t1:'#7f1d1d',t2:'#991b1b',l1:'#fef2f2',l2:'#fee2e2',ln:'#fca5a5',ink:'#7f1d1d'},
+  blue:  {t1:'#1e3a8a',t2:'#1d4ed8',l1:'#eff6ff',l2:'#dbeafe',ln:'#93c5fd',ink:'#1e3a8a'},
+  purple:{t1:'#4c1d95',t2:'#6d28d9',l1:'#f5f3ff',l2:'#ede9fe',ln:'#c4b5fd',ink:'#4c1d95'},
+  orange:{t1:'#7c2d12',t2:'#c2410c',l1:'#fff7ed',l2:'#ffedd5',ln:'#fdba74',ink:'#7c2d12'},
+  teal:  {t1:'#134e4a',t2:'#0f766e',l1:'#f0fdfa',l2:'#ccfbf1',ln:'#5eead4',ink:'#134e4a'},
+  black: {t1:'#0f172a',t2:'#334155',l1:'#f8fafc',l2:'#e2e8f0',ln:'#94a3b8',ink:'#0f172a'}
+};
+const POSTER_INKS=['auto','#000000','#14532d','#7f1d1d','#1e3a8a','#4c1d95','#7c2d12'];
+// نیا فونٹ جوڑنا ہو تو بس یہاں ایک لائن (اور اس کا @font-face)
+const POSTER_FONTS=[
+  {k:'kasheeda', label:'نوری نستعلیق کشیدہ', css:"'JNKasheeda'"},
+  {k:'noori',    label:'نوری نستعلیق',        css:"'JNNoori'"},
+  {k:'arial',    label:'Arial (سادہ)',         css:'Arial'}
+];
+function posterOpt(){
+  let o={}; try{ o=JSON.parse(localStorage.getItem('dg_poster_opt')||'{}'); }catch(e){}
+  if(!(o.theme in POSTER_THEMES)) o.theme='auto';
+  if(POSTER_INKS.indexOf(o.ink)<0) o.ink='auto';
+  if(!POSTER_FONTS.some(f=>f.k===o.font)) o.font='kasheeda';
+  return o;
+}
+function posterFontCss(o){ return (POSTER_FONTS.find(f=>f.k===o.font)||POSTER_FONTS[0]).css; }
+function posterSetOpt(k,v){
+  const o=posterOpt(); o[k]=v;
+  try{ localStorage.setItem('dg_poster_opt',JSON.stringify(o)); }catch(e){}
+  posterPaintTools(); drawPoster();
+}
+function posterPaintTools(){
+  const o=posterOpt(), isGot=posterRecord&&posterRecord.type==='got';
+  const th=document.getElementById('pst-themes'), ik=document.getElementById('pst-inks'), fs=document.getElementById('pst-font');
+  if(!th) return;
+  // بٹن دبانے سے کی بورڈ نہیں کھلتا (یہ لکھنے کا خانہ نہیں)
+  th.innerHTML=Object.keys(POSTER_THEMES).map(k=>{
+    const t=POSTER_THEMES[k]||POSTER_THEMES[isGot?'green':'red'];
+    const bg=k==='auto'?'conic-gradient(#16a34a 0 50%,#dc2626 0)':'linear-gradient(135deg,'+t.t2+','+t.t1+')';
+    return '<button type="button" title="'+k+'" class="'+(o.theme===k?'on':'')+'" style="background:'+bg+'" onclick="posterSetOpt(\'theme\',\''+k+'\')"></button>';
+  }).join('');
+  ik.innerHTML=POSTER_INKS.map(c=>{
+    const bg=c==='auto'?'linear-gradient(135deg,#fff 0 45%,#14532d 55%)':c;
+    return '<button type="button" class="'+(o.ink===c?'on':'')+'" style="background:'+bg+'" onclick="posterSetOpt(\'ink\',\''+c+'\')"></button>';
+  }).join('');
+  if(!fs.options.length) fs.innerHTML=POSTER_FONTS.map(f=>'<option value="'+f.k+'">'+f.label+'</option>').join('');
+  fs.value=o.font;
+  const ta=document.getElementById('poster-msg'); if(ta) ta.style.fontFamily=posterFontCss(o)+',Arial,sans-serif';
+}
+
 function openPoster(recordId){
   posterRecord=records.find(r=>r.id===recordId);
   if(!posterRecord) return;
   document.getElementById('poster-msg').value='';
+  posterPaintTools();
   drawPoster(); // فوراً بنائیں، انتظار نہیں
   document.getElementById('modal-poster').style.display='flex';
 }
 // پوسٹر کا نستعلیق فونٹ (7 ایم بی) ایپ کھلتے ہی پس منظر میں تیار — تاکہ پوسٹر کھولتے وقت دیر نہ ہو
 (function(){
-  function pre(){ try{ if(document.fonts){ document.fonts.load("40px 'JNKasheeda'",'ا'); document.fonts.load("40px 'UrduNoori'",'ا'); } }catch(e){} }
+  function pre(){ try{ if(document.fonts){ document.fonts.load("40px 'JNKasheeda'",'ا'); document.fonts.load("40px 'UrduNoori'",'ا'); try{ const pf=posterFontCss(posterOpt()); if(pf.charAt(0)==="'") document.fonts.load("40px "+pf,'ا'); }catch(e){} } }catch(e){} }
   if(document.readyState==='complete') setTimeout(pre,300); else window.addEventListener('load',function(){ setTimeout(pre,300); });
 })();
 
@@ -4947,15 +5013,18 @@ function drawPoster(){
   canvas.width=W; canvas.height=H;
   // Fonts
   const NF='Arial,sans-serif';           // Latin / numbers
-  const UF="'JNKasheeda',"+getAppFontStack(); // پیغام: نوری نستعلیق کشیدہ
-  if(document.fonts && !document.fonts.check("40px 'JNKasheeda'",'ا') && !window._dgPosterFontWait){
-    window._dgPosterFontWait=1;
-    document.fonts.load("40px 'JNKasheeda'",'ا').then(function(){ window._dgPosterFontWait=0; drawPoster(); }).catch(function(){ window._dgPosterFontWait=0; });
+  const PO=posterOpt(), PF=posterFontCss(PO);
+  const UF=PF+","+getAppFontStack(); // پیغام: چنا ہوا فونٹ
+  if(PF.charAt(0)==="'" && document.fonts && !document.fonts.check("40px "+PF,'ا') && window._dgPosterFontWait!==PF){
+    window._dgPosterFontWait=PF;
+    document.fonts.load("40px "+PF,'ا').then(function(){ window._dgPosterFontWait=0; drawPoster(); }).catch(function(){ window._dgPosterFontWait=0; });
   }
   const HF=getAppFontStack();            // UI labels
   const customMsg=document.getElementById('poster-msg').value;
   const shopName=getShop(), shopOwner=getOwner(), shopPhone=getPhone();
   const isGot=r.type==='got';
+  const TH=POSTER_THEMES[PO.theme]||POSTER_THEMES[isGot?'green':'red'];
+  const INK=PO.ink==='auto'?TH.ink:PO.ink;
 
   // ── Calculations ──
   const custRecs=records.filter(rec=>rec.name.trim()===r.name.trim()).sort((a,b)=>a.id-b.id);
@@ -4978,8 +5047,8 @@ function drawPoster(){
   ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
 
   // ── Glowing border (green = got / red = gave) ──
-  const bclr1=isGot?'#86efac':'#fca5a5';
-  const bclr2=isGot?'#16a34a':'#dc2626';
+  const bclr1=TH.ln;
+  const bclr2=TH.t2;
   const bGrad=ctx.createLinearGradient(pad,pad,W-pad,H-pad);
   bGrad.addColorStop(0,bclr1); bGrad.addColorStop(0.5,bclr2); bGrad.addColorStop(1,bclr1);
   ctx.lineWidth=7; ctx.strokeStyle=bGrad;
@@ -4988,8 +5057,8 @@ function drawPoster(){
   // ── Header pill ──
   const hpY=pad+16, hpH=56;
   const hpG=ctx.createLinearGradient(60,hpY,W-60,hpY+hpH);
-  hpG.addColorStop(0,isGot?'#14532d':'#7f1d1d');
-  hpG.addColorStop(1,isGot?'#166534':'#991b1b');
+  hpG.addColorStop(0,TH.t1);
+  hpG.addColorStop(1,TH.t2);
   ctx.fillStyle=hpG;
   ctx.beginPath(); ctx.roundRect(58,hpY,W-116,hpH,28); ctx.fill();
   // inner highlight line
@@ -5033,11 +5102,11 @@ function drawPoster(){
   const mbX=pad+14, mbY2=colY, mbW=colW, mbH2=colH;
   ctx.shadowColor='rgba(0,0,0,.15)'; ctx.shadowBlur=10; ctx.shadowOffsetY=4;
   const mbG=ctx.createLinearGradient(mbX,mbY2,mbX,mbY2+mbH2);
-  mbG.addColorStop(0,'#f0fdf4'); mbG.addColorStop(1,'#dcfce7');
+  mbG.addColorStop(0,TH.l1); mbG.addColorStop(1,TH.l2);
   ctx.fillStyle=mbG;
   ctx.beginPath(); ctx.roundRect(mbX,mbY2,mbW,mbH2,16); ctx.fill();
   ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
-  ctx.strokeStyle='#86efac'; ctx.lineWidth=1.5;
+  ctx.strokeStyle=TH.ln; ctx.lineWidth=1.5;
   ctx.beginPath(); ctx.roundRect(mbX,mbY2,mbW,mbH2,16); ctx.stroke();
   // top inner highlight
   ctx.strokeStyle='rgba(255,255,255,.8)'; ctx.lineWidth=1;
@@ -5068,9 +5137,9 @@ function drawPoster(){
     const totalTextH=lns.length*lh;
     const startY=mbY2+(mbH2-totalTextH)/2+mfs+4;
     ctx.font=`400 ${mfs}px ${UF}`; ctx.direction=_rtl?'rtl':'ltr'; ctx.textAlign='center';
-    lns.forEach((ln,i)=>{ ctx.fillStyle='#14532d'; ctx.fillText(ln,lcx,startY+i*lh); });
+    lns.forEach((ln,i)=>{ ctx.fillStyle=INK; ctx.fillText(ln,lcx,startY+i*lh); });
   } else {
-    ctx.fillStyle='#86efac'; ctx.font=`28px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
+    ctx.fillStyle=TH.ln; ctx.font=`28px ${HF}`; ctx.textAlign='center'; ctx.direction='ltr';
     ctx.fillText('Type your message...',lcx,mbY2+mbH2/2+6);
   }
 
@@ -5129,8 +5198,8 @@ function drawPoster(){
   const ftY=H-pad-72, ftH=62;
   ctx.shadowColor='rgba(0,0,0,.2)'; ctx.shadowBlur=8; ctx.shadowOffsetY=3;
   const ftG=ctx.createLinearGradient(pad+14,ftY,W-pad-14,ftY+ftH);
-  ftG.addColorStop(0,isGot?'#14532d':'#7f1d1d');
-  ftG.addColorStop(1,isGot?'#166534':'#991b1b');
+  ftG.addColorStop(0,TH.t1);
+  ftG.addColorStop(1,TH.t2);
   ctx.fillStyle=ftG;
   ctx.beginPath(); ctx.roundRect(pad+14,ftY,W-pad*2-28,ftH,26); ctx.fill();
   ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
@@ -5159,6 +5228,16 @@ function downloadPoster(){
   const c=document.getElementById('poster-canvas');
   const a=document.createElement('a'); a.download=`Poster_${posterRecord?.name||'khata'}.png`; a.href=c.toDataURL('image/png'); a.click();
 }
+// 🔗 Share — فون کی عام شیئر فہرست (کوئی بھی ایپ / کوئی بھی بندہ)
+async function sharePosterAny(){
+  if(!posterBlobP) _dgPosterReady();
+  try{
+    const file=new File([await posterBlobP],'poster.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file]}); return; }
+  }catch(e){ if(e&&e.name==='AbortError') return; }
+  downloadPoster();
+}
+// 📱 WhatsApp — جس کسٹمر کا پوسٹر ہے اسی کی چیٹ (نمبر محفوظ نہ ہو تو عام شیئر)
 async function sharePosterWhatsApp(){
   const c=document.getElementById('poster-canvas');
   const num=posterRecord?_dgCustPhone(posterRecord.name):'';
@@ -7282,7 +7361,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2610MO029';
+  var PK_APP_VERSION = 'GG2710TU030';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
