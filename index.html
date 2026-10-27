@@ -1816,11 +1816,26 @@ select {
 
     <!-- Unlocked panel -->
     <div id="dg-dev-unlocked" style="display:none">
-
-      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#166534;font-weight:700">
+      <!-- GG2710TU030: اوپر کیپسول بٹن — جو دبائیں صرف وہی حصہ سامنے، لمبا اسکرول نہیں -->
+      <div class="devTabs" id="dg-dev-tabs" role="tablist">
+        <button type="button" class="devTab" role="tab" data-sec="unlock" onclick="dgDevShowSec('unlock')"><b>🔓 ڈویلپر ان لاک</b><small>یہ ایپ اس فون پر ہمیشہ کھلی</small></button>
+        <button type="button" class="devTab" role="tab" data-sec="gen" onclick="dgDevShowSec('gen')"><b>🎁 کوڈ بنائیں</b><small>گاہک کے لیے نیا کوڈ</small></button>
+        <button type="button" class="devTab" role="tab" data-sec="codes" onclick="dgDevShowSec('codes')"><b>📋 جاری کوڈز</b><small>فعال، ختم، منسوخ</small></button>
+        <button type="button" class="devTab" role="tab" data-sec="transfer" onclick="dgDevShowSec('transfer')"><b>🔁 سبسکرپشن منتقل</b><small>پرانی UID سے نئی پر</small></button>
+        <button type="button" class="devTab" role="tab" data-sec="trial" onclick="dgDevShowSec('trial')"><b>♻️ ٹرائل ری سیٹ</b><small>کسی UID کا دوبارہ ٹرائل</small></button>
+        <button type="button" class="devTab" role="tab" data-sec="contact" onclick="dgDevShowSec('contact')"><b>📞 رابطہ نمبر</b><small>سب گاہکوں کے لیے</small></button>
+        <button type="button" class="devTab" role="tab" data-sec="pass" onclick="dgDevShowSec('pass')"><b>🔑 پاس ورڈ</b><small>ڈویلپر پاس ورڈ بدلیں</small></button>
+        <button type="button" class="devTab" role="tab" data-sec="device" onclick="dgDevShowSec('device')"><b>📱 یہ فون</b><small>UID اور سبسکرپشن</small></button>
+      </div>
+      <div class="devSec" data-sec="unlock"><div id="dg-dev-unlock-state"></div></div>
+      <div class="devSec" data-sec="device" style="display:none">
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#166534;font-weight:700">
         📱 اپنے فون کا Device UID دیکھنا ہو تو لاک اسکرین پر "Your Unique User ID" دیکھیں۔
       </div>
+      <div id="dg-dev-device-info"></div>
+      </div>
 
+      <div class="devSec" data-sec="contact" style="display:none">
       <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px;margin-bottom:16px">
         <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:4px">📞 ڈویلپر کانٹیکٹ نمبر (سب گاہکوں کے لیے)</div>
         <div style="font-size:11px;color:#166534;font-weight:700;line-height:1.6;margin-bottom:8px">یہاں محفوظ کیا ہوا نمبر تمام گاہکوں کی ایپ میں (انٹرنیٹ آنے پر) خودکار بدل جائے گا۔</div>
@@ -1832,13 +1847,17 @@ select {
         <input type="email" id="dg-dev-c-email" class="form-inp" placeholder="pbtcodelabs@gmail.com" dir="ltr">
         <button class="btn-unlock" style="background:#16a34a" onclick="dgDevSaveContact()">💾 نمبر محفوظ کریں</button>
       </div>
+      </div>
 
+      <div class="devSec" data-sec="trial" style="display:none">
       <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:12px;margin-bottom:16px">
         <div class="form-label" style="font-size:14px;color:#9a3412;margin-bottom:4px">♻️ ٹرائل ری سیٹ (ٹیسٹ / دوبارہ ٹرائل دینے کے لیے)</div>
         <input type="text" id="dg-dev-reset-uid" class="form-inp" placeholder="Device UID مثلاً 82001" dir="ltr">
         <button class="btn-unlock" style="background:#ea580c" onclick="dgDevResetTrial()">♻️ اس UID کا ٹرائل ری سیٹ کریں</button>
       </div>
+      </div>
 
+      <div class="devSec" data-sec="transfer" style="display:none">
       <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:12px;margin-bottom:16px">
         <div class="form-label" style="font-size:14px;color:#1e3a8a;margin-bottom:4px">🔁 سبسکرپشن دیکھیں / نئی UID پر منتقل کریں</div>
         <div style="font-size:11px;color:#1e40af;font-weight:700;line-height:1.6;margin-bottom:8px">اگر گاہک ایپ دوبارہ انسٹال کرے اور UID بدل جائے تو نیا کوڈ بنانے کے بجائے یہاں سے باقی دن نئی UID پر منتقل کریں۔</div>
@@ -1849,7 +1868,9 @@ select {
           <button class="btn-unlock" style="background:#2563eb;margin:0" onclick="dgDevTransferSub()">🔁 منتقل کریں</button>
         </div>
       </div>
+      </div>
 
+      <div class="devSec" data-sec="gen" style="display:none">
       <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:8px">🎁 نیا کوڈ بنائیں (Generate Code)</div>
       <label class="form-label">دن (Days)</label>
       <select id="dg-code-days" class="form-inp" onchange="document.getElementById('dg-code-custom-wrap').style.display=(this.value==='custom'?'block':'none')">
@@ -1873,8 +1894,10 @@ select {
         <div style="font-size:11px;color:#9a3412;font-weight:800;margin-bottom:4px">نیا کوڈ — کسٹمر کو بھیجیں</div>
         <div id="dg-code-result-text" style="font-size:20px;font-weight:900;letter-spacing:.08em;color:#c2410c;direction:ltr"></div>
       </div>
+      </div>
 
-      <div style="border-top:2px solid #f1f5f9;margin:16px 0;padding-top:14px">
+      <div class="devSec" data-sec="codes" style="display:none">
+      <div style="margin:0 0 16px">
         <div class="form-label" style="font-size:14px;color:#0f172a;margin-bottom:8px">📋 جاری کردہ کوڈز</div>
         <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
           <button id="dg-filter-all" class="dg-filter-btn active" onclick="dgSetCodeFilter('all')">سب</button>
@@ -1886,11 +1909,14 @@ select {
         </div>
         <div id="dg-codes-list"><div style="text-align:center;color:#94a3b8;font-size:12.5px;padding:14px">⏳ لوڈ ہو رہا ہے...</div></div>
       </div>
+      </div>
 
-      <div style="border-top:2px solid #f1f5f9;margin:16px 0;padding-top:14px">
+      <div class="devSec" data-sec="pass" style="display:none">
+      <div style="margin:0 0 16px">
         <div class="form-label" style="font-size:14px;color:#b91c1c;margin-bottom:8px">🔑 پاسورڈ تبدیل کریں</div>
         <input type="password" id="dg-dev-new-pass" class="form-inp" placeholder="نیا پاسورڈ لکھیں" dir="ltr">
         <button class="nc-btn-save" style="width:100%" onclick="dgDevChangePassword()">Save New Password</button>
+      </div>
       </div>
 
       <button class="nc-btn-back" style="width:100%;margin-top:10px" onclick="closeModal('modal-dev-panel')">Close</button>
@@ -1899,6 +1925,27 @@ select {
 </div>
 
 <style>
+/* GG2710TU030: ڈویلپر پینل کے کیپسول بٹن */
+.devTabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:0 0 14px}
+.devTab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;padding:8px 8px;border:1.5px solid #dbe1ea;border-radius:20px;background:linear-gradient(180deg,#fff,#eef2f7);box-shadow:0 2px 0 #cbd5e1,0 4px 10px rgba(15,23,42,.08);color:#0f172a;cursor:pointer;text-align:center;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.devTab b{font-size:13px;font-weight:800;line-height:1.25}
+.devTab small{font-size:10.5px;font-weight:600;color:#64748b;line-height:1.3}
+.devTab.active{background:linear-gradient(180deg,#14b8a6,#0f766e);border-color:#0f766e;color:#fff;box-shadow:0 2px 0 #115e59,0 6px 14px rgba(15,118,110,.35)}
+.devTab.active small{color:#ccfbf1}
+.devTab:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+.devSec{animation:devSecIn .18s ease}
+@keyframes devSecIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.devStateBox{border-radius:14px;padding:12px;font-weight:800;font-size:14px;text-align:center;margin-bottom:10px}
+.devStateBox.on{background:#dcfce7;color:#166534;border:1.5px solid #86efac}
+.devStateBox.off{background:#f1f5f9;color:#334155;border:1.5px solid #e2e8f0}
+.devStateBox small{display:block;font-weight:600;font-size:12px;margin-top:4px}
+.devBigBtn{width:100%;padding:13px;border:none;border-radius:999px;font-weight:900;font-size:14px;cursor:pointer;font-family:inherit;margin-top:6px}
+.devBigBtn.go{background:linear-gradient(180deg,#22c55e,#15803d);color:#fff;box-shadow:0 3px 0 #166534}
+.devBigBtn.stop{background:#fff;color:#b91c1c;border:1.5px solid #fca5a5}
+.devInfoRow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#f8fafc;border:1px solid #eef2f7;margin-bottom:6px;font-size:13px}
+.devInfoRow span{color:#64748b;font-weight:700;white-space:nowrap}
+.devInfoRow b{color:#0f172a;word-break:break-all}
+.devSecHint{font-size:12px;color:#64748b;margin-top:8px;text-align:center}
 .dg-filter-btn{background:#f1f5f9;border:none;color:#475569;font-size:11px;font-weight:800;padding:6px 10px;border-radius:20px;cursor:pointer}
 .dg-filter-btn.active{background:#2563eb;color:#fff}
 .dg-code-row{border:1.5px solid #e2e8f0;border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:12.5px}
@@ -2641,6 +2688,7 @@ async function dgOnAppOpenSyncChecks(){
     const fp = await getDeviceFingerprint();
     dgFetchDevContact();
     if(dgIsPlayApp()) dgPlayRetryAcks();
+    if(dgDevPermUnlocked()) return; // 🔓 ڈویلپر ان لاک فون پر آن لائن لاک/چیک نہیں
     if(localStorage.getItem('ek_act')==='YES') dgResyncLicenseOnline();
     else dgCheckAndLockTrialOnline(fp);
   }catch(e){}
@@ -2914,6 +2962,7 @@ async function initLock(){
   // Developer bypass — owner UID always unlocks, lifetime, no Firestore involved
   const DEV_UIDS = ['74065']; // Your UID is here
   const fp        = await getDeviceFingerprint();
+  if(dgDevPermUnlocked()){ showApp(); return; } // 🔓 GG2710TU030: ڈویلپر ان لاک — صرف اسی فون پر
   if(DEV_UIDS.includes(fp)){
     if(!localStorage.getItem('ek_act')){
       _dgSetLocalSub(fp, Date.now()+36500*86400000, 'DEV');
@@ -3253,6 +3302,7 @@ function _renderSubInfoBar(){
   const bar = document.getElementById('sub-info-bar');
   if(!bar) return;
   if(dgIsPlayApp()){ bar.style.cursor='pointer'; bar.onclick = dgPlayOpenPlans; }
+  if(dgDevPermUnlocked()){ bar.style.display='block'; bar.innerHTML = '🛠️ Developer unlock — never expires on this phone'; return; }
   const activated = localStorage.getItem('ek_act');
 
   if(activated === 'YES'){
@@ -3281,6 +3331,7 @@ function _renderSubInfoBar(){
 
 let _trialTimerInterval = null;
 function _startTrialTimer(){
+  if(dgDevPermUnlocked()) return; // 🔓 ڈویلپر ان لاک فون پر ٹرائل کبھی ختم نہیں
   // only for trial users (not activated)
   const activated = localStorage.getItem('ek_act');
   if(activated === 'YES') return;
@@ -3483,8 +3534,55 @@ async function dgDevUnlock(){
   }
   document.getElementById('dg-dev-locked').style.display='none';
   document.getElementById('dg-dev-unlocked').style.display='block';
+  dgDevShowSec('unlock'); // سب سے پہلے ڈویلپر ان لاک
   dgDevLoadContact();
   dgDevLoadCodes();
+}
+
+// ---------- 🔓 GG2710TU030: ڈویلپر ان لاک — یہ ایپ صرف اسی فون پر ہمیشہ کھلی (ٹرائل/ایکسپائری لاگو نہیں)۔
+// اپنی الگ کلید (dgDevPermUnlock) — کلاؤڈ/بیک اپ میں کبھی نہیں جاتی، کسی گاہک کے فون پر خود نہیں پہنچتی ----------
+function dgDevPermUnlocked(){ try{ return localStorage.getItem('dgDevPermUnlock') === '1'; }catch(e){ return false; } }
+function dgDevShowSec(key){
+  const root = document.getElementById('dg-dev-unlocked'); if(!root) return;
+  root.querySelectorAll('.devTab').forEach(b => { const on = b.dataset.sec === key; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  root.querySelectorAll('.devSec').forEach(sec => { sec.style.display = sec.dataset.sec === key ? 'block' : 'none'; });
+  if(key === 'unlock') dgDevRenderUnlock();
+  if(key === 'device') dgDevRenderDevice();
+}
+function dgDevRenderUnlock(){
+  const el = document.getElementById('dg-dev-unlock-state'); if(!el) return;
+  const on = dgDevPermUnlocked();
+  el.innerHTML = (on
+    ? '<div class="devStateBox on">✅ اس فون پر مستقل ان لاک ہے<small>یہاں ایپ کبھی بند نہیں ہوگی — ٹرائل، سبسکرپشن اور ایکسپائری اس فون پر لاگو نہیں۔</small></div><button type="button" class="devBigBtn stop" onclick="dgDevSetPermUnlock(false)">مستقل ان لاک بند کریں</button>'
+    : '<div class="devStateBox off">🔒 ان لاک نہیں<small>یہ فون باقی سب گاہکوں کی طرح عام ٹرائل/سبسکرپشن پر چل رہا ہے۔</small></div><button type="button" class="devBigBtn go" onclick="dgDevSetPermUnlock(true)">🔓 یہ ایپ اس فون پر ہمیشہ کے لیے کھولیں</button>') +
+    '<div class="devSecHint">صرف یہی فون کھلتا ہے — بیک اپ یا کلاؤڈ کے ذریعے کسی اور فون پر کبھی نہیں جاتا۔</div>';
+}
+function dgDevSetPermUnlock(on){
+  if(!on && !confirm('اس فون پر مستقل ان لاک بند کریں؟ پھر یہاں بھی عام سبسکرپشن چلے گی۔')) return;
+  try{ on ? localStorage.setItem('dgDevPermUnlock', '1') : localStorage.removeItem('dgDevPermUnlock'); }catch(e){}
+  dgDevRenderUnlock();
+  try{ _renderSubInfoBar(); }catch(e){}
+  if(on){
+    alert('✅ یہ ایپ اب اس فون پر ہمیشہ کے لیے کھلی ہے');
+    const ls = document.getElementById('lock-screen');
+    if(ls && ls.style.display !== 'none'){ closeModal('modal-dev-panel'); showApp(); }
+  }
+}
+async function dgDevRenderDevice(){
+  const el = document.getElementById('dg-dev-device-info'); if(!el) return;
+  let fp = ''; try{ fp = await getDeviceFingerprint(); }catch(e){}
+  let exp = null; try{ exp = _dgLocalSubExpiry(fp); }catch(e){}
+  const esc = v => String(v == null || v === '' ? '—' : v).replace(/</g,'&lt;');
+  const ver = (document.getElementById('pk-lock-ver') || {}).textContent || '';
+  const rows = [
+    ['ورژن', ver],
+    ['Device UID', fp],
+    ['مستقل ان لاک', dgDevPermUnlocked() ? '✅ آن' : 'بند'],
+    ['حالت', dgDevPermUnlocked() ? '🛠️ ڈویلپر (مستقل)' : (localStorage.getItem('ek_act') === 'YES' ? '🟢 ایکٹیویٹ' : '🔶 ٹرائل / لاک')],
+    ['ختم', exp ? _fmtDate(new Date(exp)) : ''],
+  ];
+  el.innerHTML = rows.map(r => '<div class="devInfoRow"><span>' + r[0] + '</span><b dir="ltr">' + esc(r[1]) + '</b></div>').join('') +
+    (fp ? '<button type="button" class="devBigBtn go" onclick="navigator.clipboard && navigator.clipboard.writeText(\'' + String(fp).replace(/\'/g,'') + '\').then(function(){ alert(\'📋 UID کاپی ہو گئی\'); })">📋 UID کاپی کریں</button>' : '');
 }
 
 function dgDevGenerateRandomCode(){
