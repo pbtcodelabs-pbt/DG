@@ -2355,7 +2355,11 @@ async function _dgOpenCustChat(num, blobPromise){
     }
   }catch(e){}
   _dgToast(copied ? '📋 پوسٹر کاپی ہو گیا — چیٹ میں دبا کر رکھیں اور Paste کریں' : '📎 چیٹ میں گیلری سے پوسٹر لگائیں (Download سے محفوظ کریں)');
-  var appUrl='whatsapp://send?phone='+num, webUrl='https://wa.me/'+num;
+  var webUrl='https://wa.me/'+num;
+  // اینڈرائیڈ (Chrome / پلے اسٹور ایپ): intent سے سیدھا WhatsApp یا WhatsApp Business؛ نہ ہو تو wa.me
+  var appUrl=/Android/i.test(navigator.userAgent)
+    ? 'intent://send/?phone='+num+'#Intent;scheme=whatsapp;S.browser_fallback_url='+encodeURIComponent(webUrl)+';end'
+    : 'whatsapp://send?phone='+num;
   var left=false, onHide=function(){ if(document.hidden) left=true; };
   document.addEventListener('visibilitychange',onHide);
   try{ location.href=appUrl; }catch(e){}
@@ -5335,18 +5339,26 @@ async function sharePosterAny(){
   }catch(e){ if(e&&e.name==='AbortError') return; }
   downloadPoster();
 }
-// 📱 WhatsApp — جس کسٹمر کا پوسٹر ہے اسی کی چیٹ (نمبر محفوظ نہ ہو تو عام شیئر)
+// 📱 WhatsApp — پوسٹر کی تصویر پکی پہنچے: فون کی شیئر فہرست سے (WhatsApp چنیں → وہی کسٹمر)۔
+// ویب ایپ سے WhatsApp کسی خاص نمبر پر تصویر خود نہیں بھیجنے دیتا؛ پہلے والا "کلپ بورڈ + چیٹ" طریقہ
+// کئی فونز پر خالی چیٹ کھولتا تھا (تصویر نہیں جاتی تھی)۔ شیئر نہ ہو سکے تو: تصویر ڈاؤن لوڈ + اسی کسٹمر کی چیٹ۔
 async function sharePosterWhatsApp(){
-  const c=document.getElementById('poster-canvas');
-  const num=posterRecord?_dgCustPhone(posterRecord.name):'';
   if(!posterBlobP) _dgPosterReady();
-  if(num){ _dgOpenCustChat(num, posterBlobP); return; }
-  try{
-    const blob=await posterBlobP;
+  const r=posterRecord;
+  const num=r?_dgCustPhone(r.name):'';
+  let blob=null; try{ blob=await posterBlobP; }catch(e){}
+  if(blob){
     const file=new File([blob],'poster.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return;}
-  }catch(e){}
-  const r=posterRecord; if(!r) return;
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      _dgToast(num ? '📱 فہرست میں WhatsApp چنیں، پھر '+r.name.trim()+' کو منتخب کریں' : '📱 فہرست میں WhatsApp چنیں');
+      try{ await navigator.share({files:[file]}); return; }
+      catch(e){ if(e&&e.name==='AbortError') return; }
+    }
+  }
+  // شیئر کی سہولت نہیں (کمپیوٹر وغیرہ): تصویر محفوظ کریں اور اسی کسٹمر کی چیٹ کھولیں
+  if(blob) downloadPoster();
+  if(num){ _dgOpenCustChat(num, Promise.resolve(blob)); return; }
+  if(!r) return;
   const net=getCustomerNet(r.name.trim());
   const text=`*${r.name}*\nNew balance: Rs ${fmt(Math.abs(net))} ${net>=0?'Received':'Paid'}\nDate: ${new Date().toLocaleDateString('en-GB')}`;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
@@ -7459,7 +7471,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2710TU033';
+  var PK_APP_VERSION = 'GG3110SA034';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
