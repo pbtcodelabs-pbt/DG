@@ -5,3 +5,4 @@
 - کام مکمل کر کے خود commit، push، PR بنا کر `main` میں merge کریں؛ جواب مختصر، اسکرین شاٹ کے ساتھ۔
 
 - **ایک ہی ویب سائٹ، کئی ایپس (مستقل اصول):** `pbtcodelabs-pbt.github.io` پر کئی ایپس چلتی ہیں۔ `sw.js` اور «تازہ کریں» بٹن صرف **اسی ایپ** کے کیش/سروس ورکر مٹائیں (`getRegistration()`، `getRegistrations()` نہیں)؛ `localStorage.clear()` کبھی نہیں — صرف اپنی کلیدیں ہٹائیں۔
+- **🆘 PBT Help Desk (GG0211MO036):** `index.html` کے آخر میں `https://pbtcodelabs-pbt.github.io/help/widget.js` (`data-float="1"`) — بائیں کنارے پر گول سرخ «SOS / Help» پٹی (انگلی سے اوپر نیچے سرکتی ہے)، ایپ کے اندر پاپ اپ میں مسئلہ / مشورہ۔ ورژن بدلیں تو `data-ver` بھی۔
