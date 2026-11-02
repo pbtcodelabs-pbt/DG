@@ -1257,6 +1257,7 @@ select {
     </div>
     <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:2px">
       <button onclick="showEditHeader()" title="نام میں ترمیم" style="background:rgba(255,255,255,.18);border:none;color:#fff;width:24px;height:24px;min-width:24px;border-radius:50%;font-size:11px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0">✏️</button>
+      <button onclick="openHelpDesk()" title="PBT Help Desk" style="background:none;border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center">🆘</button>
       <button onclick="pkRefreshApp()" title="تازہ کریں" style="background:rgba(255,255,255,.18);border:none;color:#fff;width:24px;height:24px;min-width:24px;border-radius:50%;font-size:12px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0">🔄</button>
       <div class="hdr-sub" id="hdr-shopname" style="margin:0;cursor:pointer" onclick="showEditHeader()">My Shop</div>
     </div>
@@ -7471,7 +7472,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG0211MO036';
+  var PK_APP_VERSION = 'GG0211MO037';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -8506,5 +8507,5 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
 })();
 </script>
-<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG0211MO036" data-float="1" defer></script> <!-- 🆘 GG0211MO036: PBT Help Desk -->
+<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG0211MO037" defer></script> <!-- 🆘 GG0211MO037: PBT Help Desk -->
 </body></html>
