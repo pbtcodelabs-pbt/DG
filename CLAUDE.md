@@ -8,3 +8,4 @@
 - **🆘 PBT Help Desk (GG0211MO036):** `index.html` کے آخر میں `https://pbtcodelabs-pbt.github.io/help/widget.js` (`data-float="1"`) — بائیں کنارے پر گول سرخ «SOS / Help» پٹی (انگلی سے اوپر نیچے سرکتی ہے)، ایپ کے اندر پاپ اپ میں مسئلہ / مشورہ۔ ورژن بدلیں تو `data-ver` بھی۔
 - **GG0211MO037:** SOS (PBT Help Desk) اب ایپ کی اپنی اوپر/نیچے کی پٹی میں (`onclick="openHelpDesk()"` + 🆘، `widget.js` گول SOS بناتا ہے)؛ کنارے والی پٹی ختم (مالک: صفحے کے بیچ میں نہیں)۔
 - **GG0311TU038 (ہیلپ ڈیسک #31، مالک کا حکم):** ایپ کے اندر 💬 بلبلہ (`toggleDevChat`) اب Help Desk کھولتا ہے؛ لاگ ان صفحے پر (کوڈ / سبسکرپشن) واٹس ایپ / Gmail ویسے ہی (`_isLoginScreen()`)۔
+- **ہیلپ ڈیسک #33 (3 نومبر):** `sw.js` کے fetch میں `pbtcodelabs-pbt.github.io/help/` (widget.js) کبھی کیش نہیں — پہلے پرانا بٹن (سرخ SOS) کیش سے آتا رہتا تھا۔ نیا fetch ہینڈلر بنائیں تو یہ لائن رکھیں۔
