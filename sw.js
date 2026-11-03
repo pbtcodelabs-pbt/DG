@@ -50,6 +50,8 @@ self.addEventListener('activate', function (event) {
 // Fetch: network-first for the main HTML (so a fresh refresh gets the latest
 // build), cache-first for everything else, with offline fallback to cache.
 self.addEventListener('fetch', function (event) {
+  /* ہیلپ ڈیسک (#33): pbtcodelabs-pbt.github.io/help/ کی فائلیں (widget.js) کبھی کیش نہیں — ہر ایپ میں نیا بٹن فوراً */
+  try { const _hd = new URL(event.request.url); if (_hd.hostname === 'pbtcodelabs-pbt.github.io' && _hd.pathname.startsWith('/help/')) return; } catch (_e) {}
   var req = event.request;
 
   // Never intercept Firebase/Firestore or any other cross-origin / non-GET request
