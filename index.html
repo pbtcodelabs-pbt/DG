@@ -3112,11 +3112,12 @@ async function dgEnableBio(){
       rp: { name: 'GG Khatabook' },
       user: { id: new TextEncoder().encode('dg-'+uid), name: 'GG Khatabook', displayName: 'GG Khatabook' },
       pubKeyCredParams: [{ type:'public-key', alg:-7 }, { type:'public-key', alg:-257 }],
-      authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required', residentKey:'preferred' },
+      authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required', residentKey:'discouraged', requireResidentKey:false },   /* GG1111WE040: فون کے اندر ہی — گوگل پاس ورڈ مینیجر / Gmail تصدیق نہیں */
       timeout: 60000, attestation: 'none'
     }});
     if(!cred) throw new Error('no-cred');
-    localStorage.setItem(DG_BIO_KEY, JSON.stringify({ id:_dgBioB64(cred.rawId), at:Date.now() }));
+    localStorage.setItem(DG_BIO_KEY, JSON.stringify({ id:_dgBioB64(cred.rawId), at:Date.now() })); try{ localStorage.removeItem('dg_bioFail'); }catch(e){}
+    if(window._dgBioQuiet) return true;
     if(typeof dgRenderBioSettingsCard==='function') dgRenderBioSettingsCard();
     alert('✅ فنگر پرنٹ لاگ اِن آن ہو گیا۔\n\nاب اس فون پر ایپ کھولتے ہی ٹچ مانگے گی۔');
   }catch(e){
@@ -3137,14 +3138,32 @@ async function dgBioLogin(){
   try{
     var a = await navigator.credentials.get({ publicKey: {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
-      allowCredentials: [{ type:'public-key', id:_dgBioUnB64(c.id), transports:['internal'] }],
+      allowCredentials: [{ type:'public-key', id:_dgBioUnB64(c.id) }],
       userVerification: 'required', timeout: 60000
     }});
-    if(a){ _dgBioBusy=false; _dgPinFails=0; _dgPinDone(); return; }
+    if(a){ _dgBioBusy=false; _dgPinFails=0; try{ localStorage.removeItem('dg_bioFail'); }catch(e){} _dgPinDone(); return; }
   }catch(e){
-    var er=document.getElementById('dg-pin-err'); if(er){ er.textContent='❌ ٹچ نہیں ہوا — دوبارہ 👆 دبائیں یا پن لکھیں'; er.style.display='block'; }
+    /* GG1111WE040: «No passkeys available» — فون میں پرانی فنگر پرنٹ چابی نہیں رہی؛ دوبارہ خود پاپ اپ نہیں، ایک ٹچ سے نئی چابی */
+    try{ localStorage.setItem('dg_bioFail', '1'); }catch(x){}
+    var er=document.getElementById('dg-pin-err'); if(er){ er.textContent='👆 فنگر پرنٹ نہیں چلا — نیچے «فنگر پرنٹ دوبارہ جوڑیں» دبائیں، یا پن لکھیں'; er.style.display='block'; }
+    _dgBioRelinkArea();
   }
   _dgBioBusy = false;
+}
+/* GG1111WE040: فنگر پرنٹ دوبارہ جوڑیں — نئی چابی بنتے ہی (فون کے مالک کا فنگر پرنٹ) سیدھا اندر */
+function _dgBioRelinkArea(){
+  var area = document.getElementById('dg-bio-login-area'); if(!area) return;
+  area.innerHTML = '<button type="button" onclick="dgBioRelink()" style="width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit">👆 فنگر پرنٹ دوبارہ جوڑیں — ایک ٹچ</button>'
+    + '<div style="font-size:11.5px;color:#64748b;font-weight:700;text-align:center;margin-top:6px;line-height:1.7">فون نے پرانی فنگر پرنٹ چابی بھلا دی ہے — ایک بار ٹچ کریں، آئندہ پہلے کی طرح چلے گا</div>';
+}
+async function dgBioRelink(){
+  if(_dgBioBusy) return; _dgBioBusy = true;
+  try{ localStorage.removeItem(DG_BIO_KEY); }catch(e){}
+  window._dgBioQuiet = true;
+  var ok = false; try{ ok = await dgEnableBio(); }catch(e){}
+  window._dgBioQuiet = false; _dgBioBusy = false;
+  if(ok && dgGetBioCred()){ _dgPinFails = 0; _dgPinDone(); return; }
+  var er=document.getElementById('dg-pin-err'); if(er){ er.textContent='❌ فنگر پرنٹ نہیں جڑا — پن لکھ کر کھولیں'; er.style.display='block'; }
 }
 // لاگ اِن اسکرین کے فنگر پرنٹ علاقے کو بھرنا — PIN کے بالکل نیچے، لاگ اِن اسکرین پر ہی
 //   آن ہو → "👆 فنگر پرنٹ سے لاگ اِن" (نمایاں بٹن) + خودکار پاپ اپ
@@ -3175,6 +3194,7 @@ async function dgAutoBioPrompt(){
   if(!hasBtn) return;              // فنگر پرنٹ آن نہیں — خودکار پاپ اپ نہیں
   if(_dgBioAutoTried) return;
   _dgBioAutoTried = true;
+  try{ if(localStorage.getItem('dg_bioFail')){ _dgBioRelinkArea(); return; } }catch(e){}   /* GG1111WE040: پچھلی بار نہیں چلا — خود پاپ اپ نہیں */
   setTimeout(function(){ try{ dgBioLogin(); }catch(e){} }, 350);
 }
 // ایڈمن سیٹنگز میں فنگر پرنٹ آن/آف کارڈ
@@ -7474,7 +7494,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG0511TH039';
+  var PK_APP_VERSION = 'GG1111WE040';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -8509,5 +8529,5 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
 })();
 </script>
-<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG0511TH039" defer></script> <!-- 🆘 GG0511TH039: PBT Help Desk -->
+<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG1111WE040" defer></script> <!-- 🆘 GG0511TH039: PBT Help Desk -->
 </body></html>
