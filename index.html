@@ -3540,11 +3540,11 @@ async function hashPin(pin){
 let _dgTapCount = 0, _dgTapTimer = null;
 function dgDevTap(){
   if(typeof dgIsPlayApp==='function' && dgIsPlayApp()) return;   // پلے اسٹور والی ایپ میں ڈیولپر پینل کبھی نہیں کھلتا — صرف ویب (GitHub) والی ایپ میں
-  _dgTapCount++;
-  clearTimeout(_dgTapTimer);
-  _dgTapTimer = setTimeout(()=>{ _dgTapCount=0; }, 2500);
-  if(_dgTapCount >= 7){
-    _dgTapCount = 0;
+  return; /* 🔐 مالک کا حکم (16 نومبر): 7 ٹیپ ختم — صرف ہیلپ ڈیسک سے؛ کھولنا dgDevOpen() */
+}
+function dgDevOpen(){
+  if(typeof dgIsPlayApp==='function' && dgIsPlayApp()) return;
+  {
     document.getElementById('dg-dev-locked').style.display='block';
     document.getElementById('dg-dev-unlocked').style.display='none';
     document.getElementById('dg-dev-pass-input').value='';
@@ -7494,7 +7494,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG1611MO041';
+  var PK_APP_VERSION = 'GG1611MO042';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -8529,7 +8529,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
 })();
 </script>
-<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG1611MO041" defer></script> <!-- 🆘 GG0511TH039: PBT Help Desk -->
+<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG1611MO042" defer></script> <!-- 🆘 GG0511TH039: PBT Help Desk -->
 <script>
 /* 🔐 PBT-DEVHUB (مالک کا حکم، 16 نومبر 2026): ہیلپ ڈیسک «🔐 سب ڈویلپر پینل» سے سیدھا یہاں کا ڈویلپر پینل (`?devpanel=1`)
    + ایک مشترکہ پاس ورڈ: ہیلپ ڈیسک اسی ویب سائٹ پر `pbt_devpass_v1` = SHA-256('PBTDEV|' + پاس ورڈ) رکھتا ہے — یہ پینل اسے بھی مانتا ہے (`pbtHubPwOk`)۔ */
@@ -8539,7 +8539,7 @@ window.pbtHubPwOk = async function(p){
     return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('') === h; }catch(e){ return false; }
 };
 (function(){ try{ if(!/[?&]devpanel=1\b/.test(location.search)) return;
-  window.addEventListener('load', () => setTimeout(() => { try{ for(let i=0;i<7;i++) dgDevTap(); }catch(e){} }, 3000));
+  window.addEventListener('load', () => setTimeout(() => { try{ dgDevOpen(); }catch(e){} }, 3000));
 }catch(e){} })();
 </script>
 </body></html>
