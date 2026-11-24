@@ -7496,7 +7496,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2311MO044';
+  var PK_APP_VERSION = 'GG2411TU045';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -8533,7 +8533,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
 })();
 </script>
-<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG2311MO044" defer></script> <!-- 🆘 GG0511TH039: PBT Help Desk -->
+<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG2411TU045" defer></script> <!-- 🆘 GG0511TH039: PBT Help Desk -->
 <script>
 /* 🔐 PBT-DEVHUB (مالک کا حکم، 16 نومبر 2026): ہیلپ ڈیسک «🔐 سب ڈویلپر پینل» سے سیدھا یہاں کا ڈویلپر پینل (`?devpanel=1`)
    + ایک مشترکہ پاس ورڈ: ہیلپ ڈیسک اسی ویب سائٹ پر `pbt_devpass_v1` = SHA-256('PBTDEV|' + پاس ورڈ) رکھتا ہے — یہ پینل اسے بھی مانتا ہے (`pbtHubPwOk`)۔ */
@@ -8562,22 +8562,16 @@ div:has(> div > #filter-select){display:none!important}
 #dg2c .tools{display:flex;flex-direction:column;gap:5px;padding:6px}
 #dg2c .tools input,#dg2c .tools select{width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:10px;padding:7px 8px;font:inherit;font-size:13px;font-weight:800;background:#f8fafc;color:#0f172a;min-width:0}
 #dg2c .body{padding:0 6px 6px;display:flex;flex-direction:column;gap:6px}
-#dg2c .cd{position:relative;border-radius:11px;padding:7px 8px 7px 7px;background:#fff;border:1.5px solid #e2e8f0;border-right-width:5px;cursor:pointer}
-#dg2c .col.get .cd{border-right-color:#dc2626}
-#dg2c .col.give .cd{border-right-color:#16a34a}
-#dg2c .cd.z{background:#f1f5f9;border-right-color:#94a3b8!important}
-#dg2c .cd .nm{font-size:14px;font-weight:900;color:#0f172a;line-height:1.45;overflow-wrap:anywhere}
-#dg2c .cd .am{font:900 16px/1.25 Arial,Helvetica,sans-serif;direction:ltr;text-align:right;margin-top:2px}
-#dg2c .col.get .cd .am{color:#dc2626}
-#dg2c .col.give .cd .am{color:#16a34a}
-#dg2c .cd.z .am{color:#64748b}
-#dg2c .cd .ft{display:flex;align-items:center;gap:6px;margin-top:5px}
-#dg2c .cd .ft a{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;text-decoration:none;flex:none}
-#dg2c .cd .ft .c{background:#2563eb}#dg2c .cd .ft .w{background:#22c55e}
-#dg2c .cd .ft .u{margin-right:auto;font:700 10.5px Arial,sans-serif;color:#64748b;direction:ltr}
+#dg2c .body{gap:4px}
+#dg2c .cd{display:flex;align-items:center;gap:6px;height:34px;box-sizing:border-box;border-radius:6px;padding:0 7px;border:1px solid transparent;cursor:pointer;color:#fff}
+#dg2c .col.get .cd{background:#dc2626;border-color:#b91c1c}
+#dg2c .col.give .cd{background:#16a34a;border-color:#15803d}
+#dg2c .cd.z{background:#e2e8f0!important;border-color:#cbd5e1!important;color:#334155}
+#dg2c .cd .nm{flex:1;min-width:0;unicode-bidi:plaintext;text-align:right;font-size:13px;font-weight:900;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#dg2c .cd .am{flex:none;font:900 13px/1 Arial,Helvetica,sans-serif;direction:ltr}
 #dg2c .zl{display:block;width:100%;border:1px dashed #94a3b8;border-radius:10px;background:#f8fafc;color:#475569;font:inherit;font-weight:800;font-size:12px;padding:7px 4px}
 #dg2c .em{text-align:center;color:#94a3b8;font-size:12.5px;font-weight:800;padding:14px 4px}
-@media (min-width:700px){#dg2c{gap:12px}#dg2c .body{display:grid;grid-template-columns:1fr 1fr}}
+@media (min-width:700px){#dg2c{gap:12px}#dg2c .body{display:grid;grid-template-columns:1fr 1fr;gap:4px}}
 </style>
 <script id="dg2col044">
 (function(){
@@ -8592,23 +8586,19 @@ div:has(> div > #filter-select){display:none!important}
       c.net += r.type === 'got' ? Number(r.amount || 0) : -Number(r.amount || 0); c.uses++; if(r.id > c.lastId) c.lastId = r.id; });
     return Object.keys(m).map(function(k){ return m[k]; });
   }
-  var WA = '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.7 1.2 1.6 2 1.1.9 2 1.2 2.3 1.4.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.7-.2 1.2z"/></svg>';
-  var CALL = '<svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.3 0 .7-.2 1z"/></svg>';
+  /* GG2411TU045 (#393): باریک برابر پٹی — صرف نام + رقم؛ کال / واٹس ایپ پروفائل کے صفحے پر */
   function card(c, side){
-    var sn = esc(c.name).replace(/\\/g, '\\\\'), ph = String(c.phone || '').replace(/[^0-9+]/g, ''), z = c.net === 0;
-    var wp = ph.replace(/^\+/, '').replace(/^0/, '92');
-    var msg = encodeURIComponent('As-salamu alaykum ' + c.name + ',\n\nYour current balance: Rs ' + fmt(Math.abs(c.net)) + '\n\nPlease contact me if you have any questions.');
-    return '<div class="cd' + (z ? ' z' : '') + '" data-n="' + esc(c.name) + '">'
-      + '<div class="nm">' + esc(c.name) + '</div><div class="am">Rs ' + fmt(Math.abs(c.net)) + '</div>'
-      + '<div class="ft">' + (ph ? '<a class="c" href="tel:' + esc(ph) + '" title="Call">' + CALL + '</a><a class="w" href="https://wa.me/' + esc(wp) + '?text=' + msg + '" target="_blank" title="WhatsApp">' + WA + '</a>' : '')
-      + '<span class="u">' + c.uses + ' ✎</span></div></div>';
+    return '<div class="cd' + (c.net === 0 ? ' z' : '') + '" data-n="' + esc(c.name) + '"><div class="nm">' + esc(c.name) + '</div><div class="am">Rs ' + fmt(Math.abs(c.net)) + '</div></div>';
   }
   function list(side, all){
     var st = ST[side], q = st.q.toLowerCase().trim();
     var mine = all.filter(function(c){ return side === 'get' ? c.net < 0 : c.net > 0; }), zero = all.filter(function(c){ return c.net === 0; });
     var f = function(c){ return !q || c.name.toLowerCase().indexOf(q) > -1 || String(c.phone).indexOf(q) > -1; };
     mine = mine.filter(f); zero = zero.filter(f);
-    var by = st.s === 'least' ? function(a, b){ return a.uses - b.uses || a.lastId - b.lastId; } : function(a, b){ return b.uses - a.uses || b.lastId - a.lastId; };
+    var nm = function(a, b){ return a.name.localeCompare(b.name); };
+    var by = { least: function(a, b){ return a.uses - b.uses || a.lastId - b.lastId; },
+      'new': function(a, b){ return b.lastId - a.lastId; }, old: function(a, b){ return a.lastId - b.lastId; },
+      az: nm, za: function(a, b){ return nm(b, a); } }[st.s] || function(a, b){ return b.uses - a.uses || b.lastId - a.lastId; };
     mine.sort(by); zero.sort(by);
     var h = (st.s === 'zero' ? zero.map(function(c){ return card(c, side); }).join('') : '') + mine.map(function(c){ return card(c, side); }).join('');
     if(!h) h = '<div class="em">' + (q ? 'کوئی نہیں ملا' : 'کوئی نہیں') + '</div>';
@@ -8617,7 +8607,7 @@ div:has(> div > #filter-select){display:none!important}
   }
   function sums(all){ var g = 0, gv = 0, ng = 0, nv = 0; all.forEach(function(c){ if(c.net < 0){ g -= c.net; ng++; } else if(c.net > 0){ gv += c.net; nv++; } }); return { g: g, gv: gv, ng: ng, nv: nv }; }
   function skel(el){
-    var opt = '<option value="most">⬆️ زیادہ استعمال</option><option value="least">⬇️ کم استعمال</option><option value="zero">⚖️ صفر بیلنس والے اوپر</option>';
+    var opt = '<option value="new">🆕 نئے پہلے</option><option value="old">📜 پرانے پہلے</option><option value="az">A → Z</option><option value="za">Z → A</option><option value="most">⬆️ زیادہ استعمال</option><option value="least">⬇️ کم استعمال</option><option value="zero">⚖️ صفر بیلنس والے اوپر</option>';
     el.innerHTML = '<div id="dg2c">'
       + ['get', 'give'].map(function(sd){ return '<section class="col ' + sd + '"><div class="hd"><div class="t">' + (sd === 'get' ? '🔴 لینے ہیں' : '🟢 دینے ہیں') + '</div><div class="s" id="dg2s_' + sd + '"></div><div class="n" id="dg2n_' + sd + '"></div></div>'
         + '<div class="tools"><input type="search" id="dg2q_' + sd + '" placeholder="🔍 تلاش" autocomplete="off"><select id="dg2o_' + sd + '">' + opt + '</select></div><div class="body" id="dg2b_' + sd + '"></div></section>'; }).join('') + '</div>';
@@ -8629,7 +8619,6 @@ div:has(> div > #filter-select){display:none!important}
     });
     el.addEventListener('click', function(e){
       var z = e.target.closest && e.target.closest('.zl'); if(z){ var sd = z.getAttribute('data-z'); ST[sd].s = 'zero'; document.getElementById('dg2o_' + sd).value = 'zero'; fill(); return; }
-      if(e.target.closest && e.target.closest('a')) return;
       var c = e.target.closest && e.target.closest('.cd'); if(c) openDetail(c.getAttribute('data-n'));
     });
   }
