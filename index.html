@@ -7496,7 +7496,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   // 3) App version tag (shown under the Online/Offline indicator)
   // ورژن بیج فارمولا: DG + دن(DD) + مہینہ-3-حروف-انگریزی + دن-ہفتہ-2-حروف-انگریزی(SU/MO/TU/WE/TH/FR/SA) + وقت(HHMM) + AM/PM — سب انگریزی/ہندسے، بغیر سپیس، بغیر اردو۔
   // ہر نئی بلڈ پر یہاں تازہ ترین ٹائم سٹیمپ کے ساتھ اپڈیٹ کریں (ٹھیک اُسی طرح جیسے sw.js کے CACHE_NAME میں)۔
-  var PK_APP_VERSION = 'GG2411TU045';
+  var PK_APP_VERSION = 'GG2411TU046';
   document.addEventListener('DOMContentLoaded', function(){
     var v = document.getElementById('pk-app-version');
     if (v) v.textContent = PK_APP_VERSION;
@@ -8533,7 +8533,7 @@ textarea.adm-inp{resize:none;height:90px;line-height:1.5}
   try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
 })();
 </script>
-<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG2411TU045" defer></script> <!-- 🆘 GG0511TH039: PBT Help Desk -->
+<script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="DG" data-ver="GG2411TU046" defer></script> <!-- 🆘 GG0511TH039: PBT Help Desk -->
 <script>
 /* 🔐 PBT-DEVHUB (مالک کا حکم، 16 نومبر 2026): ہیلپ ڈیسک «🔐 سب ڈویلپر پینل» سے سیدھا یہاں کا ڈویلپر پینل (`?devpanel=1`)
    + ایک مشترکہ پاس ورڈ: ہیلپ ڈیسک اسی ویب سائٹ پر `pbt_devpass_v1` = SHA-256('PBTDEV|' + پاس ورڈ) رکھتا ہے — یہ پینل اسے بھی مانتا ہے (`pbtHubPwOk`)۔ */
@@ -8562,16 +8562,18 @@ div:has(> div > #filter-select){display:none!important}
 #dg2c .tools{display:flex;flex-direction:column;gap:5px;padding:6px}
 #dg2c .tools input,#dg2c .tools select{width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:10px;padding:7px 8px;font:inherit;font-size:13px;font-weight:800;background:#f8fafc;color:#0f172a;min-width:0}
 #dg2c .body{padding:0 6px 6px;display:flex;flex-direction:column;gap:6px}
-#dg2c .body{gap:4px}
-#dg2c .cd{display:flex;align-items:center;gap:6px;height:34px;box-sizing:border-box;border-radius:6px;padding:0 7px;border:1px solid transparent;cursor:pointer;color:#fff}
+#dg2c .body{gap:8px}
+#dg2c .cd{display:flex;align-items:stretch;gap:0;height:36px;box-sizing:border-box;border-radius:6px;padding:0;overflow:hidden;direction:ltr;border:1px solid transparent;cursor:pointer;color:#fff}
 #dg2c .col.get .cd{background:#dc2626;border-color:#b91c1c}
 #dg2c .col.give .cd{background:#16a34a;border-color:#15803d}
 #dg2c .cd.z{background:#e2e8f0!important;border-color:#cbd5e1!important;color:#334155}
-#dg2c .cd .nm{flex:1;min-width:0;unicode-bidi:plaintext;text-align:right;font-size:13px;font-weight:900;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#dg2c .cd .am{flex:none;font:900 13px/1 Arial,Helvetica,sans-serif;direction:ltr}
+#dg2c .cd .nm span{display:block;width:100%;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dg2c .cd .nm{flex:1;min-width:0;display:flex;align-items:center;padding:0 7px;font-size:13px;font-weight:900;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#dg2c .cd .am{flex:none;display:flex;align-items:center;padding:0 7px;font:900 13px/1 Arial,Helvetica,sans-serif;direction:ltr;background:rgba(0,0,0,.25)}
+#dg2c .cd.z .am{background:#cbd5e1}
 #dg2c .zl{display:block;width:100%;border:1px dashed #94a3b8;border-radius:10px;background:#f8fafc;color:#475569;font:inherit;font-weight:800;font-size:12px;padding:7px 4px}
 #dg2c .em{text-align:center;color:#94a3b8;font-size:12.5px;font-weight:800;padding:14px 4px}
-@media (min-width:700px){#dg2c{gap:12px}#dg2c .body{display:grid;grid-template-columns:1fr 1fr;gap:4px}}
+@media (min-width:700px){#dg2c{gap:12px}#dg2c .body{display:grid;grid-template-columns:1fr 1fr;gap:8px}}
 </style>
 <script id="dg2col044">
 (function(){
@@ -8586,16 +8588,18 @@ div:has(> div > #filter-select){display:none!important}
       c.net += r.type === 'got' ? Number(r.amount || 0) : -Number(r.amount || 0); c.uses++; if(r.id > c.lastId) c.lastId = r.id; });
     return Object.keys(m).map(function(k){ return m[k]; });
   }
-  /* GG2411TU045 (#393): باریک برابر پٹی — صرف نام + رقم؛ کال / واٹس ایپ پروفائل کے صفحے پر */
+  /* GG2411TU046 (#393): باریک برابر پٹی — صرف نام + رقم؛ کال / واٹس ایپ پروفائل کے صفحے پر */
   function card(c, side){
-    return '<div class="cd' + (c.net === 0 ? ' z' : '') + '" data-n="' + esc(c.name) + '"><div class="nm">' + esc(c.name) + '</div><div class="am">Rs ' + fmt(Math.abs(c.net)) + '</div></div>';
+    return '<div class="cd' + (c.net === 0 ? ' z' : '') + '" data-n="' + esc(c.name) + '"><div class="nm"><span dir="auto">' + esc(c.name) + '</span></div><div class="am">Rs ' + fmt(Math.abs(c.net)) + '</div></div>';
   }
   function list(side, all){
     var st = ST[side], q = st.q.toLowerCase().trim();
     var mine = all.filter(function(c){ return side === 'get' ? c.net < 0 : c.net > 0; }), zero = all.filter(function(c){ return c.net === 0; });
     var f = function(c){ return !q || c.name.toLowerCase().indexOf(q) > -1 || String(c.phone).indexOf(q) > -1; };
     mine = mine.filter(f); zero = zero.filter(f);
-    var nm = function(a, b){ return a.name.localeCompare(b.name); };
+    /* GG2411TU046: A→Z میں انگریزی پہلے، اردو آخر؛ Z→A میں الٹ */
+    var ur = function(n){ return /^[^A-Za-z0-9]*[\u0600-\u06FF]/.test(n) ? 1 : 0; };
+    var nm = function(a, b){ return ur(a.name) - ur(b.name) || a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }); };
     var by = { least: function(a, b){ return a.uses - b.uses || a.lastId - b.lastId; },
       'new': function(a, b){ return b.lastId - a.lastId; }, old: function(a, b){ return a.lastId - b.lastId; },
       az: nm, za: function(a, b){ return nm(b, a); } }[st.s] || function(a, b){ return b.uses - a.uses || b.lastId - a.lastId; };
